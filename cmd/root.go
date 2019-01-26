@@ -9,6 +9,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type globalFlags struct {
+	ghostPrefix string
+	ghostRepo   string
+	baseCommit  string
+}
+
 var (
 	Version  string
 	Revision string
@@ -25,7 +31,7 @@ var RootCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		err = validateGlobalFlags()
+		err = globalOpts.Validate()
 		if err != nil {
 			return err
 		}
@@ -33,10 +39,7 @@ var RootCmd = &cobra.Command{
 	},
 }
 
-// Global Flags
-var ghostPrefix string
-var ghostRepo string
-var baseCommit string
+var globalOpts globalFlags
 
 func init() {
 	cobra.OnInitialize()
@@ -44,10 +47,10 @@ func init() {
 	if ghostPrefixEnv == "" {
 		ghostPrefixEnv = "ghost"
 	}
-	RootCmd.PersistentFlags().StringVar(&ghostPrefix, "ghost-prefix", ghostPrefixEnv, "prefix of ghost branch name")
+	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostPrefix, "ghost-prefix", ghostPrefixEnv, "prefix of ghost branch name")
 	ghostRepoEnv := os.Getenv("GHOST_REPO")
-	RootCmd.PersistentFlags().StringVar(&ghostRepo, "ghost-repo", ghostRepoEnv, "git refspec for ghost commits repository")
-	RootCmd.PersistentFlags().StringVar(&baseCommit, "base-commit", "HEAD", "base commit hash for generating ghost commit.")
+	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostRepo, "ghost-repo", ghostRepoEnv, "git refspec for ghost commits repository")
+	RootCmd.PersistentFlags().StringVar(&globalOpts.baseCommit, "base-commit", "HEAD", "base commit hash for generating ghost commit.")
 	RootCmd.AddCommand(versionCmd)
 }
 
@@ -68,15 +71,15 @@ func validateEnvironment() error {
 	return nil
 }
 
-func validateGlobalFlags() error {
-	if ghostPrefix == "" {
+func (flags *globalFlags) Validate() error {
+	if flags.ghostPrefix == "" {
 		return errors.New("ghost-prefix must be specified")
 	}
-	if ghostRepo == "" {
+	if flags.ghostRepo == "" {
 		return errors.New("ghost-repo must be specified")
 	}
-	if baseCommit != "" {
-		err := git.ValidateCommitish(baseCommit)
+	if flags.baseCommit != "" {
+		err := git.ValidateCommitish(flags.baseCommit)
 		if err != nil {
 			return errors.New("base-commit is not a valid object")
 		}
