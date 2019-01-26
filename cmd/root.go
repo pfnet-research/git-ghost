@@ -18,6 +18,9 @@ var RootCmd = &cobra.Command{
 	Use:   "git-ghost",
 	Short: "git-ghost",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		if cmd.Use == "version" {
+			return nil
+		}
 		err := validateEnvironment()
 		if err != nil {
 			return err
