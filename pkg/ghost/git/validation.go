@@ -12,7 +12,7 @@ var (
 
 func validateGit() error {
 	gitCmd := exec.Command("git", "version")
-	_, err := gitCmd.Output()
+	err := gitCmd.Run()
 	if err != nil {
 		return err
 	}
@@ -21,7 +21,7 @@ func validateGit() error {
 
 func validateCommitish(commitish string) error {
 	gitCmd := exec.Command("git", "cat-file", "-e", commitish)
-	_, err := gitCmd.Output()
+	err := gitCmd.Run()
 	if err != nil {
 		return err
 	}
