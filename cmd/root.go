@@ -34,11 +34,17 @@ var RootCmd = &cobra.Command{
 }
 
 // Global Flags
+var ghostPrefix string
 var ghostRepo string
 var baseCommit string
 
 func init() {
 	cobra.OnInitialize()
+	ghostPrefixEnv := os.Getenv("GHOST_PREFIX")
+	if ghostPrefixEnv == "" {
+		ghostPrefixEnv = "ghost"
+	}
+	RootCmd.PersistentFlags().StringVar(&ghostPrefix, "ghost-prefix", ghostPrefixEnv, "prefix of ghost branch name")
 	ghostRepoEnv := os.Getenv("GHOST_REPO")
 	RootCmd.PersistentFlags().StringVar(&ghostRepo, "ghost-repo", ghostRepoEnv, "git refspec for ghost commits repository")
 	RootCmd.PersistentFlags().StringVar(&baseCommit, "base-commit", "HEAD", "base commit hash for generating ghost commit.")
@@ -63,6 +69,9 @@ func validateEnvironment() error {
 }
 
 func validateGlobalFlags() error {
+	if ghostPrefix == "" {
+		return errors.New("ghost-prefix must be specified")
+	}
 	if ghostRepo == "" {
 		return errors.New("ghost-repo must be specified")
 	}
