@@ -4,13 +4,7 @@ import (
 	"os/exec"
 )
 
-// For test mocks
-var (
-	ValidateGit       = validateGit
-	ValidateCommitish = validateCommitish
-)
-
-func validateGit() error {
+func ValidateGit() error {
 	gitCmd := exec.Command("git", "version")
 	err := gitCmd.Run()
 	if err != nil {
@@ -19,7 +13,7 @@ func validateGit() error {
 	return nil
 }
 
-func validateCommitish(commitish string) error {
+func ValidateCommitish(commitish string) error {
 	gitCmd := exec.Command("git", "cat-file", "-e", commitish)
 	err := gitCmd.Run()
 	if err != nil {
