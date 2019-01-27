@@ -21,8 +21,8 @@ func ValidateGit() error {
 	return nil
 }
 
-func ValidateCommitish(commitish string) error {
-	cmd := exec.Command("git", "cat-file", "-e", commitish)
+func ValidateRefspec(dir, refspec string) error {
+	cmd := exec.Command("git", "-C", dir, "cat-file", "-e", refspec)
 	stderr := bytes.NewBufferString("")
 	cmd.Stderr = stderr
 	err := cmd.Run()

@@ -79,7 +79,7 @@ func (flags *globalFlags) Validate() error {
 		return errors.New("ghost-repo must be specified")
 	}
 	if flags.baseCommit != "" {
-		err := git.ValidateCommitish(flags.baseCommit)
+		err := git.ValidateRefspec(".", flags.baseCommit)
 		if err != nil {
 			return errors.New("base-commit is not a valid object")
 		}
