@@ -33,12 +33,12 @@ func NewPushCommand() *cobra.Command {
 				os.Exit(1)
 			}
 			resp, err := ghost.Push(ghost.PushOptions{
-				SrcDir:      globalOpts.srcDir,
-				DstDir:      globalOpts.ghostWorkDir,
-				GhostPrefix: globalOpts.ghostPrefix,
-				GhostRepo:   globalOpts.ghostRepo,
-				RemoteBase:  globalOpts.baseCommit,
-				LocalBase:   pushOpts.localBase,
+				SrcDir:          globalOpts.srcDir,
+				GhostWorkingDir: globalOpts.ghostWorkDir,
+				GhostPrefix:     globalOpts.ghostPrefix,
+				GhostRepo:       globalOpts.ghostRepo,
+				RemoteBase:      globalOpts.baseCommit,
+				LocalBase:       pushOpts.localBase,
 			})
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%s\n", err)

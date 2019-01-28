@@ -26,7 +26,7 @@ func Push(options PushOptions) (*PushResult, error) {
 
 	branches := []GhostBranch{}
 	for _, branchSpec := range branchSpecs {
-		dstDir, err := ioutil.TempDir(options.DstDir, "git-ghost-")
+		dstDir, err := ioutil.TempDir(options.GhostWorkingDir, "git-ghost-")
 		if err != nil {
 			return nil, err
 		}

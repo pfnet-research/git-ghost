@@ -44,12 +44,12 @@ func (b LocalModBranch) FileName() string {
 }
 
 type PushOptions struct {
-	SrcDir      string
-	DstDir      string
-	GhostPrefix string
-	GhostRepo   string
-	RemoteBase  string
-	LocalBase   string
+	SrcDir          string
+	GhostWorkingDir string
+	GhostPrefix     string
+	GhostRepo       string
+	RemoteBase      string
+	LocalBase       string
 }
 
 type PushResult struct {
