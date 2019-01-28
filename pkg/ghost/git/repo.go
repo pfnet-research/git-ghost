@@ -3,9 +3,14 @@ package git
 import (
 	"bytes"
 	"errors"
+	"git-ghost/pkg/util"
 	"io/ioutil"
 	"os"
 	"os/exec"
+)
+
+var (
+	ORIGIN string = "origin"
 )
 
 // CreateTempGitDir creates a temporary directory for a specified git repo.
@@ -17,7 +22,7 @@ func CreateTempGitDir(dir, repo, branch string) (string, error) {
 		return "", err
 	}
 
-	args := []string{"clone", "-q"}
+	args := []string{"clone", "-q", "-o", ORIGIN} // assuring default remote name to be ORIGIN
 	if branch != "" {
 		args = append(args, "-b", branch)
 	}
@@ -121,4 +126,10 @@ func CreateOrphanBranch(dir, branch string) error {
 		return err
 	}
 	return nil
+}
+
+func ResetHardToBranch(dir, branch string) error {
+	return util.JustRunCmd(
+		exec.Command("git", "-C", dir, "reset", "--hard", branch),
+	)
 }
