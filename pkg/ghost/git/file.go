@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"git-ghost/pkg/util"
 	"io"
 	"os"
 	"os/exec"
@@ -55,19 +56,10 @@ func CreateDiffBundleFile(dir, filepath, fromRefspec, toRefspec string) error {
 	return nil
 }
 
-func ApplyDiffBundleFile(dir, filepath, refspec string) error {
-	cmd := exec.Command("git", "-C", dir, "pull", "--ff-only", "--no-tags", filepath, refspec)
-	stderr := bytes.NewBufferString("")
-	cmd.Stderr = stderr
-	err := cmd.Run()
-	if err != nil {
-		s := stderr.String()
-		if s != "" {
-			return errors.New(s)
-		}
-		return err
-	}
-	return nil
+func ApplyDiffBundleFile(dir, filepath string) error {
+	return util.JustRunCmd(
+		exec.Command("git", "-C", dir, "am", filepath),
+	)
 }
 
 func CreateDiffPatchFile(dir, filepath, refspec string) error {
@@ -117,16 +109,7 @@ func CreateDiffPatchFile(dir, filepath, refspec string) error {
 }
 
 func ApplyDiffPatchFile(dir, filepath string) error {
-	cmd := exec.Command("git", "-C", dir, "apply", filepath)
-	stderr := bytes.NewBufferString("")
-	cmd.Stderr = stderr
-	_, err := cmd.Output()
-	if err != nil {
-		s := stderr.String()
-		if s != "" {
-			return errors.New(s)
-		}
-		return err
-	}
-	return nil
+	return util.JustRunCmd(
+		exec.Command("git", "-C", dir, "apply", filepath),
+	)
 }

@@ -3,11 +3,16 @@ package git
 import (
 	"bytes"
 	"errors"
+	"git-ghost/pkg/util"
 	"os/exec"
 )
 
+var (
+	ORIGIN string = "origin"
+)
+
 func InitializeGitDir(dir, repo, branch string) error {
-	args := []string{"clone", "-q"}
+	args := []string{"clone", "-q", "-o", ORIGIN}
 	if branch != "" {
 		args = append(args, "-b", branch)
 	}
@@ -109,4 +114,10 @@ func CreateOrphanBranch(dir, branch string) error {
 		return err
 	}
 	return nil
+}
+
+func ResetHardToBranch(dir, branch string) error {
+	return util.JustRunCmd(
+		exec.Command("git", "-C", dir, "reset", "--hard", branch),
+	)
 }

@@ -56,3 +56,13 @@ type PushResult struct {
 	LocalBaseBranch *LocalBaseBranch
 	LocalModBranch  *LocalModBranch
 }
+
+type PullOptions struct {
+	SrcDir          string
+	GhostWorkingDir string
+	GhostPrefix     string
+	GhostRepo       string
+	RemoteBase      string
+	LocalBase       string
+	Hash            string
+}

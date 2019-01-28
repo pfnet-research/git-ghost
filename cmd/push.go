@@ -34,6 +34,7 @@ func NewPushCommand() *cobra.Command {
 			}
 			resp, err := ghost.Push(ghost.PushOptions{
 				SrcDir:      globalOpts.srcDir,
+				DstDir:      globalOpts.ghostWorkDir,
 				GhostPrefix: globalOpts.ghostPrefix,
 				GhostRepo:   globalOpts.ghostRepo,
 				RemoteBase:  globalOpts.baseCommit,
