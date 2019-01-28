@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"git-ghost/pkg/ghost/git"
 	"git-ghost/pkg/util"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -36,76 +37,96 @@ func Push(options PushOptions) (string, error) {
 		return "", err
 	}
 
-	branches := []string{}
+	branches := []GhostBranch{}
 	if remoteBase != localBase {
-		filename := "commits.patch"
-		filepath := filepath.Join(dstDir, filename)
-		branchName := fmt.Sprintf("%s/%s-%s", prefix, remoteBase, localBase)
-		existence, err := git.ValidateRemoteBranchExistence(repo, branchName)
+		branch := LocalBaseBranch{
+			RemoteBaseCommit: remoteBase,
+			LocalBaseCommit:  localBase,
+			Prefix:           prefix,
+		}
+		existence, err := git.ValidateRemoteBranchExistence(repo, branch.BranchName())
 		if err != nil {
 			return "", err
 		}
 		if existence {
-			fmt.Printf("Skipped an existing local base branch '%s' in %s\n", branchName, repo)
+			fmt.Printf("Skipped an existing local base branch '%s' in %s\n", branch.BranchName(), repo)
 		} else {
-			err := git.CreateDiffBundleFile(srcDir, filepath, remoteBase, localBase)
+			diffFilePath := filepath.Join(dstDir, branch.FileName())
+			err := git.CreateDiffBundleFile(srcDir, diffFilePath, branch.RemoteBaseCommit, branch.LocalBaseCommit)
 			if err != nil {
 				return "", err
 			}
-			err = git.CreateOrphanBranch(dstDir, branchName)
+			err = git.CreateOrphanBranch(dstDir, branch.BranchName())
 			if err != nil {
 				return "", err
 			}
-			err = git.CommitFile(dstDir, filename, "this is a test")
+			err = git.CommitFile(dstDir, branch.FileName(), "this is a test")
 			if err != nil {
 				return "", err
 			}
-			branches = append(branches, branchName)
-			fmt.Printf("Created a local base branch '%s' in %s\n", branchName, repo)
+			branches = append(branches, branch)
+			fmt.Printf("Created a local base branch '%s' in %s\n", branch.BranchName(), repo)
 		}
 	}
 
-	filename := "local-mod.patch"
-	filepath := filepath.Join(dstDir, filename)
-	err = git.CreateDiffPatchFile(srcDir, filepath, options.LocalBase)
+	tmpFile, err := ioutil.TempFile("", "git-ghost-local-mod")
 	if err != nil {
 		return "", err
 	}
-	size, err := util.FileSize(filepath)
+	tmpFile.Close()
+	defer os.Remove(tmpFile.Name())
+	err = git.CreateDiffPatchFile(srcDir, tmpFile.Name(), localBase)
+	if err != nil {
+		return "", err
+	}
+	size, err := util.FileSize(tmpFile.Name())
 	if err != nil {
 		return "", err
 	}
 
 	hash := ""
 	if size > 0 {
-		hash, err = util.GenerateFileContentHash(filepath)
+		hash, err = util.GenerateFileContentHash(tmpFile.Name())
 		if err != nil {
 			return "", err
 		}
-		branchName := fmt.Sprintf("%s/%s/%s", prefix, localBase, hash)
-		existence, err := git.ValidateRemoteBranchExistence(repo, branchName)
+		branch := LocalModBranch{
+			LocalBaseCommit: localBase,
+			LocalModHash:    hash,
+			Prefix:          prefix,
+		}
+		diffFilePath := filepath.Join(dstDir, branch.FileName())
+		err := os.Rename(tmpFile.Name(), diffFilePath)
+		if err != nil {
+			return "", err
+		}
+		existence, err := git.ValidateRemoteBranchExistence(repo, branch.BranchName())
 		if err != nil {
 			return "", err
 		}
 		if existence {
-			fmt.Printf("Skipped an existing local mod branch '%s' in %s\n", branchName, repo)
+			fmt.Printf("Skipped an existing local mod branch '%s' in %s\n", branch.BranchName(), repo)
 		} else {
-			err = git.CreateOrphanBranch(dstDir, branchName)
+			err = git.CreateOrphanBranch(dstDir, branch.BranchName())
 			if err != nil {
 				return "", err
 			}
-			err = git.CommitFile(dstDir, filename, "this is a test")
+			err = git.CommitFile(dstDir, branch.FileName(), "this is a test")
 			if err != nil {
 				return "", err
 			}
-			branches = append(branches, branchName)
-			fmt.Printf("Created a local mod branch '%s' in %s\n", branchName, repo)
+			branches = append(branches, branch)
+			fmt.Printf("Created a local mod branch '%s' in %s\n", branch.BranchName(), repo)
 		}
 	}
 
 	if len(branches) > 0 {
 		fmt.Printf("Pushing branches %v\n", branches)
-		err := git.Push(dstDir, branches...)
+		branchNames := []string{}
+		for _, name := range branches {
+			branchNames = append(branchNames, name.BranchName())
+		}
+		err := git.Push(dstDir, branchNames...)
 		if err != nil {
 			return "", err
 		}
