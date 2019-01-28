@@ -51,3 +51,13 @@ type PushOptions struct {
 	RemoteBase  string
 	LocalBase   string
 }
+
+type PullOptions struct {
+	SrcDir          string
+	GhostWorkingDir string
+	GhostPrefix     string
+	GhostRepo       string
+	RemoteBase      string
+	LocalBase       string
+	Hash            string
+}
