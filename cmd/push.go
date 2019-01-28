@@ -28,10 +28,6 @@ func NewPushCommand() *cobra.Command {
 		Long:  "generate and push a ghost commit to remote repository",
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) != 0 {
-				cmd.HelpFunc()(cmd, args)
-				os.Exit(1)
-			}
 			resp, err := ghost.Push(ghost.PushOptions{
 				SrcDir:          globalOpts.srcDir,
 				GhostWorkingDir: globalOpts.ghostWorkDir,
