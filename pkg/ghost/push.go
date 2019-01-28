@@ -44,10 +44,10 @@ func Push(options PushOptions) (*PushResult, error) {
 			return nil, err
 		}
 		if existence {
-			fmt.Printf("Skipped pushing existing branch '%s' in %s\n", branch.BranchName(), options.GhostRepo)
+			fmt.Fprintf(os.Stderr, "Skipped pushing existing branch '%s' in %s\n", branch.BranchName(), options.GhostRepo)
 			continue
 		}
-		fmt.Printf("Pushing branch %s to %s\n", branch.BranchName(), options.GhostRepo)
+		fmt.Fprintf(os.Stderr, "Pushing branch %s to %s\n", branch.BranchName(), options.GhostRepo)
 		err = git.Push(dstDir, branch.BranchName())
 		if err != nil {
 			return nil, err
