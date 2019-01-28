@@ -3,6 +3,7 @@ package ghost
 import (
 	"fmt"
 	"git-ghost/pkg/ghost/git"
+	"io/ioutil"
 	"os"
 	"path"
 )
@@ -12,11 +13,15 @@ func Pull(options PullOptions) error {
 
 	// pull command assumed pwd is the src directory to apply ghost commits.
 	srcDir := options.SrcDir
-	ghostDir, err := git.CreateTempGitDir(options.GhostWorkingDir, options.GhostRepo, "")
+	ghostDir, err := ioutil.TempDir(options.GhostWorkingDir, "git-ghost-")
 	if err != nil {
 		return err
 	}
 	defer os.RemoveAll(ghostDir)
+	err = git.InitializeGitDir(ghostDir, options.GhostRepo, "")
+	if err != nil {
+		return err
+	}
 
 	fmt.Fprintf(os.Stderr, "tmpdir: %s\n", ghostDir)
 

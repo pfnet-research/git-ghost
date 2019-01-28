@@ -28,23 +28,21 @@ func NewPushCommand() *cobra.Command {
 		Long:  "generate and push a ghost commit to remote repository",
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) != 0 {
-				cmd.HelpFunc()(cmd, args)
-				os.Exit(1)
-			}
-			hash, err := ghost.Push(ghost.PushOptions{
-				SrcDir:      globalOpts.srcDir,
-				DstDir:      globalOpts.ghostWorkDir,
-				GhostPrefix: globalOpts.ghostPrefix,
-				GhostRepo:   globalOpts.ghostRepo,
-				RemoteBase:  globalOpts.baseCommit,
-				LocalBase:   pushOpts.localBase,
+			resp, err := ghost.Push(ghost.PushOptions{
+				SrcDir:          globalOpts.srcDir,
+				GhostWorkingDir: globalOpts.ghostWorkDir,
+				GhostPrefix:     globalOpts.ghostPrefix,
+				GhostRepo:       globalOpts.ghostRepo,
+				RemoteBase:      globalOpts.baseCommit,
+				LocalBase:       pushOpts.localBase,
 			})
 			if err != nil {
-				fmt.Println(err)
+				fmt.Fprintf(os.Stderr, "%s\n", err)
 				os.Exit(1)
 			}
-			fmt.Println(hash)
+			if resp.LocalModBranch != nil {
+				fmt.Println(resp.LocalModBranch.LocalModHash)
+			}
 		},
 	}
 	command.PersistentFlags().StringVar(&pushOpts.localBase, "local-base", "HEAD", "git refspec used to create a local modification patch from")
