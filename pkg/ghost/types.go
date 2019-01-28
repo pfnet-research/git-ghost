@@ -27,20 +27,20 @@ type LocalModBranch struct {
 	LocalModHash    string
 }
 
-func (b *LocalBaseBranch) BranchName() string {
+func (b LocalBaseBranch) BranchName() string {
 	return fmt.Sprintf("%s/%s-%s", b.Prefix, b.RemoteBaseCommit, b.LocalBaseCommit)
 }
 
-func (b *LocalBaseBranch) FileName() string {
-	return "commits.bundle"
+func (b LocalBaseBranch) FileName() string {
+	return "commits.patch"
 }
 
-func (b *LocalModBranch) BranchName() string {
+func (b LocalModBranch) BranchName() string {
 	return fmt.Sprintf("%s/%s/%s", b.Prefix, b.LocalBaseCommit, b.LocalModHash)
 }
 
-func (b *LocalModBranch) FileName() string {
-	return "diff.patch"
+func (b LocalModBranch) FileName() string {
+	return "local-mod.patch"
 }
 
 type PushOptions struct {
