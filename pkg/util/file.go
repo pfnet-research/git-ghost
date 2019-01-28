@@ -1,6 +1,8 @@
 package util
 
-import "os"
+import (
+	"os"
+)
 
 func FileSize(filepath string) (int64, error) {
 	fi, err := os.Stat(filepath)

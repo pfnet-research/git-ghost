@@ -32,7 +32,7 @@ func NewPushCommand() *cobra.Command {
 				cmd.HelpFunc()(cmd, args)
 				os.Exit(1)
 			}
-			hash, err := ghost.Push(ghost.PushOptions{
+			resp, err := ghost.Push(ghost.PushOptions{
 				SrcDir:      globalOpts.srcDir,
 				GhostPrefix: globalOpts.ghostPrefix,
 				GhostRepo:   globalOpts.ghostRepo,
@@ -43,7 +43,9 @@ func NewPushCommand() *cobra.Command {
 				fmt.Println(err)
 				os.Exit(1)
 			}
-			fmt.Println(hash)
+			if resp.LocalModBranch != nil {
+				fmt.Println(resp.LocalModBranch.LocalModHash)
+			}
 		},
 	}
 	command.PersistentFlags().StringVar(&pushOpts.localBase, "local-base", "HEAD", "git refspec used to create a local modification patch from")
