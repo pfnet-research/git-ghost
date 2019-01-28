@@ -3,39 +3,27 @@ package git
 import (
 	"bytes"
 	"errors"
-	"io/ioutil"
-	"os"
 	"os/exec"
 )
 
-// CreateTempGitDir creates a temporary directory for a specified git repo.
-// It is the caller's responsibility to remove the directory when no longer needed.
-// e.g. defer os.RemoveAll(dir)
-func CreateTempGitDir(dir, repo, branch string) (string, error) {
-	dirPath, err := ioutil.TempDir(dir, "git-ghost-")
-	if err != nil {
-		return "", err
-	}
-
+func InitializeGitDir(dir, repo, branch string) error {
 	args := []string{"clone", "-q"}
 	if branch != "" {
 		args = append(args, "-b", branch)
 	}
-	args = append(args, repo, dirPath)
+	args = append(args, repo, dir)
 	cmd := exec.Command("git", args...)
 	stderr := bytes.NewBufferString("")
 	cmd.Stderr = stderr
-	err = cmd.Run()
+	err := cmd.Run()
 	if err != nil {
-		os.RemoveAll(dirPath)
 		s := stderr.String()
 		if s != "" {
-			return "", errors.New(s)
+			return errors.New(s)
 		}
-		return "", err
+		return err
 	}
-
-	return dirPath, nil
+	return nil
 }
 
 func CommitAndPush(dir, filename, message, refspec string) error {
