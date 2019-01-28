@@ -10,6 +10,7 @@ import (
 )
 
 type globalFlags struct {
+	srcDir      string
 	ghostPrefix string
 	ghostRepo   string
 	baseCommit  string
@@ -43,6 +44,8 @@ var globalOpts globalFlags
 
 func init() {
 	cobra.OnInitialize()
+	currentDir := os.Getenv("PWD")
+	RootCmd.PersistentFlags().StringVar(&globalOpts.srcDir, "src-dir", currentDir, "source directory which you create ghost from")
 	ghostPrefixEnv := os.Getenv("GHOST_PREFIX")
 	if ghostPrefixEnv == "" {
 		ghostPrefixEnv = "ghost"
@@ -72,6 +75,9 @@ func validateEnvironment() error {
 }
 
 func (flags *globalFlags) Validate() error {
+	if flags.srcDir == "" {
+		return errors.New("src-dir must be specified")
+	}
 	if flags.ghostPrefix == "" {
 		return errors.New("ghost-prefix must be specified")
 	}

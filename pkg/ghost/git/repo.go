@@ -76,8 +76,10 @@ func CommitFile(dir, filename, message string) error {
 	return nil
 }
 
-func Push(dir, refspec string) error {
-	cmd := exec.Command("git", "-C", dir, "push", "origin", refspec)
+func Push(dir string, refspecs ...string) error {
+	args := []string{"-C", dir, "push", "origin"}
+	args = append(args, refspecs...)
+	cmd := exec.Command("git", args...)
 	stderr := bytes.NewBufferString("")
 	cmd.Stderr = stderr
 	err := cmd.Run()
