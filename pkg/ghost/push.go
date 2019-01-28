@@ -40,6 +40,7 @@ func Push(options PushOptions) (*PushResult, error) {
 		if branch == nil {
 			continue
 		}
+		branches = append(branches, branch)
 		existence, err := git.ValidateRemoteBranchExistence(options.GhostRepo, branch.BranchName())
 		if err != nil {
 			return nil, err
@@ -53,16 +54,15 @@ func Push(options PushOptions) (*PushResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		branches = append(branches, branch)
 	}
 
 	resp := PushResult{}
 	for _, branch := range branches {
-		if br, ok := branch.(LocalBaseBranch); ok {
-			resp.LocalBaseBranch = &br
+		if br, ok := branch.(*LocalBaseBranch); ok {
+			resp.LocalBaseBranch = br
 		}
-		if br, ok := branch.(LocalModBranch); ok {
-			resp.LocalModBranch = &br
+		if br, ok := branch.(*LocalModBranch); ok {
+			resp.LocalModBranch = br
 		}
 	}
 
