@@ -65,4 +65,5 @@ type PullOptions struct {
 	RemoteBase      string
 	LocalBase       string
 	Hash            string
+	ForceApply      bool
 }

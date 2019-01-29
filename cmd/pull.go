@@ -15,6 +15,7 @@ func init() {
 
 type pullFlags struct {
 	localBase string
+	force     bool
 }
 
 func NewPullCommand() *cobra.Command {
@@ -36,6 +37,7 @@ func NewPullCommand() *cobra.Command {
 				GhostRepo:       globalOpts.ghostRepo,
 				RemoteBase:      globalOpts.baseCommit,
 				Hash:            hashArg,
+				ForceApply:      pullFlags.force,
 			}
 
 			if pullFlags.localBase == "" {
@@ -52,5 +54,6 @@ func NewPullCommand() *cobra.Command {
 		},
 	}
 	command.PersistentFlags().StringVar(&pullFlags.localBase, "local-base", "", "git refspec used to create a local modification patch from (default \"value of --base-commit\")")
+	command.PersistentFlags().BoolVar(&pullFlags.force, "force", false, "try applying patch even when your working repository checked out different base commit")
 	return command
 }
