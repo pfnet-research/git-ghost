@@ -23,16 +23,12 @@ func Push(options PushOptions) (*PushResult, error) {
 	log.WithFields(util.ToFields(options)).Debug("push command with")
 	branchSpecs := []GhostBranchSpec{
 		LocalBaseBranchSpec{
-			Repo:              options.GhostRepo,
 			Prefix:            options.GhostPrefix,
-			SrcDir:            options.SrcDir,
 			RemoteBaseRefspec: options.RemoteBase,
 			LocalBaseRefspec:  options.LocalBase,
 		},
 		LocalModBranchSpec{
-			Repo:             options.GhostRepo,
 			Prefix:           options.GhostPrefix,
-			SrcDir:           options.SrcDir,
 			LocalBaseRefspec: options.LocalBase,
 		},
 	}
@@ -45,7 +41,7 @@ func Push(options PushOptions) (*PushResult, error) {
 		}
 		defer workingEnv.clean()
 		dstDir := workingEnv.GhostDir
-		branch, err := branchSpec.CreateBranch(dstDir)
+		branch, err := branchSpec.CreateBranch(*workingEnv)
 		if err != nil {
 			return nil, err
 		}

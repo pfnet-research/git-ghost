@@ -10,42 +10,41 @@ import (
 )
 
 type GhostBranchSpec interface {
-	CreateBranch(dstDir string) (GhostBranch, error)
+	CreateBranch(we WorkingEnv) (GhostBranch, error)
 }
 
 type LocalBaseBranchSpec struct {
-	Repo              string
-	SrcDir            string
 	Prefix            string
 	RemoteBaseRefspec string
 	LocalBaseRefspec  string
 }
 
 type LocalModBranchSpec struct {
-	Repo             string
-	SrcDir           string
 	Prefix           string
 	LocalBaseRefspec string
 }
 
-func (bs LocalBaseBranchSpec) CreateBranch(dstDir string) (GhostBranch, error) {
-	err := git.InitializeGitDir(dstDir, bs.Repo, "")
+func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
+	dstDir := we.GhostDir
+	srcDir := we.SrcDir
+	err := git.InitializeGitDir(dstDir, we.GhostRepo, "")
+
 	if err != nil {
 		return nil, err
 	}
-	err = git.ValidateRefspec(bs.SrcDir, bs.RemoteBaseRefspec)
+	err = git.ValidateRefspec(srcDir, bs.RemoteBaseRefspec)
 	if err != nil {
 		return nil, err
 	}
-	remoteBaseCommit, err := git.ResolveRefspec(bs.SrcDir, bs.RemoteBaseRefspec)
+	remoteBaseCommit, err := git.ResolveRefspec(srcDir, bs.RemoteBaseRefspec)
 	if err != nil {
 		return nil, err
 	}
-	err = git.ValidateRefspec(bs.SrcDir, bs.LocalBaseRefspec)
+	err = git.ValidateRefspec(srcDir, bs.LocalBaseRefspec)
 	if err != nil {
 		return nil, err
 	}
-	localBaseCommit, err := git.ResolveRefspec(bs.SrcDir, bs.LocalBaseRefspec)
+	localBaseCommit, err := git.ResolveRefspec(srcDir, bs.LocalBaseRefspec)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +64,7 @@ func (bs LocalBaseBranchSpec) CreateBranch(dstDir string) (GhostBranch, error) {
 	}
 	tmpFile.Close()
 	defer os.Remove(tmpFile.Name())
-	err = git.CreateDiffBundleFile(bs.SrcDir, tmpFile.Name(), remoteBaseCommit, localBaseCommit)
+	err = git.CreateDiffBundleFile(srcDir, tmpFile.Name(), remoteBaseCommit, localBaseCommit)
 	if err != nil {
 		return nil, err
 	}
@@ -86,16 +85,18 @@ func (bs LocalBaseBranchSpec) CreateBranch(dstDir string) (GhostBranch, error) {
 	return &branch, nil
 }
 
-func (bs LocalModBranchSpec) CreateBranch(dstDir string) (GhostBranch, error) {
-	err := git.InitializeGitDir(dstDir, bs.Repo, "")
+func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
+	dstDir := we.GhostDir
+	srcDir := we.SrcDir
+	err := git.InitializeGitDir(dstDir, we.GhostRepo, "")
 	if err != nil {
 		return nil, err
 	}
-	err = git.ValidateRefspec(bs.SrcDir, bs.LocalBaseRefspec)
+	err = git.ValidateRefspec(srcDir, bs.LocalBaseRefspec)
 	if err != nil {
 		return nil, err
 	}
-	localBaseCommit, err := git.ResolveRefspec(bs.SrcDir, bs.LocalBaseRefspec)
+	localBaseCommit, err := git.ResolveRefspec(srcDir, bs.LocalBaseRefspec)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +107,7 @@ func (bs LocalModBranchSpec) CreateBranch(dstDir string) (GhostBranch, error) {
 	}
 	tmpFile.Close()
 	defer os.Remove(tmpFile.Name())
-	err = git.CreateDiffPatchFile(bs.SrcDir, tmpFile.Name(), localBaseCommit)
+	err = git.CreateDiffPatchFile(srcDir, tmpFile.Name(), localBaseCommit)
 	if err != nil {
 		return nil, err
 	}
