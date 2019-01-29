@@ -1,14 +1,6 @@
 package ghost
 
-import (
-	"fmt"
-)
-
-type Commit struct {
-	BaseCommitHash string
-	Commits        []string
-	Diff           string
-}
+import "fmt"
 
 type GhostBranch interface {
 	BranchName() string
@@ -41,29 +33,4 @@ func (b LocalModBranch) BranchName() string {
 
 func (b LocalModBranch) FileName() string {
 	return "local-mod.patch"
-}
-
-type PushOptions struct {
-	SrcDir          string
-	GhostWorkingDir string
-	GhostPrefix     string
-	GhostRepo       string
-	RemoteBase      string
-	LocalBase       string
-}
-
-type PushResult struct {
-	LocalBaseBranch *LocalBaseBranch
-	LocalModBranch  *LocalModBranch
-}
-
-type PullOptions struct {
-	SrcDir          string
-	GhostWorkingDir string
-	GhostPrefix     string
-	GhostRepo       string
-	RemoteBase      string
-	LocalBase       string
-	Hash            string
-	ForceApply      bool
 }

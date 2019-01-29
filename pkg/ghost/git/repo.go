@@ -1,8 +1,6 @@
 package git
 
 import (
-	"bytes"
-	"errors"
 	"git-ghost/pkg/util"
 	"os/exec"
 )
@@ -18,17 +16,7 @@ func InitializeGitDir(dir, repo, branch string) error {
 	}
 	args = append(args, repo, dir)
 	cmd := exec.Command("git", args...)
-	stderr := bytes.NewBufferString("")
-	cmd.Stderr = stderr
-	err := cmd.Run()
-	if err != nil {
-		s := stderr.String()
-		if s != "" {
-			return errors.New(s)
-		}
-		return err
-	}
-	return nil
+	return util.JustRunCmd(cmd)
 }
 
 func CommitAndPush(dir, filename, message, refspec string) error {
@@ -44,76 +32,35 @@ func CommitAndPush(dir, filename, message, refspec string) error {
 }
 
 func CommitFile(dir, filename, message string) error {
-	cmd := exec.Command("git", "-C", dir, "add", filename)
-	stderr := bytes.NewBufferString("")
-	cmd.Stderr = stderr
-	err := cmd.Run()
+	err := util.JustRunCmd(
+		exec.Command("git", "-C", dir, "add", filename),
+	)
 	if err != nil {
-		s := stderr.String()
-		if s != "" {
-			return errors.New(s)
-		}
 		return err
 	}
-	cmd = exec.Command("git", "-C", dir, "commit", "-q", filename, "-m", message)
-	stderr.Reset()
-	cmd.Stderr = stderr
-	err = cmd.Run()
-	if err != nil {
-		s := stderr.String()
-		if s != "" {
-			return errors.New(s)
-		}
-		return err
-	}
-	return nil
+	return util.JustRunCmd(
+		exec.Command("git", "-C", dir, "commit", "-q", filename, "-m", message),
+	)
 }
 
 func Push(dir string, refspecs ...string) error {
 	args := []string{"-C", dir, "push", "origin"}
 	args = append(args, refspecs...)
-	cmd := exec.Command("git", args...)
-	stderr := bytes.NewBufferString("")
-	cmd.Stderr = stderr
-	err := cmd.Run()
-	if err != nil {
-		s := stderr.String()
-		if s != "" {
-			return errors.New(s)
-		}
-		return err
-	}
-	return nil
+	return util.JustRunCmd(
+		exec.Command("git", args...),
+	)
 }
 
 func Pull(dir, refspec string) error {
-	cmd := exec.Command("git", "-C", dir, "pull", "origin", refspec)
-	stderr := bytes.NewBufferString("")
-	cmd.Stderr = stderr
-	err := cmd.Run()
-	if err != nil {
-		s := stderr.String()
-		if s != "" {
-			return errors.New(s)
-		}
-		return err
-	}
-	return nil
+	return util.JustRunCmd(
+		exec.Command("git", "-C", dir, "pull", "origin", refspec),
+	)
 }
 
 func CreateOrphanBranch(dir, branch string) error {
-	cmd := exec.Command("git", "-C", dir, "checkout", "--orphan", branch)
-	stderr := bytes.NewBufferString("")
-	cmd.Stderr = stderr
-	err := cmd.Run()
-	if err != nil {
-		s := stderr.String()
-		if s != "" {
-			return errors.New(s)
-		}
-		return err
-	}
-	return nil
+	return util.JustRunCmd(
+		exec.Command("git", "-C", dir, "checkout", "--orphan", branch),
+	)
 }
 
 func ResetHardToBranch(dir, branch string) error {

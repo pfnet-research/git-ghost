@@ -11,6 +11,17 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+type PullOptions struct {
+	SrcDir          string
+	GhostWorkingDir string
+	GhostPrefix     string
+	GhostRepo       string
+	RemoteBase      string
+	LocalBase       string
+	Hash            string
+	ForceApply      bool
+}
+
 func Pull(options PullOptions) error {
 	log.WithFields(util.ToFields(options)).Debug("pull command with")
 
