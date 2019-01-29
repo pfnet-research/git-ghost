@@ -5,6 +5,10 @@ PROJECTROOT := "./"
 
 LDFLAGS := -ldflags="-s -w -X \"git-ghost/cmd.Version=$(VERSION)\" -X \"git-ghost/cmd.Revision=$(REVISION)\" -extldflags \"-static\""
 
+.PHONY: lint
+lint:
+	gometalinter --config gometalinter.json ./...
+
 .PHONY: deps
 deps:
 	dep ensure
