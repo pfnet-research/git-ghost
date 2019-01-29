@@ -7,6 +7,7 @@ import (
 	"git-ghost/pkg/ghost/git"
 	"os"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -37,7 +38,7 @@ func NewPushCommand() *cobra.Command {
 				LocalBase:       pushOpts.localBase,
 			})
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%s\n", err)
+				log.Error(err)
 				os.Exit(1)
 			}
 			if resp.LocalModBranch != nil {

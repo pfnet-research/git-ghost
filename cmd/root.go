@@ -6,6 +6,7 @@ import (
 	"git-ghost/pkg/ghost/git"
 	"os"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -15,6 +16,7 @@ type globalFlags struct {
 	ghostPrefix  string
 	ghostRepo    string
 	baseCommit   string
+	verbose      bool
 }
 
 var (
@@ -23,8 +25,9 @@ var (
 )
 
 var RootCmd = &cobra.Command{
-	Use:   "git-ghost",
-	Short: "git-ghost",
+	Use:           "git-ghost",
+	Short:         "git-ghost",
+	SilenceErrors: false,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		if cmd.Use == "version" {
 			return nil
@@ -36,6 +39,9 @@ var RootCmd = &cobra.Command{
 		err = globalOpts.Validate()
 		if err != nil {
 			return err
+		}
+		if globalOpts.verbose {
+			log.SetLevel(log.DebugLevel)
 		}
 		return nil
 	},
@@ -56,6 +62,7 @@ func init() {
 	ghostRepoEnv := os.Getenv("GHOST_REPO")
 	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostRepo, "ghost-repo", ghostRepoEnv, "git refspec for ghost commits repository")
 	RootCmd.PersistentFlags().StringVar(&globalOpts.baseCommit, "base-commit", "HEAD", "base commit hash for generating ghost commit.")
+	RootCmd.PersistentFlags().BoolVar(&globalOpts.verbose, "verbose", false, "verbose mode")
 	RootCmd.AddCommand(versionCmd)
 }
 

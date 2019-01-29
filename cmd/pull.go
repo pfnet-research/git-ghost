@@ -1,11 +1,10 @@
 package cmd
 
 import (
-	"fmt"
+	"git-ghost/pkg/ghost"
 	"os"
 
-	"git-ghost/pkg/ghost"
-
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -46,9 +45,8 @@ func NewPullCommand() *cobra.Command {
 				opts.LocalBase = pullFlags.localBase
 			}
 
-			err := ghost.Pull(opts)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%s\n", err)
+			if err := ghost.Pull(opts); err != nil {
+				log.Error(err)
 				os.Exit(1)
 			}
 		},
