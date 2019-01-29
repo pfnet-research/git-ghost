@@ -4,22 +4,15 @@ import (
 	"fmt"
 	"git-ghost/pkg/ghost/git"
 	"git-ghost/pkg/util"
-	"io/ioutil"
-	"os"
 	"path"
 
 	log "github.com/Sirupsen/logrus"
 )
 
 type PullOptions struct {
-	SrcDir          string
-	GhostWorkingDir string
-	GhostPrefix     string
-	GhostRepo       string
-	RemoteBase      string
-	LocalBase       string
-	Hash            string
-	ForceApply      bool
+	WorkingEnvSpec
+	GhostSpec
+	ForceApply bool
 }
 
 func Pull(options PullOptions) error {
@@ -27,21 +20,14 @@ func Pull(options PullOptions) error {
 
 	// pull command assumed pwd is the src directory to apply ghost commits.
 	srcDir := options.SrcDir
-	ghostDir, err := ioutil.TempDir(options.GhostWorkingDir, "git-ghost-")
+	workingEnv, err := options.WorkingEnvSpec.initialize()
 	if err != nil {
 		return err
 	}
-	defer os.RemoveAll(ghostDir)
-	err = git.InitializeGitDir(ghostDir, options.GhostRepo, "")
-	if err != nil {
-		return err
-	}
+	ghostDir := workingEnv.GhostDir
+	defer workingEnv.clean()
 
-	log.WithFields(log.Fields{
-		"dir": ghostDir,
-	}).Info("ghost repo was cloned")
-
-	localBaseBranch, localModBranch, err := validateAndCreateGhostBranches(options)
+	localBaseBranch, localModBranch, err := options.GhostSpec.validateAndCreateGhostBranches(options.WorkingEnvSpec)
 	if err != nil {
 		return err
 	}
@@ -114,58 +100,4 @@ func Pull(options PullOptions) error {
 		}
 	}
 	return applyGhostBranchToSrc(localModBranch)
-}
-
-func validateAndCreateGhostBranches(options PullOptions) (*LocalBaseBranch, *LocalModBranch, error) {
-	var err error
-
-	// resolve HEAD If necessary
-	remoteBaseResolved := options.RemoteBase
-	localBaseResolved := options.LocalBase
-	if options.RemoteBase == "HEAD" {
-		remoteBaseResolved, err = git.ResolveRefspec(options.SrcDir, options.RemoteBase)
-		if err != nil {
-			return nil, nil, err
-		}
-	}
-	if options.LocalBase == "HEAD" {
-		localBaseResolved, err = git.ResolveRefspec(options.SrcDir, options.LocalBase)
-		if err != nil {
-			return nil, nil, err
-		}
-	}
-
-	// ghost branch validations and create ghost branches
-	var localBaseBranch *LocalBaseBranch
-	if remoteBaseResolved != localBaseResolved {
-		// TODO warning when srcDir is on remoteBaseResolved.
-		localBaseBranch = &LocalBaseBranch{
-			Prefix:           options.GhostPrefix,
-			RemoteBaseCommit: remoteBaseResolved,
-			LocalBaseCommit:  localBaseResolved,
-		}
-
-		existence, err := git.ValidateRemoteBranchExistence(options.GhostRepo, localBaseBranch.BranchName())
-		if err != nil {
-			return nil, nil, err
-		}
-		if !existence {
-			return nil, nil, fmt.Errorf("can't resolve local base branch on %s: %+v", options.GhostRepo, localBaseBranch)
-		}
-	}
-
-	localModBranch := &LocalModBranch{
-		Prefix:          options.GhostPrefix,
-		LocalBaseCommit: localBaseResolved,
-		LocalModHash:    options.Hash,
-	}
-	existence, err := git.ValidateRemoteBranchExistence(options.GhostRepo, localModBranch.BranchName())
-	if err != nil {
-		return nil, nil, err
-	}
-	if !existence {
-		return nil, nil, fmt.Errorf("can't resolve local mod branch on %s: %+v", options.GhostRepo, localModBranch)
-	}
-
-	return localBaseBranch, localModBranch, nil
 }

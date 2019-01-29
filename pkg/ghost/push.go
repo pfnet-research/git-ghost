@@ -3,19 +3,15 @@ package ghost
 import (
 	"git-ghost/pkg/ghost/git"
 	"git-ghost/pkg/util"
-	"io/ioutil"
-	"os"
 
 	log "github.com/Sirupsen/logrus"
 )
 
 type PushOptions struct {
-	SrcDir          string
-	GhostWorkingDir string
-	GhostPrefix     string
-	GhostRepo       string
-	RemoteBase      string
-	LocalBase       string
+	WorkingEnvSpec
+	GhostPrefix string
+	RemoteBase  string
+	LocalBase   string
 }
 
 type PushResult struct {
@@ -43,11 +39,12 @@ func Push(options PushOptions) (*PushResult, error) {
 
 	branches := []GhostBranch{}
 	for _, branchSpec := range branchSpecs {
-		dstDir, err := ioutil.TempDir(options.GhostWorkingDir, "git-ghost-")
+		workingEnv, err := options.WorkingEnvSpec.initialize()
 		if err != nil {
 			return nil, err
 		}
-		defer os.RemoveAll(dstDir)
+		defer workingEnv.clean()
+		dstDir := workingEnv.GhostDir
 		branch, err := branchSpec.CreateBranch(dstDir)
 		if err != nil {
 			return nil, err
