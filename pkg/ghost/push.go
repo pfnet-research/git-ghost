@@ -1,13 +1,16 @@
 package ghost
 
 import (
-	"fmt"
 	"git-ghost/pkg/ghost/git"
+	"git-ghost/pkg/util"
 	"io/ioutil"
 	"os"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 func Push(options PushOptions) (*PushResult, error) {
+	log.WithFields(util.ToFields(options)).Debug("push command with")
 	branchSpecs := []GhostBranchSpec{
 		LocalBaseBranchSpec{
 			Repo:              options.GhostRepo,
@@ -44,10 +47,17 @@ func Push(options PushOptions) (*PushResult, error) {
 			return nil, err
 		}
 		if existence {
-			fmt.Fprintf(os.Stderr, "Skipped pushing existing branch '%s' in %s\n", branch.BranchName(), options.GhostRepo)
+			log.WithFields(log.Fields{
+				"branch":    branch.BranchName(),
+				"ghostRepo": options.GhostRepo,
+			}).Info("skipped pushing existing branch")
 			continue
 		}
-		fmt.Fprintf(os.Stderr, "Pushing branch %s to %s\n", branch.BranchName(), options.GhostRepo)
+
+		log.WithFields(log.Fields{
+			"branch":    branch.BranchName(),
+			"ghostRepo": options.GhostRepo,
+		}).Info("pushing branch")
 		err = git.Push(dstDir, branch.BranchName())
 		if err != nil {
 			return nil, err
