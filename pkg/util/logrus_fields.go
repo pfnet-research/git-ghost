@@ -9,24 +9,33 @@ import (
 func ToFields(structObj interface{}) (fields log.Fields) {
 	fields = make(log.Fields)
 
-	v := reflect.ValueOf(structObj)
-	t := v.Type()
-	for i := 0; i < t.NumField(); i++ {
-		name := t.Field(i).Name
-		value := v.FieldByName(name).Interface()
+	ptyp := reflect.TypeOf(structObj)  // a reflect.Type
+	pval := reflect.ValueOf(structObj) // a reflect.Value
+
+	var typ reflect.Type
+	var val reflect.Value
+	if ptyp.Kind() == reflect.Ptr {
+		typ = ptyp.Elem()
+		val = pval.Elem()
+	} else {
+		typ = ptyp
+		val = pval
+	}
+	for i := 0; i < typ.NumField(); i++ {
+		name := typ.Field(i).Name
+		value := val.FieldByName(name).Interface()
 		fields[name] = value
 	}
 
 	return
 }
 
-func ToFieldsMulti(structObjs ...interface{}) (fields log.Fields) {
-	fields = make(log.Fields)
-	for structObj := range structObjs {
-		fs := ToFields(structObj)
-		for k, v := range fs {
-			fields[k] = v
+func MergeFields(fieldss ...log.Fields) log.Fields {
+	merged := make(log.Fields)
+	for _, fields := range fieldss {
+		for k, v := range fields {
+			merged[k] = v
 		}
 	}
-	return
+	return merged
 }

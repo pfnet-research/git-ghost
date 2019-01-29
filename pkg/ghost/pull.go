@@ -47,7 +47,7 @@ func Pull(options PullOptions) error {
 	}
 
 	applyGhostBranchToSrc := func(ghost GhostBranch) error {
-		log.WithFields(util.ToFieldsMulti(ghost, map[string]string{"ghostDir": ghostDir, "srcDir": srcDir})).Info("applying ghost branch")
+		log.WithFields(util.MergeFields(util.ToFields(ghost), log.Fields{"ghostDir": ghostDir, "srcDir": srcDir})).Info("applying ghost branch")
 
 		err = git.ResetHardToBranch(ghostDir, git.ORIGIN+"/"+ghost.BranchName())
 		if err != nil {
@@ -78,7 +78,10 @@ func Pull(options PullOptions) error {
 		if srcHead != localBaseBranch.RemoteBaseCommit {
 			message := "HEAD is not equal to remote-base"
 			if options.ForceApply {
-				log.WithFields(util.ToFieldsMulti(localBaseBranch, map[string]string{"HEAD": srcHead, "srcDir": srcDir})).Warnf("%s. Applying local base branch will be failed.", message)
+				log.WithFields(
+					util.MergeFields(util.ToFields(*localBaseBranch),
+						log.Fields{"HEAD": srcHead, "srcDir": srcDir}),
+				).Warnf("%s. Applying local base branch will be failed.", message)
 			} else {
 				return fmt.Errorf("abort because %s (HEAD=%s, remote-base=%s)", message, srcHead, localBaseBranch.RemoteBaseCommit)
 			}
@@ -101,7 +104,10 @@ func Pull(options PullOptions) error {
 		if srcHead != localModBranch.LocalBaseCommit {
 			message := "HEAD is not equal to local-base"
 			if options.ForceApply {
-				log.WithFields(util.ToFieldsMulti(localModBranch, map[string]string{"HEAD": srcHead, "srcDir": srcDir})).Warnf("%s. Applying local mod branch will be failed.", message)
+				log.WithFields(util.MergeFields(
+					util.ToFields(*localModBranch),
+					log.Fields{"HEAD": srcHead, "srcDir": srcDir}),
+				).Warnf("%s. Applying local mod branch will be failed.", message)
 			} else {
 				return fmt.Errorf("abort because %s (HEAD=%s, local-base=%s)", message, srcHead, localModBranch.LocalBaseCommit)
 			}
