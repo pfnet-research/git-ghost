@@ -9,6 +9,20 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+type PushOptions struct {
+	SrcDir          string
+	GhostWorkingDir string
+	GhostPrefix     string
+	GhostRepo       string
+	RemoteBase      string
+	LocalBase       string
+}
+
+type PushResult struct {
+	LocalBaseBranch *LocalBaseBranch
+	LocalModBranch  *LocalModBranch
+}
+
 func Push(options PushOptions) (*PushResult, error) {
 	log.WithFields(util.ToFields(options)).Debug("push command with")
 	branchSpecs := []GhostBranchSpec{
