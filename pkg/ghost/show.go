@@ -13,6 +13,13 @@ import (
 type ShowOptions struct {
 	WorkingEnvSpec
 	GhostSpec
+	// if you want to consume and transform the output of `ghost.Show()`,
+	// Please use `io.Pipe()` as below,
+	// ```
+	// r, w := io.Pipe()
+	// go func() { ghost.Show(ShowOptions{ Writer: w }); w.Close()}
+	// ````
+	// Then, you can read the output from `r` and transform them as you like.
 	Writer io.Writer
 }
 
