@@ -27,11 +27,7 @@ type LocalModBranchSpec struct {
 func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	dstDir := we.GhostDir
 	srcDir := we.SrcDir
-	err := git.InitializeGitDir(dstDir, we.GhostRepo, "")
-	if err != nil {
-		return nil, err
-	}
-	err = git.ValidateRefspec(srcDir, bs.RemoteBaseRefspec)
+	err := git.ValidateRefspec(srcDir, bs.RemoteBaseRefspec)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +53,7 @@ func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 		LocalBaseCommit:  localBaseCommit,
 		RemoteBaseCommit: remoteBaseCommit,
 	}
-	tmpFile, err := ioutil.TempFile("", "git-ghost-local-mod")
+	tmpFile, err := ioutil.TempFile("", "git-ghost-local-base")
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +83,7 @@ func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	dstDir := we.GhostDir
 	srcDir := we.SrcDir
-	err = git.ValidateRefspec(srcDir, bs.LocalBaseRefspec)
+	err := git.ValidateRefspec(srcDir, bs.LocalBaseRefspec)
 	if err != nil {
 		return nil, err
 	}
