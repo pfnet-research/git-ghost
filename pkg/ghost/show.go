@@ -6,7 +6,6 @@ import (
 	"git-ghost/pkg/util"
 	"io"
 	"os/exec"
-	"strings"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -37,27 +36,27 @@ func Show(options ShowOptions) error {
 		}
 		return workingEnv, nil
 	}
-	genGitCatFileCommand := func(we *WorkingEnv, gb GhostBranch) []string {
-		return []string{"git", "-C", we.GhostDir, "cat-file", "-p", fmt.Sprintf("HEAD:%s", gb.FileName())}
+	execShow := func(we *WorkingEnv, gb GhostBranch) error {
+		cmd := exec.Command("git", "-C", we.GhostDir, "--no-pager", "cat-file", "-p", fmt.Sprintf("HEAD:%s", gb.FileName()))
+		cmd.Stdout = options.Writer
+		return util.JustRunCmd(cmd)
 	}
 
-	commandStr := []string{}
 	if localBaseBranch != nil {
 		we, err := checkoutGhostBranch(localBaseBranch)
 		if err != nil {
 			return err
 		}
 		defer we.clean()
-		commandStr = append(commandStr, genGitCatFileCommand(we, localBaseBranch)...)
-		commandStr = append(commandStr, "&&")
+		err = execShow(we, localBaseBranch)
+		if err != nil {
+			return err
+		}
 	}
 	we, err := checkoutGhostBranch(localModBranch)
 	if err != nil {
 		return err
 	}
 	defer we.clean()
-	commandStr = append(commandStr, genGitCatFileCommand(we, localModBranch)...)
-	cmd := exec.Command("/bin/sh", "-c", strings.Join(commandStr, " "))
-	cmd.Stdout = options.Writer
-	return util.JustRunCmd(cmd)
+	return execShow(we, localModBranch)
 }
