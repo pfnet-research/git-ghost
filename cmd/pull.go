@@ -30,19 +30,23 @@ func NewPullCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			hashArg := args[0]
 			opts := ghost.PullOptions{
-				SrcDir:          globalOpts.srcDir,
-				GhostWorkingDir: globalOpts.ghostWorkDir,
-				GhostPrefix:     globalOpts.ghostPrefix,
-				GhostRepo:       globalOpts.ghostRepo,
-				RemoteBase:      globalOpts.baseCommit,
-				Hash:            hashArg,
-				ForceApply:      pullFlags.force,
+				WorkingEnvSpec: ghost.WorkingEnvSpec{
+					SrcDir:          globalOpts.srcDir,
+					GhostWorkingDir: globalOpts.ghostWorkDir,
+					GhostRepo:       globalOpts.ghostRepo,
+				},
+				GhostSpec: ghost.GhostSpec{
+					GhostPrefix:  globalOpts.ghostPrefix,
+					RemoteBase:   globalOpts.baseCommit,
+					LocalModHash: hashArg,
+				},
+				ForceApply: pullFlags.force,
 			}
 
 			if pullFlags.localBase == "" {
-				opts.LocalBase = globalOpts.baseCommit
+				opts.GhostSpec.LocalBase = globalOpts.baseCommit
 			} else {
-				opts.LocalBase = pullFlags.localBase
+				opts.GhostSpec.LocalBase = pullFlags.localBase
 			}
 
 			if err := ghost.Pull(opts); err != nil {

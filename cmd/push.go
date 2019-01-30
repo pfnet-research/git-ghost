@@ -30,12 +30,14 @@ func NewPushCommand() *cobra.Command {
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
 			resp, err := ghost.Push(ghost.PushOptions{
-				SrcDir:          globalOpts.srcDir,
-				GhostWorkingDir: globalOpts.ghostWorkDir,
-				GhostPrefix:     globalOpts.ghostPrefix,
-				GhostRepo:       globalOpts.ghostRepo,
-				RemoteBase:      globalOpts.baseCommit,
-				LocalBase:       pushOpts.localBase,
+				WorkingEnvSpec: ghost.WorkingEnvSpec{
+					SrcDir:          globalOpts.srcDir,
+					GhostWorkingDir: globalOpts.ghostWorkDir,
+					GhostRepo:       globalOpts.ghostRepo,
+				},
+				GhostPrefix: globalOpts.ghostPrefix,
+				RemoteBase:  globalOpts.baseCommit,
+				LocalBase:   pushOpts.localBase,
 			})
 			if err != nil {
 				log.Error(err)
