@@ -7,10 +7,20 @@ import (
 	"strings"
 )
 
-func ListGhostBranchNames(repo, prefix, fromRefspec string) ([]string, error) {
-	output, err := util.JustOutputCmd(
-		exec.Command("git", "ls-remote", "-q", "--heads", "--refs", repo, fmt.Sprintf("refs/heads/%s/%s*", prefix, fromRefspec)),
-	)
+func ListGhostBranchNames(repo, prefix, fromRefspec, toRefspec string) ([]string, error) {
+	fromPattern := "*"
+	toPattern := "*"
+	if fromRefspec != "" {
+		fromPattern = fromRefspec
+	}
+	if toRefspec != "" {
+		toPattern = toRefspec
+	}
+	output, err := util.JustOutputCmd(exec.Command("git",
+		"ls-remote", "-q", "--heads", "--refs", repo,
+		fmt.Sprintf("refs/heads/%s/%s-%s", prefix, fromPattern, toPattern),
+		fmt.Sprintf("refs/heads/%s/%s/%s", prefix, fromPattern, toPattern),
+	))
 	if err != nil {
 		return []string{}, err
 	}
