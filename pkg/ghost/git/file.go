@@ -72,7 +72,7 @@ func CreateDiffPatchFile(dir, filepath, refspec string) error {
 	}
 	defer f.Close()
 
-	cmd := exec.Command("git", "-C", dir, "diff", "--binary", refspec)
+	cmd := exec.Command("git", "-C", dir, "diff", "--patience", "--binary", refspec)
 	stderr := bytes.NewBufferString("")
 	cmd.Stderr = stderr
 	reader, err := cmd.StdoutPipe()
