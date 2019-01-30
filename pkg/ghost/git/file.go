@@ -17,7 +17,10 @@ func CreateDiffBundleFile(dir, filepath, fromRefspec, toRefspec string) error {
 	}
 	defer f.Close()
 
-	cmd := exec.Command("git", "-C", dir, "format-patch", "--binary", "--stdout", fmt.Sprintf("%s..%s", fromRefspec, toRefspec))
+	cmd := exec.Command("git", "-C", dir,
+		"log", "-p", "--reverse", "--pretty=email", "--stat", "-m", "--first-parent", "--binary",
+		fmt.Sprintf("%s..%s", fromRefspec, toRefspec),
+	)
 	stderr := bytes.NewBufferString("")
 	cmd.Stderr = stderr
 	reader, err := cmd.StdoutPipe()
