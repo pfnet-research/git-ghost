@@ -3,6 +3,7 @@ package ghost
 import (
 	"fmt"
 	"git-ghost/pkg/ghost/git"
+	"regexp"
 )
 
 type GhostSpec struct {
@@ -18,13 +19,15 @@ func (gs GhostSpec) validateAndCreateGhostBranches(weSpec WorkingEnvSpec) (*Loca
 	// resolve HEAD If necessary
 	remoteBaseResolved := gs.RemoteBase
 	localBaseResolved := gs.LocalBase
-	if gs.RemoteBase == "HEAD" {
+	sha1Regex := regexp.MustCompile(`\b[0-9a-f]{5,40}\b`)
+
+	if !sha1Regex.MatchString(gs.RemoteBase) {
 		remoteBaseResolved, err = git.ResolveRefspec(weSpec.SrcDir, gs.RemoteBase)
 		if err != nil {
 			return nil, nil, err
 		}
 	}
-	if gs.LocalBase == "HEAD" {
+	if !sha1Regex.MatchString(gs.RemoteBase) {
 		localBaseResolved, err = git.ResolveRefspec(weSpec.SrcDir, gs.LocalBase)
 		if err != nil {
 			return nil, nil, err
