@@ -31,7 +31,7 @@ func (weSpec WorkingEnvSpec) initialize() (*WorkingEnv, error) {
 
 	log.WithFields(log.Fields{
 		"dir": ghostDir,
-	}).Info("ghost repo was cloned")
+	}).Debug("ghost repo was cloned")
 
 	return &WorkingEnv{
 		WorkingEnvSpec: weSpec,
