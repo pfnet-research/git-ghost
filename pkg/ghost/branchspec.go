@@ -87,10 +87,6 @@ func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	dstDir := we.GhostDir
 	srcDir := we.SrcDir
-	err := git.InitializeGitDir(dstDir, we.GhostRepo, "")
-	if err != nil {
-		return nil, err
-	}
 	err = git.ValidateRefspec(srcDir, bs.LocalBaseRefspec)
 	if err != nil {
 		return nil, err
