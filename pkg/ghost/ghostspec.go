@@ -3,6 +3,8 @@ package ghost
 import (
 	"fmt"
 	"git-ghost/pkg/ghost/git"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 type GhostSpec struct {
@@ -14,21 +16,29 @@ type GhostSpec struct {
 
 func (gs GhostSpec) validateAndCreateGhostBranches(weSpec WorkingEnvSpec) (*LocalBaseBranch, *LocalModBranch, error) {
 	var err error
-
-	// resolve HEAD If necessary
 	remoteBaseResolved := gs.RemoteBase
 	localBaseResolved := gs.LocalBase
-	if gs.RemoteBase == "HEAD" {
-		remoteBaseResolved, err = git.ResolveRefspec(weSpec.SrcDir, gs.RemoteBase)
-		if err != nil {
-			return nil, nil, err
-		}
+
+	// try to resolve specified commit-ish values
+	// if failed, we will use specified values.
+	triedToBeResolved, err := git.ResolveRefspec(weSpec.SrcDir, gs.RemoteBase)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"repository": weSpec.SrcDir,
+			"specified":  gs.RemoteBase,
+		}).Warn("can't resolve --base-commit on local git repository.  specified commit-ish value will be used.")
+	} else {
+		remoteBaseResolved = triedToBeResolved
 	}
-	if gs.LocalBase == "HEAD" {
-		localBaseResolved, err = git.ResolveRefspec(weSpec.SrcDir, gs.LocalBase)
-		if err != nil {
-			return nil, nil, err
-		}
+
+	triedToBeResolved, err = git.ResolveRefspec(weSpec.SrcDir, gs.LocalBase)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"repository": weSpec.SrcDir,
+			"specified":  gs.LocalBase,
+		}).Warn("can't resolve --local-base on local git repository.  specified commit-ish value will be used.")
+	} else {
+		localBaseResolved = triedToBeResolved
 	}
 
 	// ghost branch validations and create ghost branches
