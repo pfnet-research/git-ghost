@@ -24,6 +24,7 @@ func NewShowCommand() *cobra.Command {
 		Use:   "show [hash]",
 		Short: "show ghost commits on remote repository.",
 		Long:  "show ghost commits on remote repository.",
+		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			hashArg := args[0]
 			opts := ghost.ShowOptions{
