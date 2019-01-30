@@ -27,7 +27,7 @@ func List(options ListOptions) (*ListResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	branchNames, err := git.ListGhostBranchNames(options.GhostRepo, options.GhostPrefix, baseCommit)
+	branchNames, err := git.ListGhostBranchNames(options.GhostRepo, options.GhostPrefix, baseCommit, "")
 	if err != nil {
 		return nil, err
 	}
