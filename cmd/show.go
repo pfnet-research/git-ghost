@@ -38,6 +38,7 @@ func NewShowCommand() *cobra.Command {
 					RemoteBase:   globalOpts.baseCommit,
 					LocalModHash: hashArg,
 				},
+				Writer: os.Stdout,
 			}
 
 			if showFlags.localBase == "" {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"git-ghost/pkg/ghost/git"
 	"git-ghost/pkg/util"
-	"os"
+	"io"
 	"os/exec"
 	"strings"
 
@@ -14,6 +14,7 @@ import (
 type ShowOptions struct {
 	WorkingEnvSpec
 	GhostSpec
+	Writer io.Writer
 }
 
 func Show(options ShowOptions) error {
@@ -57,6 +58,6 @@ func Show(options ShowOptions) error {
 	defer we.clean()
 	commandStr = append(commandStr, genGitCatFileCommand(we, localModBranch)...)
 	cmd := exec.Command("/bin/sh", "-c", strings.Join(commandStr, " "))
-	cmd.Stdout = os.Stdout
+	cmd.Stdout = options.Writer
 	return util.JustRunCmd(cmd)
 }
