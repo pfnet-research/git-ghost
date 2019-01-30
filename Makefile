@@ -1,7 +1,7 @@
 NAME        := git-ghost
-VERSION     := v0.0.1
+PROJECTROOT := $(shell pwd)
+VERSION     := $(shell cat ${PROJECTROOT}/VERSION)
 REVISION    := $(shell git rev-parse --short HEAD)
-PROJECTROOT := "./"
 IMAGE_PREFIX:=
 IMAGE_TAG   ?= $(VERSION)
 
