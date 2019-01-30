@@ -24,11 +24,13 @@ func NewListCommand() *cobra.Command {
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
 			opts := ghost.ListOptions{
-				SrcDir:          globalOpts.srcDir,
-				GhostWorkingDir: globalOpts.ghostWorkDir,
-				GhostPrefix:     globalOpts.ghostPrefix,
-				GhostRepo:       globalOpts.ghostRepo,
-				BaseCommit:      globalOpts.baseCommit,
+				WorkingEnvSpec: ghost.WorkingEnvSpec{
+					SrcDir:          globalOpts.srcDir,
+					GhostWorkingDir: globalOpts.ghostWorkDir,
+					GhostRepo:       globalOpts.ghostRepo,
+				},
+				GhostPrefix: globalOpts.ghostPrefix,
+				BaseCommit:  globalOpts.baseCommit,
 			}
 
 			res, err := ghost.List(opts)

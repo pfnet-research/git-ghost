@@ -10,11 +10,9 @@ import (
 )
 
 type ListOptions struct {
-	SrcDir          string
-	GhostWorkingDir string
-	GhostPrefix     string
-	GhostRepo       string
-	BaseCommit      string
+	WorkingEnvSpec
+	GhostPrefix string
+	BaseCommit  string
 }
 
 type ListResult struct {
