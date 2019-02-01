@@ -15,7 +15,6 @@ type globalFlags struct {
 	ghostWorkDir string
 	ghostPrefix  string
 	ghostRepo    string
-	baseCommit   string
 	verbose      bool
 }
 
@@ -61,7 +60,6 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostPrefix, "ghost-prefix", ghostPrefixEnv, "prefix of ghost branch name")
 	ghostRepoEnv := os.Getenv("GHOST_REPO")
 	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostRepo, "ghost-repo", ghostRepoEnv, "git refspec for ghost commits repository")
-	RootCmd.PersistentFlags().StringVar(&globalOpts.baseCommit, "base-commit", "HEAD", "base commit hash for generating ghost commit.")
 	RootCmd.PersistentFlags().BoolVar(&globalOpts.verbose, "verbose", false, "verbose mode")
 	RootCmd.AddCommand(versionCmd)
 }
@@ -96,12 +94,6 @@ func (flags *globalFlags) Validate() error {
 	}
 	if flags.ghostRepo == "" {
 		return errors.New("ghost-repo must be specified")
-	}
-	if flags.baseCommit != "" {
-		err := git.ValidateRefspec(".", flags.baseCommit)
-		if err != nil {
-			return errors.New("base-commit is not a valid object")
-		}
 	}
 	return nil
 }

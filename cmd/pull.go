@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"errors"
 	"git-ghost/pkg/ghost"
+	"git-ghost/pkg/ghost/git"
 	"os"
 
 	log "github.com/Sirupsen/logrus"
@@ -13,13 +15,14 @@ func init() {
 }
 
 type pullFlags struct {
-	localBase string
-	force     bool
+	localBase  string
+	baseCommit string
+	force      bool
 }
 
 func NewPullCommand() *cobra.Command {
 	var (
-		pullFlags pullFlags
+		flags pullFlags
 	)
 
 	var command = &cobra.Command{
@@ -28,6 +31,12 @@ func NewPullCommand() *cobra.Command {
 		Long:  "pull a ghost commit from remote repository and apply to your working git repository.",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
+			err := flags.Validate()
+			if err != nil {
+				log.Error(err)
+				os.Exit(1)
+			}
+
 			hashArg := args[0]
 			opts := ghost.PullOptions{
 				WorkingEnvSpec: ghost.WorkingEnvSpec{
@@ -37,16 +46,16 @@ func NewPullCommand() *cobra.Command {
 				},
 				GhostSpec: ghost.GhostSpec{
 					GhostPrefix:  globalOpts.ghostPrefix,
-					RemoteBase:   globalOpts.baseCommit,
+					RemoteBase:   flags.baseCommit,
 					LocalModHash: hashArg,
 				},
-				ForceApply: pullFlags.force,
+				ForceApply: flags.force,
 			}
 
-			if pullFlags.localBase == "" {
-				opts.GhostSpec.LocalBase = globalOpts.baseCommit
+			if flags.localBase == "" {
+				opts.GhostSpec.LocalBase = flags.baseCommit
 			} else {
-				opts.GhostSpec.LocalBase = pullFlags.localBase
+				opts.GhostSpec.LocalBase = flags.localBase
 			}
 
 			if err := ghost.Pull(opts); err != nil {
@@ -55,7 +64,18 @@ func NewPullCommand() *cobra.Command {
 			}
 		},
 	}
-	command.PersistentFlags().StringVar(&pullFlags.localBase, "local-base", "", "git refspec used to create a local modification patch from (default \"value of --base-commit\")")
-	command.PersistentFlags().BoolVar(&pullFlags.force, "force", false, "try applying patch even when your working repository checked out different base commit")
+	command.PersistentFlags().StringVar(&flags.baseCommit, "base-commit", "HEAD", "base commit hash for generating ghost commit.")
+	command.PersistentFlags().StringVar(&flags.localBase, "local-base", "", "git refspec used to create a local modification patch from (default \"value of --base-commit\")")
+	command.PersistentFlags().BoolVar(&flags.force, "force", false, "try applying patch even when your working repository checked out different base commit")
 	return command
+}
+
+func (flags pullFlags) Validate() error {
+	if flags.baseCommit != "" {
+		err := git.ValidateRefspec(".", flags.baseCommit)
+		if err != nil {
+			return errors.New("base-commit is not a valid object")
+		}
+	}
+	return nil
 }
