@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 type GhostBranchSpec interface {
@@ -14,34 +16,44 @@ type GhostBranchSpec interface {
 }
 
 type LocalBaseBranchSpec struct {
-	Prefix            string
-	RemoteBaseRefspec string
-	LocalBaseRefspec  string
+	Prefix              string
+	RemoteBaseCommitish string
+	LocalBaseCommitish  string
 }
 
 type LocalModBranchSpec struct {
-	Prefix           string
-	LocalBaseRefspec string
+	Prefix             string
+	LocalBaseCommitish string
 }
 
 func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	dstDir := we.GhostDir
 	srcDir := we.SrcDir
-	err := git.ValidateRefspec(srcDir, bs.RemoteBaseRefspec)
+	err := git.ValidateRefspec(srcDir, bs.RemoteBaseCommitish)
 	if err != nil {
 		return nil, err
 	}
-	remoteBaseCommit, err := git.ResolveRefspec(srcDir, bs.RemoteBaseRefspec)
+
+	remoteBaseCommit, err := git.ResolveRefspec(srcDir, bs.RemoteBaseCommitish)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"repository": srcDir,
+			"specified":  bs.RemoteBaseCommitish,
+		}).Warn("can't resolve commit-ish value on local git repository.  specified commit-ish value will be used.")
+		remoteBaseCommit = bs.RemoteBaseCommitish
+	}
+
+	err = git.ValidateRefspec(srcDir, bs.LocalBaseCommitish)
 	if err != nil {
 		return nil, err
 	}
-	err = git.ValidateRefspec(srcDir, bs.LocalBaseRefspec)
+	localBaseCommit, err := git.ResolveRefspec(srcDir, bs.LocalBaseCommitish)
 	if err != nil {
-		return nil, err
-	}
-	localBaseCommit, err := git.ResolveRefspec(srcDir, bs.LocalBaseRefspec)
-	if err != nil {
-		return nil, err
+		log.WithFields(log.Fields{
+			"repository": srcDir,
+			"specified":  bs.LocalBaseCommitish,
+		}).Warn("can't resolve commit-ish value on local git repository.  specified commit-ish value will be used.")
+		localBaseCommit = bs.LocalBaseCommitish
 	}
 
 	if localBaseCommit == remoteBaseCommit {
@@ -83,13 +95,17 @@ func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	dstDir := we.GhostDir
 	srcDir := we.SrcDir
-	err := git.ValidateRefspec(srcDir, bs.LocalBaseRefspec)
+	err := git.ValidateRefspec(srcDir, bs.LocalBaseCommitish)
 	if err != nil {
 		return nil, err
 	}
-	localBaseCommit, err := git.ResolveRefspec(srcDir, bs.LocalBaseRefspec)
+	localBaseCommit, err := git.ResolveRefspec(srcDir, bs.LocalBaseCommitish)
 	if err != nil {
-		return nil, err
+		log.WithFields(log.Fields{
+			"repository": srcDir,
+			"specified":  bs.LocalBaseCommitish,
+		}).Warn("can't resolve commit-ish value on local git repository.  specified commit-ish value will be used.")
+		localBaseCommit = bs.LocalBaseCommitish
 	}
 
 	tmpFile, err := ioutil.TempFile("", "git-ghost-local-mod")
