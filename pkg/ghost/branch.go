@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"git-ghost/pkg/ghost/git"
 	"git-ghost/pkg/util"
+	"io"
+	"os/exec"
 	"path"
 	"reflect"
 	"regexp"
@@ -85,6 +87,19 @@ func (branches LocalModBranches) Sort() {
 	sort.Slice(branches, sortFunc)
 }
 
+func prepare(ghost GhostBranch, we WorkingEnv) error {
+	return git.ResetHardToBranch(we.GhostDir, git.ORIGIN+"/"+ghost.BranchName())
+}
+
+func show(ghost GhostBranch, we WorkingEnv, writer io.Writer) error {
+	if err := prepare(ghost, we); err != nil {
+		return err
+	}
+	cmd := exec.Command("git", "-C", we.GhostDir, "--no-pager", "cat-file", "-p", fmt.Sprintf("HEAD:%s", ghost.FileName()))
+	cmd.Stdout = writer
+	return util.JustRunCmd(cmd)
+}
+
 func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string, forceApply bool) error {
 	log.WithFields(util.MergeFields(
 		util.ToFields(ghost),
@@ -118,10 +133,7 @@ func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string, forceApply 
 		}
 	}
 
-	err = git.ResetHardToBranch(we.GhostDir, git.ORIGIN+"/"+ghost.BranchName())
-	if err != nil {
-		return err
-	}
+	prepare(ghost, we)
 
 	// TODO make this instance methods.
 	switch ghost.(type) {
@@ -139,6 +151,14 @@ func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string, forceApply 
 	return nil
 }
 
+func (bs LocalBaseBranch) Prepare(we WorkingEnv) error {
+	return prepare(bs, we)
+}
+
+func (bs LocalBaseBranch) Show(we WorkingEnv, writer io.Writer) error {
+	return show(bs, we, writer)
+}
+
 func (bs LocalBaseBranch) Apply(we WorkingEnv, forceApply bool) error {
 	if bs.RemoteBaseCommit == bs.LocalBaseCommit {
 		log.WithFields(log.Fields{
@@ -152,6 +172,14 @@ func (bs LocalBaseBranch) Apply(we WorkingEnv, forceApply bool) error {
 		return err
 	}
 	return nil
+}
+
+func (bs LocalModBranch) Prepare(we WorkingEnv) error {
+	return prepare(bs, we)
+}
+
+func (bs LocalModBranch) Show(we WorkingEnv, writer io.Writer) error {
+	return show(bs, we, writer)
 }
 
 func (bs LocalModBranch) Apply(we WorkingEnv, forceApply bool) error {
