@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"git-ghost/pkg/ghost"
 	"git-ghost/pkg/ghost/git"
 	"os"
 
@@ -16,6 +17,14 @@ type globalFlags struct {
 	ghostPrefix  string
 	ghostRepo    string
 	verbose      bool
+}
+
+func (gf globalFlags) WorkingEnvSpec() ghost.WorkingEnvSpec {
+	return ghost.WorkingEnvSpec{
+		SrcDir:          gf.srcDir,
+		GhostWorkingDir: gf.ghostWorkDir,
+		GhostRepo:       gf.ghostRepo,
+	}
 }
 
 var (
