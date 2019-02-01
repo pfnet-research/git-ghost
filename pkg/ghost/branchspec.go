@@ -26,8 +26,7 @@ type LocalModBranchSpec struct {
 	LocalBaseCommitish string
 }
 
-func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
-	dstDir := we.GhostDir
+func (bs LocalBaseBranchSpec) resolve(we WorkingEnv) (*LocalBaseBranchSpec, error) {
 	srcDir := we.SrcDir
 	err := git.ValidateRefspec(srcDir, bs.RemoteBaseCommitish)
 	if err != nil {
@@ -56,12 +55,29 @@ func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 		localBaseCommit = bs.LocalBaseCommitish
 	}
 
+	return &LocalBaseBranchSpec{
+		Prefix:              bs.Prefix,
+		RemoteBaseCommitish: remoteBaseCommit,
+		LocalBaseCommitish:  localBaseCommit,
+	}, nil
+}
+
+func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
+	dstDir := we.GhostDir
+	srcDir := we.SrcDir
+	resolved, err := bs.resolve(we)
+	if err != nil {
+		return nil, err
+	}
+
+	remoteBaseCommit := resolved.RemoteBaseCommitish
+	localBaseCommit := resolved.LocalBaseCommitish
 	if localBaseCommit == remoteBaseCommit {
 		return nil, nil
 	}
 
 	branch := LocalBaseBranch{
-		Prefix:           bs.Prefix,
+		Prefix:           resolved.Prefix,
 		LocalBaseCommit:  localBaseCommit,
 		RemoteBaseCommit: remoteBaseCommit,
 	}
@@ -92,8 +108,7 @@ func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	return &branch, nil
 }
 
-func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
-	dstDir := we.GhostDir
+func (bs LocalModBranchSpec) resolve(we WorkingEnv) (*LocalModBranchSpec, error) {
 	srcDir := we.SrcDir
 	err := git.ValidateRefspec(srcDir, bs.LocalBaseCommitish)
 	if err != nil {
@@ -107,7 +122,20 @@ func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 		}).Warn("can't resolve commit-ish value on local git repository.  specified commit-ish value will be used.")
 		localBaseCommit = bs.LocalBaseCommitish
 	}
+	return &LocalModBranchSpec{
+		Prefix:             bs.Prefix,
+		LocalBaseCommitish: localBaseCommit,
+	}, nil
+}
 
+func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
+	dstDir := we.GhostDir
+	srcDir := we.SrcDir
+	resolved, err := bs.resolve(we)
+	localBaseCommit := resolved.LocalBaseCommitish
+	if err != nil {
+		return nil, err
+	}
 	tmpFile, err := ioutil.TempFile("", "git-ghost-local-mod")
 	if err != nil {
 		return nil, err
@@ -132,7 +160,7 @@ func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 		return nil, err
 	}
 	branch := LocalModBranch{
-		Prefix:          bs.Prefix,
+		Prefix:          resolved.Prefix,
 		LocalBaseCommit: localBaseCommit,
 		LocalModHash:    hash,
 	}
