@@ -3,7 +3,6 @@ package ghost
 import (
 	"bytes"
 	"fmt"
-	"git-ghost/pkg/ghost/git"
 	"git-ghost/pkg/util"
 
 	log "github.com/Sirupsen/logrus"
@@ -11,8 +10,9 @@ import (
 
 type ListOptions struct {
 	WorkingEnvSpec
-	GhostPrefix string
-	BaseCommit  string
+	Prefix string
+	*ListCommitsBranchSpec
+	*ListDiffBranchSpec
 }
 
 type ListResult struct {
@@ -23,28 +23,26 @@ type ListResult struct {
 func List(options ListOptions) (*ListResult, error) {
 	log.WithFields(util.ToFields(options)).Debug("list command with")
 
-	baseCommit, err := git.ResolveRefspec(options.SrcDir, options.BaseCommit)
-	if err != nil {
-		return nil, err
-	}
-	branchNames, err := git.ListGhostBranchNames(options.GhostRepo, options.GhostPrefix, baseCommit, "")
-	if err != nil {
-		return nil, err
+	res := ListResult{}
+
+	if options.ListCommitsBranchSpec != nil {
+		resolved := options.ListCommitsBranchSpec.Resolve(options.SrcDir)
+		branches, err := resolved.GetBranches(options.GhostRepo, options.Prefix)
+		if err != nil {
+			return nil, err
+		}
+		res.LocalBaseBranches = branches
 	}
 
-	var res ListResult
-	for _, name := range branchNames {
-		branch := CreateGhostBranchByName(name)
-		if br, ok := branch.(*LocalBaseBranch); ok {
-			res.LocalBaseBranches = append(res.LocalBaseBranches, *br)
-			continue
+	if options.ListDiffBranchSpec != nil {
+		resolved := options.ListDiffBranchSpec.Resolve(options.SrcDir)
+		branches, err := resolved.GetBranches(options.GhostRepo, options.Prefix)
+		if err != nil {
+			return nil, err
 		}
-		if br, ok := branch.(*LocalModBranch); ok {
-			res.LocalModBranches = append(res.LocalModBranches, *br)
-			continue
-		}
-		log.Warning(fmt.Sprintf("unknown branch: %s", name))
+		res.LocalModBranches = branches
 	}
+
 	res.LocalBaseBranches.Sort()
 	res.LocalModBranches.Sort()
 
