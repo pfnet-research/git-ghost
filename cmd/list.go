@@ -31,14 +31,14 @@ func NewListCommand() *cobra.Command {
 		Run:   runListDiffCommand(&listFlags),
 	}
 	command.AddCommand(&cobra.Command{
-		Use:   "diff",
+		Use:   "commits",
 		Short: "list ghost branches of commits.",
 		Long:  "list ghost branches of commits.",
 		Args:  cobra.NoArgs,
 		Run:   runListCommitsCommand(&listFlags),
 	})
 	command.AddCommand(&cobra.Command{
-		Use:   "commits",
+		Use:   "diff",
 		Short: "list ghost branches of diffs.",
 		Long:  "list ghost branches of diffs.",
 		Args:  cobra.NoArgs,

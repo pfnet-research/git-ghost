@@ -33,14 +33,14 @@ func NewDeleteCommand() *cobra.Command {
 		Run:   runDeleteDiffCommand(&deleteFlags),
 	}
 	command.AddCommand(&cobra.Command{
-		Use:   "diff",
+		Use:   "commits",
 		Short: "delete ghost branches of commits.",
 		Long:  "delete ghost branches of commits.",
 		Args:  cobra.NoArgs,
 		Run:   runDeleteCommitsCommand(&deleteFlags),
 	})
 	command.AddCommand(&cobra.Command{
-		Use:   "commits",
+		Use:   "diff",
 		Short: "delete ghost branches of diffs.",
 		Long:  "delete ghost branches of diffs.",
 		Args:  cobra.NoArgs,
