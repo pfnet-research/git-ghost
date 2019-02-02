@@ -155,7 +155,7 @@ func runDeleteAllCommand(flags *deleteFlags) func(cmd *cobra.Command, args []str
 }
 
 func (flags deleteFlags) validate() error {
-	if (flags.hashFrom == "" || flags.hashTo == "") && !flags.all {
+	if (flags.hashFrom == "" || flags.hashTo == "") && !flags.all && !flags.dryrun {
 		return fmt.Errorf("all must be set if multiple ghosts branches are deleted")
 	}
 	return nil
