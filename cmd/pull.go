@@ -159,12 +159,14 @@ func runPullDiffCommand(flags pullFlags) func(cmd *cobra.Command, args []string)
 
 		options := ghost.PullDiffOptions{
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-			LocalModBranchSpec: ghost.LocalModBranchSpec{
-				Prefix:             globalOpts.ghostPrefix,
-				LocalBaseCommitish: arg.diffFrom,
+			PullableLocalModBranchSpec: ghost.PullableLocalModBranchSpec{
+				LocalModBranchSpec: ghost.LocalModBranchSpec{
+					Prefix:             globalOpts.ghostPrefix,
+					LocalBaseCommitish: arg.diffFrom,
+				},
+				LocalModHash: arg.diffHash,
 			},
-			LocalModHash: arg.diffHash,
-			ForceApply:   flags.forceApply,
+			ForceApply: flags.forceApply,
 		}
 
 		err := ghost.PullDiff(options, nil)
@@ -204,12 +206,14 @@ func runPullAllCommand(flags pullFlags) func(cmd *cobra.Command, args []string) 
 				RemoteBaseCommitish: pullCommitsArg.commitsFrom,
 				LocalBaseCommitish:  pullCommitsArg.commitsTo,
 			},
-			LocalModBranchSpec: ghost.LocalModBranchSpec{
-				Prefix:             globalOpts.ghostPrefix,
-				LocalBaseCommitish: pullDiffArg.diffFrom,
+			PullableLocalModBranchSpec: ghost.PullableLocalModBranchSpec{
+				LocalModBranchSpec: ghost.LocalModBranchSpec{
+					Prefix:             globalOpts.ghostPrefix,
+					LocalBaseCommitish: pullDiffArg.diffFrom,
+				},
+				LocalModHash: pullDiffArg.diffHash,
 			},
-			LocalModHash: pullDiffArg.diffHash,
-			ForceApply:   flags.forceApply,
+			ForceApply: flags.forceApply,
 		}
 
 		err := ghost.Pull(options)

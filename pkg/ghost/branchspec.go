@@ -14,6 +14,15 @@ import (
 type GhostBranchSpec interface {
 	CreateBranch(we WorkingEnv) (GhostBranch, error)
 }
+type PullableGhostBranchSpec interface {
+	PullBranch(we WorkingEnv) (GhostBranch, error)
+}
+
+// ensuring interfaces
+var _ GhostBranchSpec = LocalBaseBranchSpec{}
+var _ GhostBranchSpec = LocalModBranchSpec{}
+var _ PullableGhostBranchSpec = LocalBaseBranchSpec{}
+var _ PullableGhostBranchSpec = PullableLocalModBranchSpec{}
 
 type LocalBaseBranchSpec struct {
 	Prefix              string
@@ -24,6 +33,11 @@ type LocalBaseBranchSpec struct {
 type LocalModBranchSpec struct {
 	Prefix             string
 	LocalBaseCommitish string
+}
+
+type PullableLocalModBranchSpec struct {
+	LocalModBranchSpec
+	LocalModHash string
 }
 
 func (bs LocalBaseBranchSpec) resolve(we WorkingEnv) (*LocalBaseBranchSpec, error) {
@@ -55,11 +69,39 @@ func (bs LocalBaseBranchSpec) resolve(we WorkingEnv) (*LocalBaseBranchSpec, erro
 		localBaseCommit = bs.LocalBaseCommitish
 	}
 
-	return &LocalBaseBranchSpec{
+	branch := &LocalBaseBranchSpec{
 		Prefix:              bs.Prefix,
 		RemoteBaseCommitish: remoteBaseCommit,
 		LocalBaseCommitish:  localBaseCommit,
-	}, nil
+	}
+
+	return branch, nil
+}
+
+func (bs LocalBaseBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
+	resolved, err := bs.resolve(we)
+	if err != nil {
+		return nil, err
+	}
+
+	branch := &LocalBaseBranch{
+		Prefix:           resolved.Prefix,
+		RemoteBaseCommit: resolved.RemoteBaseCommitish,
+		LocalBaseCommit:  resolved.LocalBaseCommitish,
+	}
+	if branch.RemoteBaseCommit == branch.LocalBaseCommit {
+		log.WithFields(log.Fields{
+			"from": branch.RemoteBaseCommit,
+			"to":   branch.LocalBaseCommit,
+		}).Warn("skipping pull and apply ghost commits branch because from-hash and to-hash is the same.")
+		return nil, nil
+	}
+
+	err = pull(branch, we)
+	if err != nil {
+		return nil, err
+	}
+	return branch, nil
 }
 
 func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
@@ -179,4 +221,25 @@ func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	}
 
 	return &branch, nil
+}
+
+func (bs PullableLocalModBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
+	resolved, err := bs.resolve(we)
+	if err != nil {
+		return nil, err
+	}
+	branch := &LocalModBranch{
+		Prefix:          resolved.Prefix,
+		LocalBaseCommit: resolved.LocalBaseCommitish,
+		LocalModHash:    bs.LocalModHash,
+	}
+	err = pull(branch, we)
+	if err != nil {
+		return nil, err
+	}
+	return branch, nil
+}
+
+func pull(ghost GhostBranch, we WorkingEnv) error {
+	return git.ResetHardToBranch(we.GhostDir, git.ORIGIN+"/"+ghost.BranchName())
 }

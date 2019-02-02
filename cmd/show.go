@@ -147,12 +147,14 @@ func runShowDiffCommand(cmd *cobra.Command, args []string) {
 
 	options := ghost.ShowDiffOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		LocalModBranchSpec: ghost.LocalModBranchSpec{
-			Prefix:             globalOpts.ghostPrefix,
-			LocalBaseCommitish: arg.diffFrom,
+		PullableLocalModBranchSpec: ghost.PullableLocalModBranchSpec{
+			LocalModBranchSpec: ghost.LocalModBranchSpec{
+				Prefix:             globalOpts.ghostPrefix,
+				LocalBaseCommitish: arg.diffFrom,
+			},
+			LocalModHash: arg.diffHash,
 		},
-		LocalModHash: arg.diffHash,
-		Writer:       os.Stdout,
+		Writer: os.Stdout,
 	}
 
 	err := ghost.ShowDiff(options)
@@ -190,12 +192,14 @@ func runShowAllCommand(cmd *cobra.Command, args []string) {
 			RemoteBaseCommitish: showCommitsArg.commitsFrom,
 			LocalBaseCommitish:  showCommitsArg.commitsTo,
 		},
-		LocalModBranchSpec: ghost.LocalModBranchSpec{
-			Prefix:             globalOpts.ghostPrefix,
-			LocalBaseCommitish: showDiffArg.diffFrom,
+		PullableLocalModBranchSpec: ghost.PullableLocalModBranchSpec{
+			LocalModBranchSpec: ghost.LocalModBranchSpec{
+				Prefix:             globalOpts.ghostPrefix,
+				LocalBaseCommitish: showDiffArg.diffFrom,
+			},
+			LocalModHash: showDiffArg.diffHash,
 		},
-		LocalModHash: showDiffArg.diffHash,
-		Writer:       os.Stdout,
+		Writer: os.Stdout,
 	}
 
 	err := ghost.ShowAll(options)

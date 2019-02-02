@@ -9,9 +9,8 @@ import (
 type PullOptions struct {
 	WorkingEnvSpec
 	LocalBaseBranchSpec
-	LocalModBranchSpec
-	LocalModHash string
-	ForceApply   bool
+	PullableLocalModBranchSpec
+	ForceApply bool
 }
 
 type PullCommitsOptions struct {
@@ -21,9 +20,8 @@ type PullCommitsOptions struct {
 }
 type PullDiffOptions struct {
 	WorkingEnvSpec
-	LocalModBranchSpec
-	LocalModHash string
-	ForceApply   bool
+	PullableLocalModBranchSpec
+	ForceApply bool
 }
 
 func PullCommits(options PullCommitsOptions, workingEnv *WorkingEnv) error {
@@ -37,17 +35,12 @@ func PullCommits(options PullCommitsOptions, workingEnv *WorkingEnv) error {
 		defer we.clean()
 	}
 
-	resolved, err := options.LocalBaseBranchSpec.resolve(*we)
+	pulledBranch, err := options.LocalBaseBranchSpec.PullBranch(*we)
 	if err != nil {
 		return err
 	}
-	branch := LocalBaseBranch{
-		Prefix:           resolved.Prefix,
-		RemoteBaseCommit: resolved.RemoteBaseCommitish,
-		LocalBaseCommit:  resolved.LocalBaseCommitish,
-	}
 
-	return branch.Apply(*we, options.ForceApply)
+	return pulledBranch.Apply(*we, options.ForceApply)
 }
 
 func PullDiff(options PullDiffOptions, workingEnv *WorkingEnv) error {
@@ -60,18 +53,12 @@ func PullDiff(options PullDiffOptions, workingEnv *WorkingEnv) error {
 		defer we.clean()
 	}
 
-	resolved, err := options.LocalModBranchSpec.resolve(*we)
+	pulledBranch, err := options.PullableLocalModBranchSpec.PullBranch(*we)
 	if err != nil {
 		return err
 	}
 
-	branch := LocalModBranch{
-		Prefix:          resolved.Prefix,
-		LocalBaseCommit: resolved.LocalBaseCommitish,
-		LocalModHash:    options.LocalModHash,
-	}
-
-	return branch.Apply(*we, options.ForceApply)
+	return pulledBranch.Apply(*we, options.ForceApply)
 }
 
 func Pull(options PullOptions) error {
@@ -92,10 +79,9 @@ func Pull(options PullOptions) error {
 	}
 
 	err = PullDiff(PullDiffOptions{
-		WorkingEnvSpec:     options.WorkingEnvSpec,
-		LocalModBranchSpec: options.LocalModBranchSpec,
-		LocalModHash:       options.LocalModHash,
-		ForceApply:         options.ForceApply,
+		WorkingEnvSpec:             options.WorkingEnvSpec,
+		PullableLocalModBranchSpec: options.PullableLocalModBranchSpec,
+		ForceApply:                 options.ForceApply,
 	}, we)
 	if err != nil {
 		return err
