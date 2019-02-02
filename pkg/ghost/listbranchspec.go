@@ -18,8 +18,12 @@ type ListDiffBranchSpec struct {
 
 func (options ListCommitsBranchSpec) Resolve(srcDir string) *ListCommitsBranchSpec {
 	var newOptions ListCommitsBranchSpec
-	newOptions.HashFrom = resolveRefspecOrIgnore(srcDir, options.HashFrom)
-	newOptions.HashTo = resolveRefspecOrIgnore(srcDir, options.HashTo)
+	if options.HashFrom != "" {
+		newOptions.HashFrom = resolveRefspecOrIgnore(srcDir, options.HashFrom)
+	}
+	if options.HashTo != "" {
+		newOptions.HashTo = resolveRefspecOrIgnore(srcDir, options.HashTo)
+	}
 	return &newOptions
 }
 
@@ -40,8 +44,12 @@ func (options *ListCommitsBranchSpec) GetBranches(repo, prefix string) (LocalBas
 
 func (options ListDiffBranchSpec) Resolve(srcDir string) *ListDiffBranchSpec {
 	var newOptions ListDiffBranchSpec
-	newOptions.HashFrom = resolveRefspecOrIgnore(srcDir, options.HashFrom)
-	newOptions.HashTo = resolveRefspecOrIgnore(srcDir, options.HashTo)
+	if options.HashFrom != "" {
+		newOptions.HashFrom = resolveRefspecOrIgnore(srcDir, options.HashFrom)
+	}
+	if options.HashTo != "" {
+		newOptions.HashTo = resolveRefspecOrIgnore(srcDir, options.HashTo)
+	}
 	return &newOptions
 }
 
