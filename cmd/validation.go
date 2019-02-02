@@ -13,7 +13,7 @@ func nonEmpty(name, value string) error {
 }
 
 func isValidComittish(name, comittish string) error {
-	err := git.ValidateRefspec(globalOpts.srcDir, comittish)
+	err := git.ValidateComittish(globalOpts.srcDir, comittish)
 	if err != nil {
 		return fmt.Errorf("%s is not a valid object", name)
 	}

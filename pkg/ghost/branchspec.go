@@ -28,12 +28,12 @@ type LocalModBranchSpec struct {
 
 func (bs LocalBaseBranchSpec) resolve(we WorkingEnv) (*LocalBaseBranchSpec, error) {
 	srcDir := we.SrcDir
-	err := git.ValidateRefspec(srcDir, bs.RemoteBaseCommitish)
+	err := git.ValidateComittish(srcDir, bs.RemoteBaseCommitish)
 	if err != nil {
 		return nil, err
 	}
 
-	remoteBaseCommit, err := git.ResolveRefspec(srcDir, bs.RemoteBaseCommitish)
+	remoteBaseCommit, err := git.ResolveComittish(srcDir, bs.RemoteBaseCommitish)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"repository": srcDir,
@@ -42,11 +42,11 @@ func (bs LocalBaseBranchSpec) resolve(we WorkingEnv) (*LocalBaseBranchSpec, erro
 		remoteBaseCommit = bs.RemoteBaseCommitish
 	}
 
-	err = git.ValidateRefspec(srcDir, bs.LocalBaseCommitish)
+	err = git.ValidateComittish(srcDir, bs.LocalBaseCommitish)
 	if err != nil {
 		return nil, err
 	}
-	localBaseCommit, err := git.ResolveRefspec(srcDir, bs.LocalBaseCommitish)
+	localBaseCommit, err := git.ResolveComittish(srcDir, bs.LocalBaseCommitish)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"repository": srcDir,
@@ -110,11 +110,11 @@ func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 
 func (bs LocalModBranchSpec) resolve(we WorkingEnv) (*LocalModBranchSpec, error) {
 	srcDir := we.SrcDir
-	err := git.ValidateRefspec(srcDir, bs.LocalBaseCommitish)
+	err := git.ValidateComittish(srcDir, bs.LocalBaseCommitish)
 	if err != nil {
 		return nil, err
 	}
-	localBaseCommit, err := git.ResolveRefspec(srcDir, bs.LocalBaseCommitish)
+	localBaseCommit, err := git.ResolveComittish(srcDir, bs.LocalBaseCommitish)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"repository": srcDir,
