@@ -47,9 +47,6 @@ func (options ListDiffBranchSpec) Resolve(srcDir string) *ListDiffBranchSpec {
 	if options.HashFrom != "" {
 		newOptions.HashFrom = resolveRefspecOrIgnore(srcDir, options.HashFrom)
 	}
-	if options.HashTo != "" {
-		newOptions.HashTo = resolveRefspecOrIgnore(srcDir, options.HashTo)
-	}
 	return &newOptions
 }
 
