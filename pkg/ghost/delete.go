@@ -92,7 +92,7 @@ func (res *DeleteResult) PrettyString() string {
 		buffer.WriteString("\n")
 	}
 	for _, branch := range res.LocalBaseBranches {
-		buffer.WriteString(fmt.Sprintf("%s -> %s\n", branch.RemoteBaseCommit, branch.LocalBaseCommit))
+		buffer.WriteString(fmt.Sprintf("%s => %s\n", branch.RemoteBaseCommit, branch.LocalBaseCommit))
 	}
 	if len(res.LocalBaseBranches) > 0 {
 		buffer.WriteString("\n")
