@@ -27,7 +27,7 @@ RUN curl -sLo- https://github.com/alecthomas/gometalinter/releases/download/v${G
 
 
 ####################################################################################################
-# git-ghost-dev
+# git-ghost-build
 ####################################################################################################
 FROM builder as git-ghost-build
 
@@ -67,9 +67,19 @@ ENV GHOST_REPO=/work/ghost-repo
 WORKDIR /work/local
 
 ####################################################################################################
-# git-ghost
+# git-ghost-e2e
 ####################################################################################################
-FROM ubuntu:16.04 as git-ghost
+FROM git-ghost-build as git-ghost-e2e
+
+COPY --from=git-ghost-build /go/src/git-ghost/bin/git-ghost /usr/local/bin/
+WORKDIR /go/src/git-ghost
+RUN git config --global user.email you@example.com \
+    && git config --global user.name "Your Name"
+
+####################################################################################################
+# git-ghost-cli
+####################################################################################################
+FROM ubuntu:16.04 as git-ghost-cli
 
 RUN apt-get update && apt-get install -y \
     git && \

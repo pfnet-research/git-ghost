@@ -45,6 +45,7 @@ func Pull(options PullOptions) error {
 		case *LocalBaseBranch:
 			err = git.ApplyDiffBundleFile(srcDir, path.Join(ghostDir, ghost.FileName()))
 		case *LocalModBranch:
+			log.Infof("%s - %s", srcDir, ghostDir)
 			err = git.ApplyDiffPatchFile(srcDir, path.Join(ghostDir, ghost.FileName()))
 		default:
 			return fmt.Errorf("not supported on type = %+v", t)
