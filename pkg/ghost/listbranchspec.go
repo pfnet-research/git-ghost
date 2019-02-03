@@ -16,19 +16,19 @@ type ListDiffBranchSpec struct {
 	HashTo   string
 }
 
-func (options ListCommitsBranchSpec) Resolve(srcDir string) *ListCommitsBranchSpec {
+func (ls ListCommitsBranchSpec) Resolve(srcDir string) *ListCommitsBranchSpec {
 	var newOptions ListCommitsBranchSpec
-	if options.HashFrom != "" {
-		newOptions.HashFrom = resolveRefspecOrIgnore(srcDir, options.HashFrom)
+	if ls.HashFrom != "" {
+		newOptions.HashFrom = resolveRefspecOrIgnore(srcDir, ls.HashFrom)
 	}
-	if options.HashTo != "" {
-		newOptions.HashTo = resolveRefspecOrIgnore(srcDir, options.HashTo)
+	if ls.HashTo != "" {
+		newOptions.HashTo = resolveRefspecOrIgnore(srcDir, ls.HashTo)
 	}
 	return &newOptions
 }
 
-func (options *ListCommitsBranchSpec) GetBranches(repo, prefix string) (LocalBaseBranches, error) {
-	branchNames, err := git.ListGhostBranchNames(repo, prefix, options.HashFrom, options.HashTo)
+func (ls *ListCommitsBranchSpec) GetBranches(repo, prefix string) (LocalBaseBranches, error) {
+	branchNames, err := git.ListGhostBranchNames(repo, prefix, ls.HashFrom, ls.HashTo)
 	if err != nil {
 		return nil, err
 	}
@@ -42,16 +42,16 @@ func (options *ListCommitsBranchSpec) GetBranches(repo, prefix string) (LocalBas
 	return branches, nil
 }
 
-func (options ListDiffBranchSpec) Resolve(srcDir string) *ListDiffBranchSpec {
+func (ls ListDiffBranchSpec) Resolve(srcDir string) *ListDiffBranchSpec {
 	var newOptions ListDiffBranchSpec
-	if options.HashFrom != "" {
-		newOptions.HashFrom = resolveRefspecOrIgnore(srcDir, options.HashFrom)
+	if ls.HashFrom != "" {
+		newOptions.HashFrom = resolveRefspecOrIgnore(srcDir, ls.HashFrom)
 	}
 	return &newOptions
 }
 
-func (options *ListDiffBranchSpec) GetBranches(repo, prefix string) (LocalModBranches, error) {
-	branchNames, err := git.ListGhostBranchNames(repo, prefix, options.HashFrom, options.HashTo)
+func (ls *ListDiffBranchSpec) GetBranches(repo, prefix string) (LocalModBranches, error) {
+	branchNames, err := git.ListGhostBranchNames(repo, prefix, ls.HashFrom, ls.HashTo)
 	if err != nil {
 		return nil, err
 	}
