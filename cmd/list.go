@@ -51,8 +51,8 @@ func NewListCommand() *cobra.Command {
 		Args:  cobra.NoArgs,
 		Run:   runListAllCommand(&listFlags),
 	})
-	command.PersistentFlags().StringVar(&listFlags.hashFrom, "from", "", "commit or diff hash to which ghost branches are listd.")
-	command.PersistentFlags().StringVar(&listFlags.hashTo, "to", "", "commit or diff hash from which ghot branches are listd.")
+	command.PersistentFlags().StringVar(&listFlags.hashFrom, "from", "", "commit or diff hash to which ghost branches are listed.")
+	command.PersistentFlags().StringVar(&listFlags.hashTo, "to", "", "commit or diff hash from which ghost branches are listed.")
 	return command
 }
 

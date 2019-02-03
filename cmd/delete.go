@@ -54,7 +54,7 @@ func NewDeleteCommand() *cobra.Command {
 		Run:   runDeleteAllCommand(&deleteFlags),
 	})
 	command.PersistentFlags().StringVar(&deleteFlags.hashFrom, "from", "", "commit or diff hash to which ghost branches are deleted.")
-	command.PersistentFlags().StringVar(&deleteFlags.hashTo, "to", "", "commit or diff hash from which ghot branches are deleted.")
+	command.PersistentFlags().StringVar(&deleteFlags.hashTo, "to", "", "commit or diff hash from which ghost branches are deleted.")
 	command.PersistentFlags().BoolVar(&deleteFlags.all, "all", false, "flag to ensure multiple ghost branches.")
 	command.PersistentFlags().BoolVar(&deleteFlags.dryrun, "dry-run", false, "If true, only print the branch names that would be deleted, without deleting them.")
 	return command
