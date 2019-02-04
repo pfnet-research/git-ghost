@@ -19,16 +19,16 @@ deps:
 build: deps
 	go build -tags netgo -installsuffix netgo $(LDFLAGS) -o bin/$(NAME) $(PROJECTROOT)
 
-.PHONY: docker-build-test
-docker-build-test:
+.PHONY: build-image-test
+build-image-test:
 	docker build --build-arg NAME=$(NAME) --build-arg VERSION=$(VERSION) --build-arg REVISION=$(REVISION) -t $(IMAGE_PREFIX)git-ghost-test:$(IMAGE_TAG) --target git-ghost-test $(PROJECTROOT)
 
-.PHONY: docker-build-e2e
-docker-build-e2e:
+.PHONY: build-image-e2e
+build-image-e2e:
 	docker build --build-arg NAME=$(NAME) --build-arg VERSION=$(VERSION) --build-arg REVISION=$(REVISION) -t $(IMAGE_PREFIX)git-ghost-e2e:$(IMAGE_TAG) --target git-ghost-e2e $(PROJECTROOT)
 
-.PHONY: docker-build-cli
-docker-build-cli:
+.PHONY: build-image-cli
+build-image-cli:
 	docker build --build-arg NAME=$(NAME) --build-arg VERSION=$(VERSION) --build-arg REVISION=$(REVISION) -t $(IMAGE_PREFIX)git-ghost-cli:$(IMAGE_TAG) --target git-ghost-cli $(PROJECTROOT)
 
 test: deps
@@ -39,7 +39,7 @@ e2e:
 	@go test -v $(PROJECTROOT)/test/e2e/e2e_test.go
 
 .PHONY: docker-e2e
-docker-e2e: docker-build-e2e
+docker-e2e: build-image-e2e
 	@docker run $(IMAGE_PREFIX)git-ghost-e2e:$(IMAGE_TAG) make e2e
 
 .PHONY: clean
