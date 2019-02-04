@@ -40,41 +40,35 @@ type PullableLocalModBranchSpec struct {
 	LocalModHash string
 }
 
+func resolveComittishOr(we WorkingEnv, commitishToResolve string) string {
+	resolved, err := git.ResolveComittish(we.SrcDir, commitishToResolve)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"repository": we.SrcDir,
+			"specified":  commitishToResolve,
+		}).Warn("can't resolve commit-ish value on local git repository.  specified commit-ish value will be used.")
+		return commitishToResolve
+	}
+	return resolved
+}
+
 func (bs LocalBaseBranchSpec) Resolve(we WorkingEnv) (*LocalBaseBranchSpec, error) {
 	srcDir := we.SrcDir
 	err := git.ValidateComittish(srcDir, bs.RemoteBaseCommitish)
 	if err != nil {
 		return nil, err
 	}
-
-	remoteBaseCommit, err := git.ResolveComittish(srcDir, bs.RemoteBaseCommitish)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"repository": srcDir,
-			"specified":  bs.RemoteBaseCommitish,
-		}).Warn("can't resolve commit-ish value on local git repository.  specified commit-ish value will be used.")
-		remoteBaseCommit = bs.RemoteBaseCommitish
-	}
-
+	remoteBaseCommit := resolveComittishOr(we, bs.RemoteBaseCommitish)
 	err = git.ValidateComittish(srcDir, bs.LocalBaseCommitish)
 	if err != nil {
 		return nil, err
 	}
-	localBaseCommit, err := git.ResolveComittish(srcDir, bs.LocalBaseCommitish)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"repository": srcDir,
-			"specified":  bs.LocalBaseCommitish,
-		}).Warn("can't resolve commit-ish value on local git repository.  specified commit-ish value will be used.")
-		localBaseCommit = bs.LocalBaseCommitish
-	}
-
+	localBaseCommit := resolveComittishOr(we, bs.LocalBaseCommitish)
 	branch := &LocalBaseBranchSpec{
 		Prefix:              bs.Prefix,
 		RemoteBaseCommitish: remoteBaseCommit,
 		LocalBaseCommitish:  localBaseCommit,
 	}
-
 	return branch, nil
 }
 
@@ -156,14 +150,7 @@ func (bs LocalModBranchSpec) Resolve(we WorkingEnv) (*LocalModBranchSpec, error)
 	if err != nil {
 		return nil, err
 	}
-	localBaseCommit, err := git.ResolveComittish(srcDir, bs.LocalBaseCommitish)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"repository": srcDir,
-			"specified":  bs.LocalBaseCommitish,
-		}).Warn("can't resolve commit-ish value on local git repository.  specified commit-ish value will be used.")
-		localBaseCommit = bs.LocalBaseCommitish
-	}
+	localBaseCommit := resolveComittishOr(we, bs.LocalBaseCommitish)
 	return &LocalModBranchSpec{
 		Prefix:             bs.Prefix,
 		LocalBaseCommitish: localBaseCommit,
