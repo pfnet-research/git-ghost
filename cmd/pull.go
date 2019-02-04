@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"errors"
 	"git-ghost/pkg/ghost"
-	"git-ghost/pkg/ghost/git"
 	"os"
 
 	log "github.com/Sirupsen/logrus"
@@ -15,67 +13,217 @@ func init() {
 }
 
 type pullFlags struct {
-	localBase  string
-	baseCommit string
-	force      bool
+	forceApply bool
 }
 
 func NewPullCommand() *cobra.Command {
 	var (
 		flags pullFlags
 	)
-
-	var command = &cobra.Command{
-		Use:   "pull [hash]",
-		Short: "pull a ghost commit from remote repository and apply to your working git repository.",
-		Long:  "pull a ghost commit from remote repository and apply to your working git repository.",
-		Args:  cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			err := flags.Validate()
-			if err != nil {
-				log.Error(err)
-				os.Exit(1)
-			}
-
-			hashArg := args[0]
-			opts := ghost.PullOptions{
-				WorkingEnvSpec: ghost.WorkingEnvSpec{
-					SrcDir:          globalOpts.srcDir,
-					GhostWorkingDir: globalOpts.ghostWorkDir,
-					GhostRepo:       globalOpts.ghostRepo,
-				},
-				GhostSpec: ghost.GhostSpec{
-					GhostPrefix:  globalOpts.ghostPrefix,
-					RemoteBase:   flags.baseCommit,
-					LocalModHash: hashArg,
-				},
-				ForceApply: flags.force,
-			}
-
-			if flags.localBase == "" {
-				opts.GhostSpec.LocalBase = flags.baseCommit
-			} else {
-				opts.GhostSpec.LocalBase = flags.localBase
-			}
-
-			if err := ghost.Pull(opts); err != nil {
-				log.Error(err)
-				os.Exit(1)
-			}
-		},
+	command := &cobra.Command{
+		Use:   "pull [from-hash(default=HEAD)] [diff-hash]",
+		Short: "pull commits(hash1...hash2), diff(hash...current state) from ghost repo and apply them to working dir",
+		Long:  "pull commits or diff or all from ghost repo and apply them to working dir.  If you didn't specify any subcommand, this commands works as an alias for 'pull diff' command.",
+		Args:  cobra.RangeArgs(1, 2),
+		Run:   runPullDiffCommand(&flags),
 	}
-	command.PersistentFlags().StringVar(&flags.baseCommit, "base-commit", "HEAD", "base commit hash for generating ghost commit.")
-	command.PersistentFlags().StringVar(&flags.localBase, "local-base", "", "git refspec used to create a local modification patch from (default \"value of --base-commit\")")
-	command.PersistentFlags().BoolVar(&flags.force, "force", false, "try applying patch even when your working repository checked out different base commit")
+	// command.PersistentFlags().BoolVarP(&flags.forceApply, "force", "f", true, "force apply pulled ghost branches to working dir")
+
+	command.AddCommand(&cobra.Command{
+		Use:   "diff [diff-from-hash(default=HEAD)] [diff-hash]",
+		Short: "pull diff from ghost repo and apply it to working dir",
+		Long:  "pull diff from [diff-from-hash] to [diff-hash] from your ghost repo and apply it to working dir",
+		Args:  cobra.RangeArgs(1, 2),
+		Run:   runPullDiffCommand(&flags),
+	})
+	command.AddCommand(&cobra.Command{
+		Use:   "commits [from-hash(default=HEAD)] [to-hash]",
+		Short: "pull commits from ghost repo and apply it to working dir",
+		Long:  "pull commits from [from-hash] to [to-hash] from your ghost repo and apply it to working dir",
+		Args:  cobra.RangeArgs(1, 2),
+		Run:   runPullCommitsCommand(&flags),
+	})
+	command.AddCommand(&cobra.Command{
+		Use:   "all [from-hash(default=HEAD)] [to-hash] [diff-hash]",
+		Short: "pull both commits and diff from ghost repo and apply them to working dir sequentially",
+		Long:  "pull commits([from-hash]...[to-hash]) and diff([to-hash]...[diff-hash]) and apply them to working dir sequentially",
+		Args:  cobra.RangeArgs(2, 3),
+		Run:   runPullAllCommand(&flags),
+	})
 	return command
 }
 
-func (flags pullFlags) Validate() error {
-	if flags.baseCommit != "" {
-		err := git.ValidateRefspec(".", flags.baseCommit)
-		if err != nil {
-			return errors.New("base-commit is not a valid object")
-		}
+type pullCommitsArg struct {
+	commitsFrom string
+	commitsTo   string
+}
+
+func newPullCommitsArg(args []string) pullCommitsArg {
+	arg := pullCommitsArg{
+		commitsFrom: "HEAD",
+		commitsTo:   "",
+	}
+
+	if len(args) >= 2 {
+		arg.commitsFrom = args[0]
+		arg.commitsTo = args[1]
+		return arg
+	}
+
+	if len(args) >= 1 {
+		arg.commitsTo = args[0]
+		return arg
+	}
+
+	return arg
+}
+
+func (arg pullCommitsArg) validate() error {
+	if err := nonEmpty("commit-from", arg.commitsFrom); err != nil {
+		return err
+	}
+	if err := nonEmpty("commit-to", arg.commitsTo); err != nil {
+		return err
 	}
 	return nil
+}
+
+func runPullCommitsCommand(flags *pullFlags) func(cmd *cobra.Command, args []string) {
+	return func(cmd *cobra.Command, args []string) {
+		arg := newPullCommitsArg(args)
+		if err := arg.validate(); err != nil {
+			log.Error(err)
+			os.Exit(1)
+		}
+
+		options := ghost.PullOptions{
+			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
+			LocalBaseBranchSpec: &ghost.LocalBaseBranchSpec{
+				Prefix:              globalOpts.ghostPrefix,
+				RemoteBaseCommitish: arg.commitsFrom,
+				LocalBaseCommitish:  arg.commitsTo,
+			},
+			// ForceApply: flags.forceApply,
+		}
+
+		err := ghost.Pull(options)
+		if err != nil {
+			log.Error(err)
+			os.Exit(1)
+		}
+	}
+}
+
+type pullDiffArg struct {
+	diffFrom string
+	diffHash string
+}
+
+func newPullDiffArg(args []string) pullDiffArg {
+	arg := pullDiffArg{
+		diffFrom: "HEAD",
+		diffHash: "",
+	}
+
+	if len(args) >= 2 {
+		arg.diffFrom = args[0]
+		arg.diffHash = args[1]
+		return arg
+	}
+
+	if len(args) >= 1 {
+		arg.diffHash = args[0]
+		return arg
+	}
+
+	return arg
+}
+
+func (arg pullDiffArg) validate() error {
+	if err := nonEmpty("diff-from-hash", arg.diffFrom); err != nil {
+		return err
+	}
+	if err := nonEmpty("diff-hash", arg.diffHash); err != nil {
+		return err
+	}
+	return nil
+}
+
+func runPullDiffCommand(flags *pullFlags) func(cmd *cobra.Command, args []string) {
+	return func(cmd *cobra.Command, args []string) {
+		arg := newPullDiffArg(args)
+		if err := arg.validate(); err != nil {
+			log.Error(err)
+			os.Exit(1)
+		}
+
+		options := ghost.PullOptions{
+			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
+			PullableLocalModBranchSpec: &ghost.PullableLocalModBranchSpec{
+				LocalModBranchSpec: ghost.LocalModBranchSpec{
+					Prefix:             globalOpts.ghostPrefix,
+					LocalBaseCommitish: arg.diffFrom,
+				},
+				LocalModHash: arg.diffHash,
+			},
+			// ForceApply: flags.forceApply,
+		}
+
+		err := ghost.Pull(options)
+		if err != nil {
+			log.Error(err)
+			os.Exit(1)
+		}
+	}
+}
+
+func runPullAllCommand(flags *pullFlags) func(cmd *cobra.Command, args []string) {
+	return func(cmd *cobra.Command, args []string) {
+		var pullCommitsArg pullCommitsArg
+		var pullDiffArg pullDiffArg
+
+		switch len(args) {
+		case 3:
+			pullCommitsArg = newPullCommitsArg(args[0:2])
+			pullDiffArg = newPullDiffArg(args[1:])
+		case 2:
+			pullCommitsArg = newPullCommitsArg(args[0:1])
+			pullDiffArg = newPullDiffArg(args)
+		default:
+			log.Error(cmd.Args(cmd, args))
+			os.Exit(1)
+		}
+
+		if err := pullCommitsArg.validate(); err != nil {
+			log.Error(err)
+			os.Exit(1)
+		}
+		if err := pullDiffArg.validate(); err != nil {
+			log.Error(err)
+			os.Exit(1)
+		}
+
+		options := ghost.PullOptions{
+			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
+			LocalBaseBranchSpec: &ghost.LocalBaseBranchSpec{
+				Prefix:              globalOpts.ghostPrefix,
+				RemoteBaseCommitish: pullCommitsArg.commitsFrom,
+				LocalBaseCommitish:  pullCommitsArg.commitsTo,
+			},
+			PullableLocalModBranchSpec: &ghost.PullableLocalModBranchSpec{
+				LocalModBranchSpec: ghost.LocalModBranchSpec{
+					Prefix:             globalOpts.ghostPrefix,
+					LocalBaseCommitish: pullDiffArg.diffFrom,
+				},
+				LocalModHash: pullDiffArg.diffHash,
+			},
+			// ForceApply: flags.forceApply,
+		}
+
+		err := ghost.Pull(options)
+		if err != nil {
+			log.Error(err)
+			os.Exit(1)
+		}
+	}
 }

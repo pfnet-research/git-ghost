@@ -19,12 +19,12 @@ func InitializeGitDir(dir, repo, branch string) error {
 	return util.JustRunCmd(cmd)
 }
 
-func CommitAndPush(dir, filename, message, refspec string) error {
+func CommitAndPush(dir, filename, message, comittish string) error {
 	err := CommitFile(dir, filename, message)
 	if err != nil {
 		return err
 	}
-	err = Push(dir, refspec)
+	err = Push(dir, comittish)
 	if err != nil {
 		return err
 	}
@@ -43,17 +43,17 @@ func CommitFile(dir, filename, message string) error {
 	)
 }
 
-func Push(dir string, refspecs ...string) error {
+func Push(dir string, comittishes ...string) error {
 	args := []string{"-C", dir, "push", "origin"}
-	args = append(args, refspecs...)
+	args = append(args, comittishes...)
 	return util.JustRunCmd(
 		exec.Command("git", args...),
 	)
 }
 
-func Pull(dir, refspec string) error {
+func Pull(dir, comittish string) error {
 	return util.JustRunCmd(
-		exec.Command("git", "-C", dir, "pull", "origin", refspec),
+		exec.Command("git", "-C", dir, "pull", "origin", comittish),
 	)
 }
 

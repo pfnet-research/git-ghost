@@ -10,7 +10,7 @@ import (
 	"os/exec"
 )
 
-func CreateDiffBundleFile(dir, filepath, fromRefspec, toRefspec string) error {
+func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) error {
 	f, err := os.Create(filepath)
 	if err != nil {
 		return err
@@ -19,7 +19,7 @@ func CreateDiffBundleFile(dir, filepath, fromRefspec, toRefspec string) error {
 
 	cmd := exec.Command("git", "-C", dir,
 		"log", "-p", "--reverse", "--pretty=email", "--stat", "-m", "--first-parent", "--binary",
-		fmt.Sprintf("%s..%s", fromRefspec, toRefspec),
+		fmt.Sprintf("%s..%s", fromComittish, toComittish),
 	)
 	stderr := bytes.NewBufferString("")
 	cmd.Stderr = stderr
@@ -65,14 +65,14 @@ func ApplyDiffBundleFile(dir, filepath string) error {
 	)
 }
 
-func CreateDiffPatchFile(dir, filepath, refspec string) error {
+func CreateDiffPatchFile(dir, filepath, comittish string) error {
 	f, err := os.Create(filepath)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	cmd := exec.Command("git", "-C", dir, "diff", "--patience", "--binary", refspec)
+	cmd := exec.Command("git", "-C", dir, "diff", "--patience", "--binary", comittish)
 	stderr := bytes.NewBufferString("")
 	cmd.Stderr = stderr
 	reader, err := cmd.StdoutPipe()

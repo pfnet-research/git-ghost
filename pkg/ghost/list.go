@@ -23,7 +23,7 @@ type ListResult struct {
 func List(options ListOptions) (*ListResult, error) {
 	log.WithFields(util.ToFields(options)).Debug("list command with")
 
-	baseCommit, err := git.ResolveRefspec(options.SrcDir, options.BaseCommit)
+	baseCommit, err := git.ResolveComittish(options.SrcDir, options.BaseCommit)
 	if err != nil {
 		return nil, err
 	}

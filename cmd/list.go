@@ -59,7 +59,7 @@ func NewListCommand() *cobra.Command {
 
 func (flags listFlags) Validate() error {
 	if flags.baseCommit != "" {
-		err := git.ValidateRefspec(".", flags.baseCommit)
+		err := git.ValidateComittish(".", flags.baseCommit)
 		if err != nil {
 			return errors.New("base-commit is not a valid object")
 		}
