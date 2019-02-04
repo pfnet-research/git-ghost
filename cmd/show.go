@@ -17,28 +17,28 @@ func NewShowCommand() *cobra.Command {
 		Use:   "show [from-hash(default=HEAD)] [diff-hash]",
 		Short: "show commits(hash1...hash2), diff(hash...current state) in ghost repo",
 		Long:  "show commits or diff or all from ghost repo.  If you didn't specify any subcommand, this commands works as an alias for 'show diff' command.",
-		Args:  cobra.MinimumNArgs(1),
+		Args:  cobra.RangeArgs(1, 2),
 		Run:   runShowDiffCommand,
 	}
 	command.AddCommand(&cobra.Command{
 		Use:   "diff [diff-from-hash(default=HEAD)] [diff-hash]",
 		Short: "show diff in ghost repo ",
 		Long:  "show diff from [diff-from-hash] to [diff-hash] in ghost repo",
-		Args:  cobra.MinimumNArgs(1),
+		Args:  cobra.RangeArgs(1, 2),
 		Run:   runShowDiffCommand,
 	})
 	command.AddCommand(&cobra.Command{
 		Use:   "commits [from-hash(default=HEAD)] [to-hash]",
 		Short: "show commits in ghost repo",
 		Long:  "show commits from [from-hash] to [to-hash] in ghost repo",
-		Args:  cobra.MinimumNArgs(1),
+		Args:  cobra.RangeArgs(1, 2),
 		Run:   runShowCommitsCommand,
 	})
 	command.AddCommand(&cobra.Command{
 		Use:   "all [from-hash(default=HEAD)] [to-hash] [diff-hash]",
 		Short: "show both commits and diff in ghost repo",
 		Long:  "show commits([from-hash]...[to-hash]) and diff([to-hash]...[diff-hash]) in ghost repo",
-		Args:  cobra.MinimumNArgs(2),
+		Args:  cobra.RangeArgs(2, 3),
 		Run:   runShowAllCommand,
 	})
 	return command
@@ -80,7 +80,7 @@ func (arg showCommitsArg) validate() error {
 }
 
 func runShowCommitsCommand(cmd *cobra.Command, args []string) {
-	arg := newPullCommitsArg(args)
+	arg := newShowCommitsArg(args)
 	if err := arg.validate(); err != nil {
 		log.Error(err)
 		os.Exit(1)
@@ -168,12 +168,16 @@ func runShowAllCommand(cmd *cobra.Command, args []string) {
 	var showCommitsArg showCommitsArg
 	var showDiffArg showDiffArg
 
-	if len(args) >= 3 {
+	switch len(args) {
+	case 3:
 		showCommitsArg = newShowCommitsArg(args[0:2])
 		showDiffArg = newShowDiffArg(args[1:])
-	} else { // len(args) == 2
+	case 2:
 		showCommitsArg = newShowCommitsArg(args[0:1])
 		showDiffArg = newShowDiffArg(args)
+	default:
+		log.Error(cmd.Args(cmd, args))
+		os.Exit(1)
 	}
 
 	if err := showCommitsArg.validate(); err != nil {
