@@ -40,7 +40,7 @@ type PullableLocalModBranchSpec struct {
 	LocalModHash string
 }
 
-func (bs LocalBaseBranchSpec) resolve(we WorkingEnv) (*LocalBaseBranchSpec, error) {
+func (bs LocalBaseBranchSpec) Resolve(we WorkingEnv) (*LocalBaseBranchSpec, error) {
 	srcDir := we.SrcDir
 	err := git.ValidateComittish(srcDir, bs.RemoteBaseCommitish)
 	if err != nil {
@@ -79,7 +79,7 @@ func (bs LocalBaseBranchSpec) resolve(we WorkingEnv) (*LocalBaseBranchSpec, erro
 }
 
 func (bs LocalBaseBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
-	resolved, err := bs.resolve(we)
+	resolved, err := bs.Resolve(we)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (bs LocalBaseBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
 func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	dstDir := we.GhostDir
 	srcDir := we.SrcDir
-	resolved, err := bs.resolve(we)
+	resolved, err := bs.Resolve(we)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	return &branch, nil
 }
 
-func (bs LocalModBranchSpec) resolve(we WorkingEnv) (*LocalModBranchSpec, error) {
+func (bs LocalModBranchSpec) Resolve(we WorkingEnv) (*LocalModBranchSpec, error) {
 	srcDir := we.SrcDir
 	err := git.ValidateComittish(srcDir, bs.LocalBaseCommitish)
 	if err != nil {
@@ -173,7 +173,7 @@ func (bs LocalModBranchSpec) resolve(we WorkingEnv) (*LocalModBranchSpec, error)
 func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	dstDir := we.GhostDir
 	srcDir := we.SrcDir
-	resolved, err := bs.resolve(we)
+	resolved, err := bs.Resolve(we)
 	localBaseCommit := resolved.LocalBaseCommitish
 	if err != nil {
 		return nil, err
@@ -224,7 +224,7 @@ func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 }
 
 func (bs PullableLocalModBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
-	resolved, err := bs.resolve(we)
+	resolved, err := bs.Resolve(we)
 	if err != nil {
 		return nil, err
 	}
