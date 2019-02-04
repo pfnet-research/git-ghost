@@ -72,7 +72,7 @@ build-image-cli:
 	docker build --build-arg NAME=$(NAME) --build-arg VERSION=$(VERSION) --build-arg REVISION=$(REVISION) -t $(IMAGE_PREFIX)git-ghost-cli:$(IMAGE_TAG) --target git-ghost-cli $(PROJECTROOT)
 
 .PHONY: build-image-all
-build-image-all: build-image-test build-image-e2e build-imagae-cli
+build-image-all: build-image-test build-image-e2e build-image-cli
 
 test: deps
 	@go test -v $(PROJECTROOT)/...
