@@ -40,30 +40,17 @@ type PullableLocalModBranchSpec struct {
 	LocalModHash string
 }
 
-func resolveComittishOr(we WorkingEnv, commitishToResolve string) string {
-	resolved, err := git.ResolveComittish(we.SrcDir, commitishToResolve)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"repository": we.SrcDir,
-			"specified":  commitishToResolve,
-		}).Warn("can't resolve commit-ish value on local git repository.  specified commit-ish value will be used.")
-		return commitishToResolve
-	}
-	return resolved
-}
-
-func (bs LocalBaseBranchSpec) Resolve(we WorkingEnv) (*LocalBaseBranchSpec, error) {
-	srcDir := we.SrcDir
+func (bs LocalBaseBranchSpec) Resolve(srcDir string) (*LocalBaseBranchSpec, error) {
 	err := git.ValidateComittish(srcDir, bs.RemoteBaseCommitish)
 	if err != nil {
 		return nil, err
 	}
-	remoteBaseCommit := resolveComittishOr(we, bs.RemoteBaseCommitish)
+	remoteBaseCommit := resolveComittishOr(srcDir, bs.RemoteBaseCommitish)
 	err = git.ValidateComittish(srcDir, bs.LocalBaseCommitish)
 	if err != nil {
 		return nil, err
 	}
-	localBaseCommit := resolveComittishOr(we, bs.LocalBaseCommitish)
+	localBaseCommit := resolveComittishOr(srcDir, bs.LocalBaseCommitish)
 	branch := &LocalBaseBranchSpec{
 		Prefix:              bs.Prefix,
 		RemoteBaseCommitish: remoteBaseCommit,
@@ -73,7 +60,7 @@ func (bs LocalBaseBranchSpec) Resolve(we WorkingEnv) (*LocalBaseBranchSpec, erro
 }
 
 func (bs LocalBaseBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
-	resolved, err := bs.Resolve(we)
+	resolved, err := bs.Resolve(we.SrcDir)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +88,7 @@ func (bs LocalBaseBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
 func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	dstDir := we.GhostDir
 	srcDir := we.SrcDir
-	resolved, err := bs.Resolve(we)
+	resolved, err := bs.Resolve(we.SrcDir)
 	if err != nil {
 		return nil, err
 	}
@@ -144,13 +131,12 @@ func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	return &branch, nil
 }
 
-func (bs LocalModBranchSpec) Resolve(we WorkingEnv) (*LocalModBranchSpec, error) {
-	srcDir := we.SrcDir
+func (bs LocalModBranchSpec) Resolve(srcDir string) (*LocalModBranchSpec, error) {
 	err := git.ValidateComittish(srcDir, bs.LocalBaseCommitish)
 	if err != nil {
 		return nil, err
 	}
-	localBaseCommit := resolveComittishOr(we, bs.LocalBaseCommitish)
+	localBaseCommit := resolveComittishOr(srcDir, bs.LocalBaseCommitish)
 	return &LocalModBranchSpec{
 		Prefix:             bs.Prefix,
 		LocalBaseCommitish: localBaseCommit,
@@ -160,7 +146,7 @@ func (bs LocalModBranchSpec) Resolve(we WorkingEnv) (*LocalModBranchSpec, error)
 func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	dstDir := we.GhostDir
 	srcDir := we.SrcDir
-	resolved, err := bs.Resolve(we)
+	resolved, err := bs.Resolve(we.SrcDir)
 	localBaseCommit := resolved.LocalBaseCommitish
 	if err != nil {
 		return nil, err
@@ -211,7 +197,7 @@ func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 }
 
 func (bs PullableLocalModBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
-	resolved, err := bs.Resolve(we)
+	resolved, err := bs.Resolve(we.SrcDir)
 	if err != nil {
 		return nil, err
 	}
@@ -229,4 +215,16 @@ func (bs PullableLocalModBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, err
 
 func pull(ghost GhostBranch, we WorkingEnv) error {
 	return git.ResetHardToBranch(we.GhostDir, git.ORIGIN+"/"+ghost.BranchName())
+}
+
+func resolveComittishOr(srcDir string, commitishToResolve string) string {
+	resolved, err := git.ResolveComittish(srcDir, commitishToResolve)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"repository": srcDir,
+			"specified":  commitishToResolve,
+		}).Warn("can't resolve commit-ish value on local git repository.  specified commit-ish value will be used.")
+		return commitishToResolve
+	}
+	return resolved
 }

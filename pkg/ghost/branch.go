@@ -86,11 +86,27 @@ func (branches LocalBaseBranches) Sort() {
 	sort.Slice(branches, sortFunc)
 }
 
+func (branches LocalBaseBranches) AsGhostBranches() []GhostBranch {
+	ghostBranches := make([]GhostBranch, len(branches))
+	for i, branch := range branches {
+		ghostBranches[i] = branch
+	}
+	return ghostBranches
+}
+
 func (branches LocalModBranches) Sort() {
 	sortFunc := func(i, j int) bool {
 		return branches[i].BranchName() < branches[j].BranchName()
 	}
 	sort.Slice(branches, sortFunc)
+}
+
+func (branches LocalModBranches) AsGhostBranches() []GhostBranch {
+	ghostBranches := make([]GhostBranch, len(branches))
+	for i, branch := range branches {
+		ghostBranches[i] = branch
+	}
+	return ghostBranches
 }
 
 func show(ghost GhostBranch, we WorkingEnv, writer io.Writer) error {

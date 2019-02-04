@@ -1,6 +1,7 @@
 package git
 
 import (
+	"fmt"
 	"git-ghost/pkg/util"
 	"os/exec"
 )
@@ -40,6 +41,16 @@ func CommitFile(dir, filename, message string) error {
 	}
 	return util.JustRunCmd(
 		exec.Command("git", "-C", dir, "commit", "-q", filename, "-m", message),
+	)
+}
+
+func DeleteRemoteBranches(dir string, branchNames ...string) error {
+	args := []string{"-C", dir, "push", "origin"}
+	for _, name := range branchNames {
+		args = append(args, fmt.Sprintf(":%s", name))
+	}
+	return util.JustRunCmd(
+		exec.Command("git", args...),
 	)
 }
 
