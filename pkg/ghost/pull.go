@@ -8,54 +8,16 @@ import (
 
 type PullOptions struct {
 	WorkingEnvSpec
-	LocalBaseBranchSpec
-	PullableLocalModBranchSpec
+	*LocalBaseBranchSpec
+	*PullableLocalModBranchSpec
 }
 
-type PullCommitsOptions struct {
-	WorkingEnvSpec
-	LocalBaseBranchSpec
-}
-type PullDiffOptions struct {
-	WorkingEnvSpec
-	PullableLocalModBranchSpec
-}
-
-func PullCommits(options PullCommitsOptions, workingEnv *WorkingEnv) error {
-	log.WithFields(util.ToFields(options)).Debug("pull commits command with")
-
-	we, initialized, err := initializeWorkingEnvIfRequired(options.WorkingEnvSpec, workingEnv)
+func pullAndApply(spec PullableGhostBranchSpec, we WorkingEnv) error {
+	pulledBranch, err := spec.PullBranch(we)
 	if err != nil {
 		return err
 	}
-	if initialized {
-		defer we.clean()
-	}
-
-	pulledBranch, err := options.LocalBaseBranchSpec.PullBranch(*we)
-	if err != nil {
-		return err
-	}
-
-	return pulledBranch.Apply(*we)
-}
-
-func PullDiff(options PullDiffOptions, workingEnv *WorkingEnv) error {
-	log.WithFields(util.ToFields(options)).Debug("pull diff command with")
-	we, initialized, err := initializeWorkingEnvIfRequired(options.WorkingEnvSpec, workingEnv)
-	if err != nil {
-		return err
-	}
-	if initialized {
-		defer we.clean()
-	}
-
-	pulledBranch, err := options.PullableLocalModBranchSpec.PullBranch(*we)
-	if err != nil {
-		return err
-	}
-
-	return pulledBranch.Apply(*we)
+	return pulledBranch.Apply(we)
 }
 
 func Pull(options PullOptions) error {
@@ -66,32 +28,17 @@ func Pull(options PullOptions) error {
 	}
 	defer we.clean()
 
-	err = PullCommits(PullCommitsOptions{
-		WorkingEnvSpec:      options.WorkingEnvSpec,
-		LocalBaseBranchSpec: options.LocalBaseBranchSpec,
-	}, we)
-	if err != nil {
-		return err
-	}
-
-	err = PullDiff(PullDiffOptions{
-		WorkingEnvSpec:             options.WorkingEnvSpec,
-		PullableLocalModBranchSpec: options.PullableLocalModBranchSpec,
-	}, we)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func initializeWorkingEnvIfRequired(spec WorkingEnvSpec, we *WorkingEnv) (*WorkingEnv, bool, error) {
-	if we == nil {
-		we, err := spec.initialize()
+	if options.LocalBaseBranchSpec != nil {
+		err := pullAndApply(*options.LocalBaseBranchSpec, *we)
 		if err != nil {
-			return nil, false, err
+			return err
 		}
-		return we, true, nil
 	}
-	return we, false, nil
+
+	if options.PullableLocalModBranchSpec != nil {
+		return pullAndApply(*options.PullableLocalModBranchSpec, *we)
+	}
+
+	log.WithFields(util.ToFields(options)).Warn("pull command has nothing to do with")
+	return nil
 }

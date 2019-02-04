@@ -96,9 +96,9 @@ func runPullCommitsCommand(flags *pullFlags) func(cmd *cobra.Command, args []str
 			os.Exit(1)
 		}
 
-		options := ghost.PullCommitsOptions{
+		options := ghost.PullOptions{
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-			LocalBaseBranchSpec: ghost.LocalBaseBranchSpec{
+			LocalBaseBranchSpec: &ghost.LocalBaseBranchSpec{
 				Prefix:              globalOpts.ghostPrefix,
 				RemoteBaseCommitish: arg.commitsFrom,
 				LocalBaseCommitish:  arg.commitsTo,
@@ -106,7 +106,7 @@ func runPullCommitsCommand(flags *pullFlags) func(cmd *cobra.Command, args []str
 			// ForceApply: flags.forceApply,
 		}
 
-		err := ghost.PullCommits(options, nil)
+		err := ghost.Pull(options)
 		if err != nil {
 			log.Error(err)
 			os.Exit(1)
@@ -157,9 +157,9 @@ func runPullDiffCommand(flags *pullFlags) func(cmd *cobra.Command, args []string
 			os.Exit(1)
 		}
 
-		options := ghost.PullDiffOptions{
+		options := ghost.PullOptions{
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-			PullableLocalModBranchSpec: ghost.PullableLocalModBranchSpec{
+			PullableLocalModBranchSpec: &ghost.PullableLocalModBranchSpec{
 				LocalModBranchSpec: ghost.LocalModBranchSpec{
 					Prefix:             globalOpts.ghostPrefix,
 					LocalBaseCommitish: arg.diffFrom,
@@ -169,7 +169,7 @@ func runPullDiffCommand(flags *pullFlags) func(cmd *cobra.Command, args []string
 			// ForceApply: flags.forceApply,
 		}
 
-		err := ghost.PullDiff(options, nil)
+		err := ghost.Pull(options)
 		if err != nil {
 			log.Error(err)
 			os.Exit(1)
@@ -205,12 +205,12 @@ func runPullAllCommand(flags *pullFlags) func(cmd *cobra.Command, args []string)
 
 		options := ghost.PullOptions{
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-			LocalBaseBranchSpec: ghost.LocalBaseBranchSpec{
+			LocalBaseBranchSpec: &ghost.LocalBaseBranchSpec{
 				Prefix:              globalOpts.ghostPrefix,
 				RemoteBaseCommitish: pullCommitsArg.commitsFrom,
 				LocalBaseCommitish:  pullCommitsArg.commitsTo,
 			},
-			PullableLocalModBranchSpec: ghost.PullableLocalModBranchSpec{
+			PullableLocalModBranchSpec: &ghost.PullableLocalModBranchSpec{
 				LocalModBranchSpec: ghost.LocalModBranchSpec{
 					Prefix:             globalOpts.ghostPrefix,
 					LocalBaseCommitish: pullDiffArg.diffFrom,

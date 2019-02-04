@@ -86,9 +86,9 @@ func runShowCommitsCommand(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	options := ghost.ShowCommitsOptions{
+	options := ghost.ShowOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		LocalBaseBranchSpec: ghost.LocalBaseBranchSpec{
+		LocalBaseBranchSpec: &ghost.LocalBaseBranchSpec{
 			Prefix:              globalOpts.ghostPrefix,
 			RemoteBaseCommitish: arg.commitsFrom,
 			LocalBaseCommitish:  arg.commitsTo,
@@ -96,7 +96,7 @@ func runShowCommitsCommand(cmd *cobra.Command, args []string) {
 		Writer: os.Stdout,
 	}
 
-	err := ghost.ShowCommits(options)
+	err := ghost.Show(options)
 	if err != nil {
 		log.Error(err)
 		os.Exit(1)
@@ -145,9 +145,9 @@ func runShowDiffCommand(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	options := ghost.ShowDiffOptions{
+	options := ghost.ShowOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		PullableLocalModBranchSpec: ghost.PullableLocalModBranchSpec{
+		PullableLocalModBranchSpec: &ghost.PullableLocalModBranchSpec{
 			LocalModBranchSpec: ghost.LocalModBranchSpec{
 				Prefix:             globalOpts.ghostPrefix,
 				LocalBaseCommitish: arg.diffFrom,
@@ -157,7 +157,7 @@ func runShowDiffCommand(cmd *cobra.Command, args []string) {
 		Writer: os.Stdout,
 	}
 
-	err := ghost.ShowDiff(options)
+	err := ghost.Show(options)
 	if err != nil {
 		log.Error(err)
 		os.Exit(1)
@@ -191,12 +191,12 @@ func runShowAllCommand(cmd *cobra.Command, args []string) {
 
 	options := ghost.ShowOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		LocalBaseBranchSpec: ghost.LocalBaseBranchSpec{
+		LocalBaseBranchSpec: &ghost.LocalBaseBranchSpec{
 			Prefix:              globalOpts.ghostPrefix,
 			RemoteBaseCommitish: showCommitsArg.commitsFrom,
 			LocalBaseCommitish:  showCommitsArg.commitsTo,
 		},
-		PullableLocalModBranchSpec: ghost.PullableLocalModBranchSpec{
+		PullableLocalModBranchSpec: &ghost.PullableLocalModBranchSpec{
 			LocalModBranchSpec: ghost.LocalModBranchSpec{
 				Prefix:             globalOpts.ghostPrefix,
 				LocalBaseCommitish: showDiffArg.diffFrom,
@@ -206,7 +206,7 @@ func runShowAllCommand(cmd *cobra.Command, args []string) {
 		Writer: os.Stdout,
 	}
 
-	err := ghost.ShowAll(options)
+	err := ghost.Show(options)
 	if err != nil {
 		log.Error(err)
 		os.Exit(1)
