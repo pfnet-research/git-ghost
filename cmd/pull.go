@@ -25,7 +25,7 @@ func NewPullCommand() *cobra.Command {
 		Short: "pull commits(hash1...hash2), diff(hash...current state) from ghost repo and apply them to working dir",
 		Long:  "pull commits or diff or all from ghost repo and apply them to working dir.  If you didn't specify any subcommand, this commands works as an alias for 'pull diff' command.",
 		Args:  cobra.RangeArgs(1, 2),
-		Run:   runPullDiffCommand(flags),
+		Run:   runPullDiffCommand(&flags),
 	}
 	// command.PersistentFlags().BoolVarP(&flags.forceApply, "force", "f", true, "force apply pulled ghost branches to working dir")
 
@@ -34,21 +34,21 @@ func NewPullCommand() *cobra.Command {
 		Short: "pull diff from ghost repo and apply it to working dir",
 		Long:  "pull diff from [diff-from-hash] to [diff-hash] from your ghost repo and apply it to working dir",
 		Args:  cobra.RangeArgs(1, 2),
-		Run:   runPullDiffCommand(flags),
+		Run:   runPullDiffCommand(&flags),
 	})
 	command.AddCommand(&cobra.Command{
 		Use:   "commits [from-hash(default=HEAD)] [to-hash]",
 		Short: "pull commits from ghost repo and apply it to working dir",
 		Long:  "pull commits from [from-hash] to [to-hash] from your ghost repo and apply it to working dir",
 		Args:  cobra.RangeArgs(1, 2),
-		Run:   runPullCommitsCommand(flags),
+		Run:   runPullCommitsCommand(&flags),
 	})
 	command.AddCommand(&cobra.Command{
 		Use:   "all [from-hash(default=HEAD)] [to-hash] [diff-hash]",
 		Short: "pull both commits and diff from ghost repo and apply them to working dir sequentially",
 		Long:  "pull commits([from-hash]...[to-hash]) and diff([to-hash]...[diff-hash]) and apply them to working dir sequentially",
 		Args:  cobra.RangeArgs(2, 3),
-		Run:   runPullAllCommand(flags),
+		Run:   runPullAllCommand(&flags),
 	})
 	return command
 }
@@ -88,7 +88,7 @@ func (arg pullCommitsArg) validate() error {
 	return nil
 }
 
-func runPullCommitsCommand(flags pullFlags) func(cmd *cobra.Command, args []string) {
+func runPullCommitsCommand(flags *pullFlags) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 		arg := newPullCommitsArg(args)
 		if err := arg.validate(); err != nil {
@@ -149,7 +149,7 @@ func (arg pullDiffArg) validate() error {
 	return nil
 }
 
-func runPullDiffCommand(flags pullFlags) func(cmd *cobra.Command, args []string) {
+func runPullDiffCommand(flags *pullFlags) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 		arg := newPullDiffArg(args)
 		if err := arg.validate(); err != nil {
@@ -177,7 +177,7 @@ func runPullDiffCommand(flags pullFlags) func(cmd *cobra.Command, args []string)
 	}
 }
 
-func runPullAllCommand(flags pullFlags) func(cmd *cobra.Command, args []string) {
+func runPullAllCommand(flags *pullFlags) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 		var pullCommitsArg pullCommitsArg
 		var pullDiffArg pullDiffArg
