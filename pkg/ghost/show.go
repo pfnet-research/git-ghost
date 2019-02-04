@@ -1,18 +1,16 @@
 package ghost
 
 import (
-	"fmt"
-	"git-ghost/pkg/ghost/git"
 	"git-ghost/pkg/util"
 	"io"
-	"os/exec"
 
 	log "github.com/Sirupsen/logrus"
 )
 
 type ShowOptions struct {
 	WorkingEnvSpec
-	GhostSpec
+	*LocalBaseBranchSpec
+	*PullableLocalModBranchSpec
 	// if you want to consume and transform the output of `ghost.Show()`,
 	// Please use `io.Pipe()` as below,
 	// ```
@@ -23,47 +21,41 @@ type ShowOptions struct {
 	Writer io.Writer
 }
 
-func Show(options ShowOptions) error {
-	log.WithFields(util.ToFields(options)).Debug("show command with")
-
-	localBaseBranch, localModBranch, err := options.GhostSpec.validateAndCreateGhostBranches(options.WorkingEnvSpec)
+func pullAndshow(branchSpec PullableGhostBranchSpec, we WorkingEnv, writer io.Writer) error {
+	branch, err := branchSpec.PullBranch(we)
 	if err != nil {
 		return err
 	}
-
-	checkoutGhostBranch := func(gb GhostBranch) (*WorkingEnv, error) {
-		workingEnv, err := options.WorkingEnvSpec.initialize()
-		if err != nil {
-			return nil, err
-		}
-
-		err = git.ResetHardToBranch(workingEnv.GhostDir, git.ORIGIN+"/"+gb.BranchName())
-		if err != nil {
-			return nil, err
-		}
-		return workingEnv, nil
+	if branch != nil {
+		return branch.Show(we, writer)
 	}
-	execShow := func(we *WorkingEnv, gb GhostBranch) error {
-		cmd := exec.Command("git", "-C", we.GhostDir, "--no-pager", "cat-file", "-p", fmt.Sprintf("HEAD:%s", gb.FileName()))
-		cmd.Stdout = options.Writer
-		return util.JustRunCmd(cmd)
-	}
+	return nil
+}
 
-	if localBaseBranch != nil {
-		we, err := checkoutGhostBranch(localBaseBranch)
+func Show(options ShowOptions) error {
+	log.WithFields(util.ToFields(options)).Debug("pull command with")
+
+	if options.LocalBaseBranchSpec != nil {
+		we, err := options.WorkingEnvSpec.initialize()
 		if err != nil {
 			return err
 		}
 		defer we.clean()
-		err = execShow(we, localBaseBranch)
+		err = pullAndshow(options.LocalBaseBranchSpec, *we, options.Writer)
 		if err != nil {
 			return err
 		}
 	}
-	we, err := checkoutGhostBranch(localModBranch)
-	if err != nil {
-		return err
+
+	if options.PullableLocalModBranchSpec != nil {
+		we, err := options.WorkingEnvSpec.initialize()
+		if err != nil {
+			return err
+		}
+		defer we.clean()
+		return pullAndshow(options.PullableLocalModBranchSpec, *we, options.Writer)
 	}
-	defer we.clean()
-	return execShow(we, localModBranch)
+
+	log.WithFields(util.ToFields(options)).Warn("show command has nothing to do with")
+	return nil
 }

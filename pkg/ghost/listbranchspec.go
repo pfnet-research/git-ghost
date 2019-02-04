@@ -2,8 +2,6 @@ package ghost
 
 import (
 	"git-ghost/pkg/ghost/git"
-
-	log "github.com/Sirupsen/logrus"
 )
 
 type ListCommitsBranchSpec struct {
@@ -19,10 +17,10 @@ type ListDiffBranchSpec struct {
 func (ls ListCommitsBranchSpec) Resolve(srcDir string) *ListCommitsBranchSpec {
 	var newOptions ListCommitsBranchSpec
 	if ls.HashFrom != "" {
-		newOptions.HashFrom = resolveRefspecOrIgnore(srcDir, ls.HashFrom)
+		newOptions.HashFrom = resolveComittishOr(srcDir, ls.HashFrom)
 	}
 	if ls.HashTo != "" {
-		newOptions.HashTo = resolveRefspecOrIgnore(srcDir, ls.HashTo)
+		newOptions.HashTo = resolveComittishOr(srcDir, ls.HashTo)
 	}
 	return &newOptions
 }
@@ -45,7 +43,7 @@ func (ls *ListCommitsBranchSpec) GetBranches(repo, prefix string) (LocalBaseBran
 func (ls ListDiffBranchSpec) Resolve(srcDir string) *ListDiffBranchSpec {
 	var newOptions ListDiffBranchSpec
 	if ls.HashFrom != "" {
-		newOptions.HashFrom = resolveRefspecOrIgnore(srcDir, ls.HashFrom)
+		newOptions.HashFrom = resolveComittishOr(srcDir, ls.HashFrom)
 	}
 	return &newOptions
 }
@@ -63,15 +61,4 @@ func (ls *ListDiffBranchSpec) GetBranches(repo, prefix string) (LocalModBranches
 		}
 	}
 	return branches, nil
-}
-
-func resolveRefspecOrIgnore(dir, refspec string) string {
-	commit, err := git.ResolveRefspec(dir, refspec)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"refspec": refspec,
-		}).Warning("Failed to resolve refspec")
-		commit = refspec
-	}
-	return commit
 }

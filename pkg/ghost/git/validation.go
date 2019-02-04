@@ -11,8 +11,8 @@ func ValidateGit() error {
 	)
 }
 
-func ValidateRefspec(dir, refspec string) error {
+func ValidateComittish(dir, comittish string) error {
 	return util.JustRunCmd(
-		exec.Command("git", "-C", dir, "cat-file", "-e", refspec),
+		exec.Command("git", "-C", dir, "cat-file", "-e", comittish),
 	)
 }
