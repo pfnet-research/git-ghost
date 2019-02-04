@@ -1,10 +1,8 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"git-ghost/pkg/ghost"
-	"git-ghost/pkg/ghost/git"
 	"os"
 
 	log "github.com/Sirupsen/logrus"
@@ -16,53 +14,140 @@ func init() {
 }
 
 type listFlags struct {
-	baseCommit string
+	hashFrom string
+	hashTo   string
 }
 
 func NewListCommand() *cobra.Command {
 	var (
-		flags listFlags
+		listFlags listFlags
 	)
+
 	var command = &cobra.Command{
 		Use:   "list",
-		Short: "list ghost commits on remote repository.",
-		Long:  "list ghost commits on remote repository.",
+		Short: "list ghost branches of diffs.",
+		Long:  "list ghost branches of diffs.",
 		Args:  cobra.NoArgs,
-		Run: func(cmd *cobra.Command, args []string) {
-			err := flags.Validate()
-			if err != nil {
-				log.Error(err)
-				os.Exit(1)
-			}
-
-			opts := ghost.ListOptions{
-				WorkingEnvSpec: ghost.WorkingEnvSpec{
-					SrcDir:          globalOpts.srcDir,
-					GhostWorkingDir: globalOpts.ghostWorkDir,
-					GhostRepo:       globalOpts.ghostRepo,
-				},
-				GhostPrefix: globalOpts.ghostPrefix,
-				BaseCommit:  flags.baseCommit,
-			}
-
-			res, err := ghost.List(opts)
-			if err != nil {
-				log.Error(err)
-				os.Exit(1)
-			}
-			fmt.Printf(res.PrettyString())
-		},
+		Run:   runListDiffCommand(&listFlags),
 	}
-	command.PersistentFlags().StringVar(&flags.baseCommit, "base-commit", "HEAD", "base commit hash for generating ghost commit.")
+	command.AddCommand(&cobra.Command{
+		Use:   "commits",
+		Short: "list ghost branches of commits.",
+		Long:  "list ghost branches of commits.",
+		Args:  cobra.NoArgs,
+		Run:   runListCommitsCommand(&listFlags),
+	})
+	command.AddCommand(&cobra.Command{
+		Use:   "diff",
+		Short: "list ghost branches of diffs.",
+		Long:  "list ghost branches of diffs.",
+		Args:  cobra.NoArgs,
+		Run:   runListDiffCommand(&listFlags),
+	})
+	command.AddCommand(&cobra.Command{
+		Use:   "all",
+		Short: "list ghost branches of all types.",
+		Long:  "list ghost branches of all types.",
+		Args:  cobra.NoArgs,
+		Run:   runListAllCommand(&listFlags),
+	})
+	command.PersistentFlags().StringVar(&listFlags.hashFrom, "from", "", "commit or diff hash to which ghost branches are listed.")
+	command.PersistentFlags().StringVar(&listFlags.hashTo, "to", "", "commit or diff hash from which ghost branches are listed.")
 	return command
 }
 
-func (flags listFlags) Validate() error {
-	if flags.baseCommit != "" {
-		err := git.ValidateRefspec(".", flags.baseCommit)
+func runListCommitsCommand(flags *listFlags) func(cmd *cobra.Command, args []string) {
+	return func(cmd *cobra.Command, args []string) {
+		err := flags.validate()
 		if err != nil {
-			return errors.New("base-commit is not a valid object")
+			log.Error(err)
+			os.Exit(1)
 		}
+		opts := ghost.ListOptions{
+			WorkingEnvSpec: ghost.WorkingEnvSpec{
+				SrcDir:          globalOpts.srcDir,
+				GhostWorkingDir: globalOpts.ghostWorkDir,
+				GhostRepo:       globalOpts.ghostRepo,
+			},
+			ListCommitsBranchSpec: &ghost.ListCommitsBranchSpec{
+				Prefix:   globalOpts.ghostPrefix,
+				HashFrom: flags.hashFrom,
+				HashTo:   flags.hashTo,
+			},
+		}
+
+		res, err := ghost.List(opts)
+		if err != nil {
+			log.Error(err)
+			os.Exit(1)
+		}
+		fmt.Printf(res.PrettyString())
 	}
+}
+
+func runListDiffCommand(flags *listFlags) func(cmd *cobra.Command, args []string) {
+	return func(cmd *cobra.Command, args []string) {
+		err := flags.validate()
+		if err != nil {
+			log.Error(err)
+			os.Exit(1)
+		}
+		opts := ghost.ListOptions{
+			WorkingEnvSpec: ghost.WorkingEnvSpec{
+				SrcDir:          globalOpts.srcDir,
+				GhostWorkingDir: globalOpts.ghostWorkDir,
+				GhostRepo:       globalOpts.ghostRepo,
+			},
+			ListDiffBranchSpec: &ghost.ListDiffBranchSpec{
+				Prefix:   globalOpts.ghostPrefix,
+				HashFrom: flags.hashFrom,
+				HashTo:   flags.hashTo,
+			},
+		}
+
+		res, err := ghost.List(opts)
+		if err != nil {
+			log.Error(err)
+			os.Exit(1)
+		}
+		fmt.Printf(res.PrettyString())
+	}
+}
+
+func runListAllCommand(flags *listFlags) func(cmd *cobra.Command, args []string) {
+	return func(cmd *cobra.Command, args []string) {
+		err := flags.validate()
+		if err != nil {
+			log.Error(err)
+			os.Exit(1)
+		}
+		opts := ghost.ListOptions{
+			WorkingEnvSpec: ghost.WorkingEnvSpec{
+				SrcDir:          globalOpts.srcDir,
+				GhostWorkingDir: globalOpts.ghostWorkDir,
+				GhostRepo:       globalOpts.ghostRepo,
+			},
+			ListCommitsBranchSpec: &ghost.ListCommitsBranchSpec{
+				Prefix:   globalOpts.ghostPrefix,
+				HashFrom: flags.hashFrom,
+				HashTo:   flags.hashTo,
+			},
+			ListDiffBranchSpec: &ghost.ListDiffBranchSpec{
+				Prefix:   globalOpts.ghostPrefix,
+				HashFrom: flags.hashFrom,
+				HashTo:   flags.hashTo,
+			},
+		}
+
+		res, err := ghost.List(opts)
+		if err != nil {
+			log.Error(err)
+			os.Exit(1)
+		}
+		fmt.Printf(res.PrettyString())
+	}
+}
+
+func (flags listFlags) validate() error {
 	return nil
 }

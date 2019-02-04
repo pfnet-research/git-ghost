@@ -21,6 +21,7 @@ git add sample.txt
 git commit sample.txt -m 'Initial commit'
 echo b > sample.txt
 git commit sample.txt -m 'Second commit'
+echo c > sample.txt
 )
 
 (

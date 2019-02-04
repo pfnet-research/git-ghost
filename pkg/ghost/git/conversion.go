@@ -6,9 +6,9 @@ import (
 	"strings"
 )
 
-func ResolveRefspec(dir, refspec string) (string, error) {
+func ResolveComittish(dir, comittish string) (string, error) {
 	commit, err := util.JustOutputCmd(
-		exec.Command("git", "-C", dir, "rev-list", "-1", refspec),
+		exec.Command("git", "-C", dir, "rev-list", "-1", comittish),
 	)
 	if err != nil {
 		return "", err

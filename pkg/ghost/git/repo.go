@@ -1,6 +1,7 @@
 package git
 
 import (
+	"fmt"
 	"git-ghost/pkg/util"
 	"os/exec"
 )
@@ -19,12 +20,12 @@ func InitializeGitDir(dir, repo, branch string) error {
 	return util.JustRunCmd(cmd)
 }
 
-func CommitAndPush(dir, filename, message, refspec string) error {
+func CommitAndPush(dir, filename, message, comittish string) error {
 	err := CommitFile(dir, filename, message)
 	if err != nil {
 		return err
 	}
-	err = Push(dir, refspec)
+	err = Push(dir, comittish)
 	if err != nil {
 		return err
 	}
@@ -43,17 +44,27 @@ func CommitFile(dir, filename, message string) error {
 	)
 }
 
-func Push(dir string, refspecs ...string) error {
+func DeleteRemoteBranches(dir string, branchNames ...string) error {
 	args := []string{"-C", dir, "push", "origin"}
-	args = append(args, refspecs...)
+	for _, name := range branchNames {
+		args = append(args, fmt.Sprintf(":%s", name))
+	}
 	return util.JustRunCmd(
 		exec.Command("git", args...),
 	)
 }
 
-func Pull(dir, refspec string) error {
+func Push(dir string, comittishes ...string) error {
+	args := []string{"-C", dir, "push", "origin"}
+	args = append(args, comittishes...)
 	return util.JustRunCmd(
-		exec.Command("git", "-C", dir, "pull", "origin", refspec),
+		exec.Command("git", args...),
+	)
+}
+
+func Pull(dir, comittish string) error {
+	return util.JustRunCmd(
+		exec.Command("git", "-C", dir, "pull", "origin", comittish),
 	)
 }
 

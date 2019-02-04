@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"git-ghost/pkg/ghost"
 	"git-ghost/pkg/ghost/git"
 	"os"
 
@@ -16,6 +17,14 @@ type globalFlags struct {
 	ghostPrefix  string
 	ghostRepo    string
 	verbose      bool
+}
+
+func (gf globalFlags) WorkingEnvSpec() ghost.WorkingEnvSpec {
+	return ghost.WorkingEnvSpec{
+		SrcDir:          gf.srcDir,
+		GhostWorkingDir: gf.ghostWorkDir,
+		GhostRepo:       gf.ghostRepo,
+	}
 }
 
 var (
@@ -59,7 +68,7 @@ func init() {
 	}
 	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostPrefix, "ghost-prefix", ghostPrefixEnv, "prefix of ghost branch name")
 	ghostRepoEnv := os.Getenv("GHOST_REPO")
-	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostRepo, "ghost-repo", ghostRepoEnv, "git refspec for ghost commits repository")
+	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostRepo, "ghost-repo", ghostRepoEnv, "git remote url for ghosts repository")
 	RootCmd.PersistentFlags().BoolVar(&globalOpts.verbose, "verbose", false, "verbose mode")
 	RootCmd.AddCommand(versionCmd)
 }
