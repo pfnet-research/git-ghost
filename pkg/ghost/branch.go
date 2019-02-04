@@ -18,7 +18,7 @@ type GhostBranch interface {
 	BranchName() string
 	FileName() string
 	Show(we WorkingEnv, writer io.Writer) error
-	Apply(we WorkingEnv, forceApply bool) error
+	Apply(we WorkingEnv) error
 }
 
 // interface assetions
@@ -99,14 +99,13 @@ func show(ghost GhostBranch, we WorkingEnv, writer io.Writer) error {
 	return util.JustRunCmd(cmd)
 }
 
-func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string, forceApply bool) error {
+func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string) error {
 	log.WithFields(util.MergeFields(
 		util.ToFields(ghost),
 		log.Fields{
 			"ghostDir":        we.GhostDir,
 			"srcDir":          we.SrcDir,
 			"expectedSrcHead": expectedSrcHead,
-			"forceApply":      forceApply,
 		},
 	)).Info("applying ghost branch")
 
@@ -117,19 +116,15 @@ func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string, forceApply 
 
 	if srcHead != expectedSrcHead {
 		message := "HEAD is not equal to expected"
-		if forceApply {
-			log.WithFields(util.MergeFields(
-				util.ToFields(ghost),
-				log.Fields{
-					"actualSrcHead":   srcHead,
-					"expectedSrcHead": expectedSrcHead,
-					"srcDir":          we.SrcDir,
-				},
-			),
-			).Warnf("%s. Applying ghost branch will be failed.", message)
-		} else {
-			return fmt.Errorf("abort because %s (actual=%s, expected=%s)", message, srcHead, expectedSrcHead)
-		}
+		log.WithFields(util.MergeFields(
+			util.ToFields(ghost),
+			log.Fields{
+				"actualSrcHead":   srcHead,
+				"expectedSrcHead": expectedSrcHead,
+				"srcDir":          we.SrcDir,
+			},
+		),
+		).Warnf("%s. Applying ghost branch might be failed.", message)
 	}
 
 	// TODO make this instance methods.
@@ -152,8 +147,8 @@ func (bs LocalBaseBranch) Show(we WorkingEnv, writer io.Writer) error {
 	return show(bs, we, writer)
 }
 
-func (bs LocalBaseBranch) Apply(we WorkingEnv, forceApply bool) error {
-	err := apply(bs, we, bs.RemoteBaseCommit, forceApply)
+func (bs LocalBaseBranch) Apply(we WorkingEnv) error {
+	err := apply(bs, we, bs.RemoteBaseCommit)
 	if err != nil {
 		return err
 	}
@@ -164,8 +159,8 @@ func (bs LocalModBranch) Show(we WorkingEnv, writer io.Writer) error {
 	return show(bs, we, writer)
 }
 
-func (bs LocalModBranch) Apply(we WorkingEnv, forceApply bool) error {
-	err := apply(bs, we, bs.LocalBaseCommit, forceApply)
+func (bs LocalModBranch) Apply(we WorkingEnv) error {
+	err := apply(bs, we, bs.LocalBaseCommit)
 	if err != nil {
 		return err
 	}

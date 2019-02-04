@@ -10,18 +10,15 @@ type PullOptions struct {
 	WorkingEnvSpec
 	LocalBaseBranchSpec
 	PullableLocalModBranchSpec
-	ForceApply bool
 }
 
 type PullCommitsOptions struct {
 	WorkingEnvSpec
 	LocalBaseBranchSpec
-	ForceApply bool
 }
 type PullDiffOptions struct {
 	WorkingEnvSpec
 	PullableLocalModBranchSpec
-	ForceApply bool
 }
 
 func PullCommits(options PullCommitsOptions, workingEnv *WorkingEnv) error {
@@ -40,7 +37,7 @@ func PullCommits(options PullCommitsOptions, workingEnv *WorkingEnv) error {
 		return err
 	}
 
-	return pulledBranch.Apply(*we, options.ForceApply)
+	return pulledBranch.Apply(*we)
 }
 
 func PullDiff(options PullDiffOptions, workingEnv *WorkingEnv) error {
@@ -58,7 +55,7 @@ func PullDiff(options PullDiffOptions, workingEnv *WorkingEnv) error {
 		return err
 	}
 
-	return pulledBranch.Apply(*we, options.ForceApply)
+	return pulledBranch.Apply(*we)
 }
 
 func Pull(options PullOptions) error {
@@ -72,7 +69,6 @@ func Pull(options PullOptions) error {
 	err = PullCommits(PullCommitsOptions{
 		WorkingEnvSpec:      options.WorkingEnvSpec,
 		LocalBaseBranchSpec: options.LocalBaseBranchSpec,
-		ForceApply:          options.ForceApply,
 	}, we)
 	if err != nil {
 		return err
@@ -81,7 +77,6 @@ func Pull(options PullOptions) error {
 	err = PullDiff(PullDiffOptions{
 		WorkingEnvSpec:             options.WorkingEnvSpec,
 		PullableLocalModBranchSpec: options.PullableLocalModBranchSpec,
-		ForceApply:                 options.ForceApply,
 	}, we)
 	if err != nil {
 		return err

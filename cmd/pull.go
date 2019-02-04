@@ -27,7 +27,7 @@ func NewPullCommand() *cobra.Command {
 		Args:  cobra.MinimumNArgs(1),
 		Run:   runPullDiffCommand(flags),
 	}
-	command.PersistentFlags().BoolVarP(&flags.forceApply, "force", "f", true, "force apply pulled ghost branches to working dir")
+	// command.PersistentFlags().BoolVarP(&flags.forceApply, "force", "f", true, "force apply pulled ghost branches to working dir")
 
 	command.AddCommand(&cobra.Command{
 		Use:   "diff [diff-from-hash(default=HEAD)] [diff-hash]",
@@ -103,7 +103,7 @@ func runPullCommitsCommand(flags pullFlags) func(cmd *cobra.Command, args []stri
 				RemoteBaseCommitish: arg.commitsFrom,
 				LocalBaseCommitish:  arg.commitsTo,
 			},
-			ForceApply: flags.forceApply,
+			// ForceApply: flags.forceApply,
 		}
 
 		err := ghost.PullCommits(options, nil)
@@ -166,7 +166,7 @@ func runPullDiffCommand(flags pullFlags) func(cmd *cobra.Command, args []string)
 				},
 				LocalModHash: arg.diffHash,
 			},
-			ForceApply: flags.forceApply,
+			// ForceApply: flags.forceApply,
 		}
 
 		err := ghost.PullDiff(options, nil)
@@ -213,7 +213,7 @@ func runPullAllCommand(flags pullFlags) func(cmd *cobra.Command, args []string) 
 				},
 				LocalModHash: pullDiffArg.diffHash,
 			},
-			ForceApply: flags.forceApply,
+			// ForceApply: flags.forceApply,
 		}
 
 		err := ghost.Pull(options)
