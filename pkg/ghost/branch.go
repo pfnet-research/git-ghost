@@ -146,17 +146,13 @@ func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string) error {
 	// TODO make this instance methods.
 	switch ghost.(type) {
 	case LocalBaseBranch:
-		err = git.ApplyDiffBundleFile(we.SrcDir, path.Join(we.GhostDir, ghost.FileName()))
+		return git.ApplyDiffBundleFile(we.SrcDir, path.Join(we.GhostDir, ghost.FileName()))
 	case LocalModBranch:
-		err = git.ApplyDiffPatchFile(we.SrcDir, path.Join(we.GhostDir, ghost.FileName()))
+		return git.ApplyDiffPatchFile(we.SrcDir, path.Join(we.GhostDir, ghost.FileName()))
+
 	default:
 		return fmt.Errorf("not supported on type = %+v", reflect.TypeOf(ghost))
 	}
-
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (bs LocalBaseBranch) Show(we WorkingEnv, writer io.Writer) error {

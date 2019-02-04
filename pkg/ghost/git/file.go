@@ -8,6 +8,9 @@ import (
 	"io"
 	"os"
 	"os/exec"
+
+	log "github.com/Sirupsen/logrus"
+	multierror "github.com/hashicorp/go-multierror"
 )
 
 func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) error {
@@ -60,9 +63,26 @@ func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) erro
 }
 
 func ApplyDiffBundleFile(dir, filepath string) error {
-	return util.JustRunCmd(
+	var errs error
+	err := util.JustRunCmd(
 		exec.Command("git", "-C", dir, "am", filepath),
 	)
+	if err != nil {
+		multierror.Append(errs, err)
+		log.WithFields(util.MergeFields(
+			log.Fields{
+				"srcDir":   dir,
+				"filepath": filepath,
+				"error":    err.Error(),
+			})).Info("apply('git am') failed. aborting.")
+		resetErr := util.JustRunCmd(
+			exec.Command("git", "-C", dir, "am", "--abort"),
+		)
+		if resetErr != nil {
+			multierror.Append(errs, resetErr)
+		}
+	}
+	return errs
 }
 
 func CreateDiffPatchFile(dir, filepath, comittish string) error {
