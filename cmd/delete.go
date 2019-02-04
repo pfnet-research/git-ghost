@@ -73,8 +73,8 @@ func runDeleteCommitsCommand(flags *deleteFlags) func(cmd *cobra.Command, args [
 				GhostWorkingDir: globalOpts.ghostWorkDir,
 				GhostRepo:       globalOpts.ghostRepo,
 			},
-			Prefix: globalOpts.ghostPrefix,
 			ListCommitsBranchSpec: &ghost.ListCommitsBranchSpec{
+				Prefix:   globalOpts.ghostPrefix,
 				HashFrom: flags.hashFrom,
 				HashTo:   flags.hashTo,
 			},
@@ -103,8 +103,8 @@ func runDeleteDiffCommand(flags *deleteFlags) func(cmd *cobra.Command, args []st
 				GhostWorkingDir: globalOpts.ghostWorkDir,
 				GhostRepo:       globalOpts.ghostRepo,
 			},
-			Prefix: globalOpts.ghostPrefix,
 			ListDiffBranchSpec: &ghost.ListDiffBranchSpec{
+				Prefix:   globalOpts.ghostPrefix,
 				HashFrom: flags.hashFrom,
 				HashTo:   flags.hashTo,
 			},
@@ -133,12 +133,13 @@ func runDeleteAllCommand(flags *deleteFlags) func(cmd *cobra.Command, args []str
 				GhostWorkingDir: globalOpts.ghostWorkDir,
 				GhostRepo:       globalOpts.ghostRepo,
 			},
-			Prefix: globalOpts.ghostPrefix,
 			ListCommitsBranchSpec: &ghost.ListCommitsBranchSpec{
+				Prefix:   globalOpts.ghostPrefix,
 				HashFrom: flags.hashFrom,
 				HashTo:   flags.hashTo,
 			},
 			ListDiffBranchSpec: &ghost.ListDiffBranchSpec{
+				Prefix:   globalOpts.ghostPrefix,
 				HashFrom: flags.hashFrom,
 				HashTo:   flags.hashTo,
 			},

@@ -11,7 +11,6 @@ import (
 
 type DeleteOptions struct {
 	WorkingEnvSpec
-	Prefix string
 	*ListCommitsBranchSpec
 	*ListDiffBranchSpec
 	Dryrun bool
@@ -29,7 +28,7 @@ func Delete(options DeleteOptions) (*DeleteResult, error) {
 
 	if options.ListCommitsBranchSpec != nil {
 		resolved := options.ListCommitsBranchSpec.Resolve(options.SrcDir)
-		branches, err := resolved.GetBranches(options.GhostRepo, options.Prefix)
+		branches, err := resolved.GetBranches(options.GhostRepo)
 		if err != nil {
 			return nil, err
 		}
@@ -38,7 +37,7 @@ func Delete(options DeleteOptions) (*DeleteResult, error) {
 
 	if options.ListDiffBranchSpec != nil {
 		resolved := options.ListDiffBranchSpec.Resolve(options.SrcDir)
-		branches, err := resolved.GetBranches(options.GhostRepo, options.Prefix)
+		branches, err := resolved.GetBranches(options.GhostRepo)
 		if err != nil {
 			return nil, err
 		}

@@ -10,7 +10,6 @@ import (
 
 type ListOptions struct {
 	WorkingEnvSpec
-	Prefix string
 	*ListCommitsBranchSpec
 	*ListDiffBranchSpec
 }
@@ -27,7 +26,7 @@ func List(options ListOptions) (*ListResult, error) {
 
 	if options.ListCommitsBranchSpec != nil {
 		resolved := options.ListCommitsBranchSpec.Resolve(options.SrcDir)
-		branches, err := resolved.GetBranches(options.GhostRepo, options.Prefix)
+		branches, err := resolved.GetBranches(options.GhostRepo)
 		if err != nil {
 			return nil, err
 		}
@@ -36,7 +35,7 @@ func List(options ListOptions) (*ListResult, error) {
 
 	if options.ListDiffBranchSpec != nil {
 		resolved := options.ListDiffBranchSpec.Resolve(options.SrcDir)
-		branches, err := resolved.GetBranches(options.GhostRepo, options.Prefix)
+		branches, err := resolved.GetBranches(options.GhostRepo)
 		if err != nil {
 			return nil, err
 		}

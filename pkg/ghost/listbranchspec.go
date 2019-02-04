@@ -5,28 +5,30 @@ import (
 )
 
 type ListCommitsBranchSpec struct {
+	Prefix   string
 	HashFrom string
 	HashTo   string
 }
 
 type ListDiffBranchSpec struct {
+	Prefix   string
 	HashFrom string
 	HashTo   string
 }
 
-func (ls ListCommitsBranchSpec) Resolve(srcDir string) *ListCommitsBranchSpec {
-	var newOptions ListCommitsBranchSpec
+func (ls *ListCommitsBranchSpec) Resolve(srcDir string) *ListCommitsBranchSpec {
+	newSpec := *ls
 	if ls.HashFrom != "" {
-		newOptions.HashFrom = resolveComittishOr(srcDir, ls.HashFrom)
+		newSpec.HashFrom = resolveComittishOr(srcDir, ls.HashFrom)
 	}
 	if ls.HashTo != "" {
-		newOptions.HashTo = resolveComittishOr(srcDir, ls.HashTo)
+		newSpec.HashTo = resolveComittishOr(srcDir, ls.HashTo)
 	}
-	return &newOptions
+	return &newSpec
 }
 
-func (ls *ListCommitsBranchSpec) GetBranches(repo, prefix string) (LocalBaseBranches, error) {
-	branchNames, err := git.ListGhostBranchNames(repo, prefix, ls.HashFrom, ls.HashTo)
+func (ls *ListCommitsBranchSpec) GetBranches(repo string) (LocalBaseBranches, error) {
+	branchNames, err := git.ListGhostBranchNames(repo, ls.Prefix, ls.HashFrom, ls.HashTo)
 	if err != nil {
 		return nil, err
 	}
@@ -40,16 +42,16 @@ func (ls *ListCommitsBranchSpec) GetBranches(repo, prefix string) (LocalBaseBran
 	return branches, nil
 }
 
-func (ls ListDiffBranchSpec) Resolve(srcDir string) *ListDiffBranchSpec {
-	var newOptions ListDiffBranchSpec
+func (ls *ListDiffBranchSpec) Resolve(srcDir string) *ListDiffBranchSpec {
+	newSpec := *ls
 	if ls.HashFrom != "" {
-		newOptions.HashFrom = resolveComittishOr(srcDir, ls.HashFrom)
+		newSpec.HashFrom = resolveComittishOr(srcDir, ls.HashFrom)
 	}
-	return &newOptions
+	return &newSpec
 }
 
-func (ls *ListDiffBranchSpec) GetBranches(repo, prefix string) (LocalModBranches, error) {
-	branchNames, err := git.ListGhostBranchNames(repo, prefix, ls.HashFrom, ls.HashTo)
+func (ls *ListDiffBranchSpec) GetBranches(repo string) (LocalModBranches, error) {
+	branchNames, err := git.ListGhostBranchNames(repo, ls.Prefix, ls.HashFrom, ls.HashTo)
 	if err != nil {
 		return nil, err
 	}

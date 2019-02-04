@@ -69,8 +69,8 @@ func runListCommitsCommand(flags *listFlags) func(cmd *cobra.Command, args []str
 				GhostWorkingDir: globalOpts.ghostWorkDir,
 				GhostRepo:       globalOpts.ghostRepo,
 			},
-			Prefix: globalOpts.ghostPrefix,
 			ListCommitsBranchSpec: &ghost.ListCommitsBranchSpec{
+				Prefix:   globalOpts.ghostPrefix,
 				HashFrom: flags.hashFrom,
 				HashTo:   flags.hashTo,
 			},
@@ -98,8 +98,8 @@ func runListDiffCommand(flags *listFlags) func(cmd *cobra.Command, args []string
 				GhostWorkingDir: globalOpts.ghostWorkDir,
 				GhostRepo:       globalOpts.ghostRepo,
 			},
-			Prefix: globalOpts.ghostPrefix,
 			ListDiffBranchSpec: &ghost.ListDiffBranchSpec{
+				Prefix:   globalOpts.ghostPrefix,
 				HashFrom: flags.hashFrom,
 				HashTo:   flags.hashTo,
 			},
@@ -127,12 +127,13 @@ func runListAllCommand(flags *listFlags) func(cmd *cobra.Command, args []string)
 				GhostWorkingDir: globalOpts.ghostWorkDir,
 				GhostRepo:       globalOpts.ghostRepo,
 			},
-			Prefix: globalOpts.ghostPrefix,
 			ListCommitsBranchSpec: &ghost.ListCommitsBranchSpec{
+				Prefix:   globalOpts.ghostPrefix,
 				HashFrom: flags.hashFrom,
 				HashTo:   flags.hashTo,
 			},
 			ListDiffBranchSpec: &ghost.ListDiffBranchSpec{
+				Prefix:   globalOpts.ghostPrefix,
 				HashFrom: flags.hashFrom,
 				HashTo:   flags.hashTo,
 			},
