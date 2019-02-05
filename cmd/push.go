@@ -40,10 +40,7 @@ func NewPushCommand() *cobra.Command {
 		Short: "push both commits and diff to your ghost repo",
 		Long:  "push both commits([commits-from-hash]...[diff-from-hash]) and diff([diff-from-hash]...current state) to your ghost repo",
 		Args:  cobra.RangeArgs(1, 2),
-		Run: func(cmd *cobra.Command, args []string) {
-			runPushCommitsCommand(cmd, args)
-			runPushDiffCommand(cmd, args[1:])
-		},
+		Run:   runPushAllCommand,
 	})
 	return command
 }
@@ -89,16 +86,16 @@ func runPushCommitsCommand(cmd *cobra.Command, args []string) {
 		log.Error(err)
 		os.Exit(1)
 	}
-	options := ghost.PushCommitsOptions{
+	options := ghost.PushOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		LocalBaseBranchSpec: ghost.LocalBaseBranchSpec{
+		LocalBaseBranchSpec: &ghost.LocalBaseBranchSpec{
 			Prefix:              globalOpts.ghostPrefix,
 			RemoteBaseCommitish: pushArg.commitsFrom,
 			LocalBaseCommitish:  pushArg.commitsTo,
 		},
 	}
 
-	result, err := ghost.PushCommits(options)
+	result, err := ghost.Push(options)
 	if err != nil {
 		log.Error(err)
 		os.Exit(1)
@@ -126,6 +123,7 @@ func newPushDiffArg(args []string) pushDiffArg {
 	}
 	return pushDiffArg
 }
+
 func (arg pushDiffArg) validate() error {
 	if err := nonEmpty("diff-from", arg.diffFrom); err != nil {
 		return err
@@ -142,18 +140,63 @@ func runPushDiffCommand(cmd *cobra.Command, args []string) {
 		log.Error(err)
 		os.Exit(1)
 	}
-	options := ghost.PushDiffOptions{
+	options := ghost.PushOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		LocalModBranchSpec: ghost.LocalModBranchSpec{
+		LocalModBranchSpec: &ghost.LocalModBranchSpec{
 			Prefix:             globalOpts.ghostPrefix,
 			LocalBaseCommitish: pushArg.diffFrom,
 		},
 	}
 
-	result, err := ghost.PushDiff(options)
+	result, err := ghost.Push(options)
 	if err != nil {
 		log.Error(err)
 		os.Exit(1)
+	}
+
+	if result.LocalModBranch != nil {
+		fmt.Printf(result.LocalModBranch.LocalModHash)
+	}
+}
+
+func runPushAllCommand(cmd *cobra.Command, args []string) {
+	pushCommitsArg := newPushCommitsArg(args[0:1])
+	if err := pushCommitsArg.validate(); err != nil {
+		log.Error(err)
+		os.Exit(1)
+	}
+
+	pushDiffArg := newPushDiffArg(args[1:])
+	if err := pushDiffArg.validate(); err != nil {
+		log.Error(err)
+		os.Exit(1)
+	}
+
+	options := ghost.PushOptions{
+		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
+		LocalBaseBranchSpec: &ghost.LocalBaseBranchSpec{
+			Prefix:              globalOpts.ghostPrefix,
+			RemoteBaseCommitish: pushCommitsArg.commitsFrom,
+			LocalBaseCommitish:  pushCommitsArg.commitsTo,
+		},
+		LocalModBranchSpec: &ghost.LocalModBranchSpec{
+			Prefix:             globalOpts.ghostPrefix,
+			LocalBaseCommitish: pushDiffArg.diffFrom,
+		},
+	}
+
+	result, err := ghost.Push(options)
+	if err != nil {
+		log.Error(err)
+		os.Exit(1)
+	}
+
+	if result.LocalBaseBranch != nil {
+		fmt.Printf(
+			"%s %s\n",
+			result.LocalBaseBranch.RemoteBaseCommit,
+			result.LocalBaseBranch.LocalBaseCommit,
+		)
 	}
 
 	if result.LocalModBranch != nil {
