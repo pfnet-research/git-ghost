@@ -147,10 +147,10 @@ func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	dstDir := we.GhostDir
 	srcDir := we.SrcDir
 	resolved, err := bs.Resolve(we.SrcDir)
-	localBaseCommit := resolved.LocalBaseCommitish
 	if err != nil {
 		return nil, err
 	}
+	localBaseCommit := resolved.LocalBaseCommitish
 	tmpFile, err := ioutil.TempFile("", "git-ghost-local-mod")
 	if err != nil {
 		return nil, err

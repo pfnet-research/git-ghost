@@ -68,7 +68,7 @@ func ApplyDiffBundleFile(dir, filepath string) error {
 		exec.Command("git", "-C", dir, "am", filepath),
 	)
 	if err != nil {
-		multierror.Append(errs, err)
+		errs = multierror.Append(errs, err)
 		log.WithFields(util.MergeFields(
 			log.Fields{
 				"srcDir":   dir,
@@ -79,7 +79,7 @@ func ApplyDiffBundleFile(dir, filepath string) error {
 			exec.Command("git", "-C", dir, "am", "--abort"),
 		)
 		if resetErr != nil {
-			multierror.Append(errs, resetErr)
+			errs = multierror.Append(errs, resetErr)
 		}
 	}
 	return errs
