@@ -69,7 +69,7 @@ func pushGhostBranch(branchSpec GhostBranchSpec, workingEnvSpec WorkingEnvSpec) 
 			"branch":    branch.BranchName(),
 			"ghostRepo": workingEnv.GhostRepo,
 		}).Info("skipped pushing existing branch")
-		return nil, nil
+		return branch, nil
 	}
 
 	log.WithFields(log.Fields{
