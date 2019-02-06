@@ -57,20 +57,22 @@ func (res *ListResult) PrettyString() string {
 	if res.LocalBaseBranches != nil {
 		buffer.WriteString("Local Base Branches:\n")
 		buffer.WriteString("\n")
+		buffer.WriteString(fmt.Sprintf("%-40s %-40s\n", "Remote Base", "Local Base"))
 		branches := *res.LocalBaseBranches
 		branches.Sort()
 		for _, branch := range branches {
-			buffer.WriteString(fmt.Sprintf("%s => %s\n", branch.RemoteBaseCommit, branch.LocalBaseCommit))
+			buffer.WriteString(fmt.Sprintf("%s %s\n", branch.RemoteBaseCommit, branch.LocalBaseCommit))
 		}
 		buffer.WriteString("\n")
 	}
 	if res.LocalModBranches != nil {
 		buffer.WriteString("Local Mod Branches:\n")
 		buffer.WriteString("\n")
+		buffer.WriteString(fmt.Sprintf("%-40s %-40s\n", "Local Base", "Local Mod"))
 		branches := *res.LocalModBranches
 		branches.Sort()
 		for _, branch := range branches {
-			buffer.WriteString(fmt.Sprintf("%s -> %s\n", branch.LocalBaseCommit, branch.LocalModHash))
+			buffer.WriteString(fmt.Sprintf("%s %s\n", branch.LocalBaseCommit, branch.LocalModHash))
 		}
 		buffer.WriteString("\n")
 	}
