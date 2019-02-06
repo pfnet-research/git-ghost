@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"git-ghost/pkg/ghost/git"
+	"git-ghost/pkg/ghost/types"
 	"git-ghost/pkg/util"
 
 	log "github.com/Sirupsen/logrus"
@@ -11,16 +12,16 @@ import (
 
 // DeleteOptions represents arg for Delete func
 type DeleteOptions struct {
-	WorkingEnvSpec
-	*ListCommitsBranchSpec
-	*ListDiffBranchSpec
+	types.WorkingEnvSpec
+	*types.ListCommitsBranchSpec
+	*types.ListDiffBranchSpec
 	Dryrun bool
 }
 
 // DeleteResult contains deleted ghost branches in Delete func
 type DeleteResult struct {
-	LocalBaseBranches LocalBaseBranches
-	LocalModBranches  LocalModBranches
+	types.LocalBaseBranches
+	types.LocalModBranches
 }
 
 // Delete deletes ghost branches from ghost repo and returns deleted branches
@@ -47,13 +48,13 @@ func Delete(options DeleteOptions) (*DeleteResult, error) {
 		res.LocalModBranches = branches
 	}
 
-	workingEnv, err := options.WorkingEnvSpec.initialize()
+	workingEnv, err := options.WorkingEnvSpec.Initialize()
 	if err != nil {
 		return nil, err
 	}
-	defer workingEnv.clean()
+	defer workingEnv.Clean()
 
-	deleteBranches := func(branches []GhostBranch, dryrun bool) error {
+	deleteBranches := func(branches []types.GhostBranch, dryrun bool) error {
 		var branchNames []string
 		for _, branch := range branches {
 			branchNames = append(branchNames, branch.BranchName())

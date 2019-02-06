@@ -2,6 +2,7 @@ package ghost
 
 import (
 	"git-ghost/pkg/ghost/git"
+	"git-ghost/pkg/ghost/types"
 	"git-ghost/pkg/util"
 
 	log "github.com/Sirupsen/logrus"
@@ -9,15 +10,15 @@ import (
 
 // PushOptions represents arg for Push func
 type PushOptions struct {
-	WorkingEnvSpec
-	*LocalBaseBranchSpec
-	*LocalModBranchSpec
+	types.WorkingEnvSpec
+	*types.LocalBaseBranchSpec
+	*types.LocalModBranchSpec
 }
 
 // PushResult contains resultant ghost branches of Push func
 type PushResult struct {
-	*LocalBaseBranch
-	*LocalModBranch
+	*types.LocalBaseBranch
+	*types.LocalModBranch
 }
 
 // Push pushes create ghost branches and push them to remote ghost repository
@@ -30,7 +31,7 @@ func Push(options PushOptions) (*PushResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		localBaseBranch, _ := branch.(*LocalBaseBranch)
+		localBaseBranch, _ := branch.(*types.LocalBaseBranch)
 		result.LocalBaseBranch = localBaseBranch
 	}
 
@@ -39,19 +40,19 @@ func Push(options PushOptions) (*PushResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		localModBranch, _ := branch.(*LocalModBranch)
+		localModBranch, _ := branch.(*types.LocalModBranch)
 		result.LocalModBranch = localModBranch
 	}
 
 	return &result, nil
 }
 
-func pushGhostBranch(branchSpec GhostBranchSpec, workingEnvSpec WorkingEnvSpec) (GhostBranch, error) {
-	workingEnv, err := workingEnvSpec.initialize()
+func pushGhostBranch(branchSpec types.GhostBranchSpec, workingEnvSpec types.WorkingEnvSpec) (types.GhostBranch, error) {
+	workingEnv, err := workingEnvSpec.Initialize()
 	if err != nil {
 		return nil, err
 	}
-	defer workingEnv.clean()
+	defer workingEnv.Clean()
 	dstDir := workingEnv.GhostDir
 	branch, err := branchSpec.CreateBranch(*workingEnv)
 	if err != nil {

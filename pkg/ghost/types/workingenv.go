@@ -1,4 +1,4 @@
-package ghost
+package types
 
 import (
 	"git-ghost/pkg/ghost/git"
@@ -24,7 +24,7 @@ type WorkingEnv struct {
 	GhostDir string
 }
 
-func (weSpec WorkingEnvSpec) initialize() (*WorkingEnv, error) {
+func (weSpec WorkingEnvSpec) Initialize() (*WorkingEnv, error) {
 	ghostDir, err := ioutil.TempDir(weSpec.GhostWorkingDir, "git-ghost-")
 	if err != nil {
 		return nil, err
@@ -44,6 +44,6 @@ func (weSpec WorkingEnvSpec) initialize() (*WorkingEnv, error) {
 	}, nil
 }
 
-func (weSpec WorkingEnv) clean() {
+func (weSpec WorkingEnv) Clean() {
 	os.RemoveAll(weSpec.GhostDir)
 }

@@ -1,6 +1,7 @@
 package ghost
 
 import (
+	"git-ghost/pkg/ghost/types"
 	"git-ghost/pkg/util"
 	"io"
 
@@ -9,9 +10,9 @@ import (
 
 // ShowOptions represents arg for Pull func
 type ShowOptions struct {
-	WorkingEnvSpec
-	*LocalBaseBranchSpec
-	*PullableLocalModBranchSpec
+	types.WorkingEnvSpec
+	*types.LocalBaseBranchSpec
+	*types.PullableLocalModBranchSpec
 	// if you want to consume and transform the output of `ghost.Show()`,
 	// Please use `io.Pipe()` as below,
 	// ```
@@ -22,7 +23,7 @@ type ShowOptions struct {
 	Writer io.Writer
 }
 
-func pullAndshow(branchSpec PullableGhostBranchSpec, we WorkingEnv, writer io.Writer) error {
+func pullAndshow(branchSpec types.PullableGhostBranchSpec, we types.WorkingEnv, writer io.Writer) error {
 	branch, err := branchSpec.PullBranch(we)
 	if err != nil {
 		return err
@@ -38,11 +39,11 @@ func Show(options ShowOptions) error {
 	log.WithFields(util.ToFields(options)).Debug("pull command with")
 
 	if options.LocalBaseBranchSpec != nil {
-		we, err := options.WorkingEnvSpec.initialize()
+		we, err := options.WorkingEnvSpec.Initialize()
 		if err != nil {
 			return err
 		}
-		defer we.clean()
+		defer we.Clean()
 		err = pullAndshow(options.LocalBaseBranchSpec, *we, options.Writer)
 		if err != nil {
 			return err
@@ -50,11 +51,11 @@ func Show(options ShowOptions) error {
 	}
 
 	if options.PullableLocalModBranchSpec != nil {
-		we, err := options.WorkingEnvSpec.initialize()
+		we, err := options.WorkingEnvSpec.Initialize()
 		if err != nil {
 			return err
 		}
-		defer we.clean()
+		defer we.Clean()
 		return pullAndshow(options.PullableLocalModBranchSpec, *we, options.Writer)
 	}
 
