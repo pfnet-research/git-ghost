@@ -7,17 +7,20 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+// PushOptions represents arg for Push func
 type PushOptions struct {
 	WorkingEnvSpec
 	*LocalBaseBranchSpec
 	*LocalModBranchSpec
 }
 
+// PushResult contains resultant ghost branches of Push func
 type PushResult struct {
 	*LocalBaseBranch
 	*LocalModBranch
 }
 
+// Push pushes create ghost branches and push them to remote ghost repository
 func Push(options PushOptions) (*PushResult, error) {
 	log.WithFields(util.ToFields(options)).Debug("push command with")
 

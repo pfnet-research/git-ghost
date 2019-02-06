@@ -10,4 +10,8 @@ $ cd git-ghost
 
 # build
 $ make build
+
+# see godoc
+$ go get golang.org/x/tools/cmd/godoc
+$ godoc -http=:6060  # access http://localhost:6060 in browser
 ```

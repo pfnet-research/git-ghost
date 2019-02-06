@@ -9,6 +9,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+// DeleteOptions represents arg for Delete func
 type DeleteOptions struct {
 	WorkingEnvSpec
 	*ListCommitsBranchSpec
@@ -16,11 +17,13 @@ type DeleteOptions struct {
 	Dryrun bool
 }
 
+// DeleteResult contains deleted ghost branches in Delete func
 type DeleteResult struct {
 	LocalBaseBranches LocalBaseBranches
 	LocalModBranches  LocalModBranches
 }
 
+// Delete deletes ghost branches from ghost repo and returns deleted branches
 func Delete(options DeleteOptions) (*DeleteResult, error) {
 	log.WithFields(util.ToFields(options)).Debug("delete command with")
 
@@ -83,6 +86,7 @@ func Delete(options DeleteOptions) (*DeleteResult, error) {
 	return &res, nil
 }
 
+// PrettyString pretty prints ListResult
 func (res *DeleteResult) PrettyString() string {
 	// TODO: Make it prettier
 	var buffer bytes.Buffer

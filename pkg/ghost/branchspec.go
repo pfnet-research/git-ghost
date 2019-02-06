@@ -11,10 +11,19 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+// GhostBranchSpec is an interface
+//
+// GhostBranchSpec is a specification for creating ghost branch
 type GhostBranchSpec interface {
+	// CreateBranch create a ghost branch on WorkingEnv and returns a GhostBranch object
 	CreateBranch(we WorkingEnv) (GhostBranch, error)
 }
+
+// PullableGhostBranchSpec is an interface
+//
+// PullableGhostBranchSpec is a specification for pulling ghost branch from ghost repo
 type PullableGhostBranchSpec interface {
+	// PullBranch pulls a ghost branch on from ghost repo in WorkingEnv and returns a GhostBranch object
 	PullBranch(we WorkingEnv) (GhostBranch, error)
 }
 
@@ -24,22 +33,26 @@ var _ GhostBranchSpec = LocalModBranchSpec{}
 var _ PullableGhostBranchSpec = LocalBaseBranchSpec{}
 var _ PullableGhostBranchSpec = PullableLocalModBranchSpec{}
 
+// LocalBaseBranchSpec is a spec for creating local base branch
 type LocalBaseBranchSpec struct {
 	Prefix              string
 	RemoteBaseCommitish string
 	LocalBaseCommitish  string
 }
 
+// LocalModBranchSpec is a spec for creating local mod branch
 type LocalModBranchSpec struct {
 	Prefix             string
 	LocalBaseCommitish string
 }
 
+// PullableLocalModBranchSpec is a spec for pulling local base branch
 type PullableLocalModBranchSpec struct {
 	LocalModBranchSpec
 	LocalModHash string
 }
 
+// Resolve resolves comittish in LocalModBranchSpec as full commit hash values
 func (bs LocalBaseBranchSpec) Resolve(srcDir string) (*LocalBaseBranchSpec, error) {
 	err := git.ValidateComittish(srcDir, bs.RemoteBaseCommitish)
 	if err != nil {
@@ -59,6 +72,7 @@ func (bs LocalBaseBranchSpec) Resolve(srcDir string) (*LocalBaseBranchSpec, erro
 	return branch, nil
 }
 
+// PullBranch pulls a ghost branch on from ghost repo in WorkingEnv and returns a GhostBranch object
 func (bs LocalBaseBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
 	resolved, err := bs.Resolve(we.SrcDir)
 	if err != nil {
@@ -85,6 +99,7 @@ func (bs LocalBaseBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
 	return branch, nil
 }
 
+// CreateBranch create a ghost branch on WorkingEnv and returns a GhostBranch object
 func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	dstDir := we.GhostDir
 	srcDir := we.SrcDir
@@ -131,6 +146,7 @@ func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	return &branch, nil
 }
 
+// Resolve resolves comittish in LocalModBranchSpec as full commit hash values
 func (bs LocalModBranchSpec) Resolve(srcDir string) (*LocalModBranchSpec, error) {
 	err := git.ValidateComittish(srcDir, bs.LocalBaseCommitish)
 	if err != nil {
@@ -143,6 +159,7 @@ func (bs LocalModBranchSpec) Resolve(srcDir string) (*LocalModBranchSpec, error)
 	}, nil
 }
 
+// CreateBranch create a ghost branch on WorkingEnv and returns a GhostBranch object
 func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	dstDir := we.GhostDir
 	srcDir := we.SrcDir
@@ -196,6 +213,7 @@ func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	return &branch, nil
 }
 
+// PullBranch pulls a ghost branch on from ghost repo in WorkingEnv and returns a GhostBranch object
 func (bs PullableLocalModBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
 	resolved, err := bs.Resolve(we.SrcDir)
 	if err != nil {

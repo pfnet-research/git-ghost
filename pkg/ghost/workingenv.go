@@ -8,12 +8,17 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+// WorkingEnvSpec abstract an environment git-ghost works with
 type WorkingEnvSpec struct {
-	SrcDir          string
+	// SrcDir is local git directory
+	SrcDir string
+	// GhostWorkingDir is a root directory which git-ghost creates temporary directories
 	GhostWorkingDir string
-	GhostRepo       string
+	// GhostRepo is a repository url git-ghost works with
+	GhostRepo string
 }
 
+// WorkingEnv is initialized environment containing temporary local ghost repository
 type WorkingEnv struct {
 	WorkingEnvSpec
 	GhostDir string
