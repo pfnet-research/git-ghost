@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"git-ghost/pkg/ghost"
+	"git-ghost/pkg/ghost/types"
 	"os"
 
 	log "github.com/Sirupsen/logrus"
@@ -68,12 +69,12 @@ func runDeleteCommitsCommand(flags *deleteFlags) func(cmd *cobra.Command, args [
 			os.Exit(1)
 		}
 		opts := ghost.DeleteOptions{
-			WorkingEnvSpec: ghost.WorkingEnvSpec{
+			WorkingEnvSpec: types.WorkingEnvSpec{
 				SrcDir:          globalOpts.srcDir,
 				GhostWorkingDir: globalOpts.ghostWorkDir,
 				GhostRepo:       globalOpts.ghostRepo,
 			},
-			ListCommitsBranchSpec: &ghost.ListCommitsBranchSpec{
+			ListCommitsBranchSpec: &types.ListCommitsBranchSpec{
 				Prefix:   globalOpts.ghostPrefix,
 				HashFrom: flags.hashFrom,
 				HashTo:   flags.hashTo,
@@ -98,12 +99,12 @@ func runDeleteDiffCommand(flags *deleteFlags) func(cmd *cobra.Command, args []st
 			os.Exit(1)
 		}
 		opts := ghost.DeleteOptions{
-			WorkingEnvSpec: ghost.WorkingEnvSpec{
+			WorkingEnvSpec: types.WorkingEnvSpec{
 				SrcDir:          globalOpts.srcDir,
 				GhostWorkingDir: globalOpts.ghostWorkDir,
 				GhostRepo:       globalOpts.ghostRepo,
 			},
-			ListDiffBranchSpec: &ghost.ListDiffBranchSpec{
+			ListDiffBranchSpec: &types.ListDiffBranchSpec{
 				Prefix:   globalOpts.ghostPrefix,
 				HashFrom: flags.hashFrom,
 				HashTo:   flags.hashTo,
@@ -128,17 +129,17 @@ func runDeleteAllCommand(flags *deleteFlags) func(cmd *cobra.Command, args []str
 			os.Exit(1)
 		}
 		opts := ghost.DeleteOptions{
-			WorkingEnvSpec: ghost.WorkingEnvSpec{
+			WorkingEnvSpec: types.WorkingEnvSpec{
 				SrcDir:          globalOpts.srcDir,
 				GhostWorkingDir: globalOpts.ghostWorkDir,
 				GhostRepo:       globalOpts.ghostRepo,
 			},
-			ListCommitsBranchSpec: &ghost.ListCommitsBranchSpec{
+			ListCommitsBranchSpec: &types.ListCommitsBranchSpec{
 				Prefix:   globalOpts.ghostPrefix,
 				HashFrom: flags.hashFrom,
 				HashTo:   flags.hashTo,
 			},
-			ListDiffBranchSpec: &ghost.ListDiffBranchSpec{
+			ListDiffBranchSpec: &types.ListDiffBranchSpec{
 				Prefix:   globalOpts.ghostPrefix,
 				HashFrom: flags.hashFrom,
 				HashTo:   flags.hashTo,

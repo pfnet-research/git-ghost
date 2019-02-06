@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"git-ghost/pkg/ghost"
+	"git-ghost/pkg/ghost/types"
 	"os"
 
 	log "github.com/Sirupsen/logrus"
@@ -88,7 +89,7 @@ func runPushCommitsCommand(cmd *cobra.Command, args []string) {
 	}
 	options := ghost.PushOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		LocalBaseBranchSpec: &ghost.LocalBaseBranchSpec{
+		LocalBaseBranchSpec: &types.LocalBaseBranchSpec{
 			Prefix:              globalOpts.ghostPrefix,
 			RemoteBaseCommitish: pushArg.commitsFrom,
 			LocalBaseCommitish:  pushArg.commitsTo,
@@ -142,7 +143,7 @@ func runPushDiffCommand(cmd *cobra.Command, args []string) {
 	}
 	options := ghost.PushOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		LocalModBranchSpec: &ghost.LocalModBranchSpec{
+		LocalModBranchSpec: &types.LocalModBranchSpec{
 			Prefix:             globalOpts.ghostPrefix,
 			LocalBaseCommitish: pushArg.diffFrom,
 		},
@@ -174,12 +175,12 @@ func runPushAllCommand(cmd *cobra.Command, args []string) {
 
 	options := ghost.PushOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		LocalBaseBranchSpec: &ghost.LocalBaseBranchSpec{
+		LocalBaseBranchSpec: &types.LocalBaseBranchSpec{
 			Prefix:              globalOpts.ghostPrefix,
 			RemoteBaseCommitish: pushCommitsArg.commitsFrom,
 			LocalBaseCommitish:  pushCommitsArg.commitsTo,
 		},
-		LocalModBranchSpec: &ghost.LocalModBranchSpec{
+		LocalModBranchSpec: &types.LocalModBranchSpec{
 			Prefix:             globalOpts.ghostPrefix,
 			LocalBaseCommitish: pushDiffArg.diffFrom,
 		},

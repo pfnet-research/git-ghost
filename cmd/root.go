@@ -3,8 +3,8 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"git-ghost/pkg/ghost"
 	"git-ghost/pkg/ghost/git"
+	"git-ghost/pkg/ghost/types"
 	"os"
 
 	log "github.com/Sirupsen/logrus"
@@ -19,8 +19,8 @@ type globalFlags struct {
 	verbose      bool
 }
 
-func (gf globalFlags) WorkingEnvSpec() ghost.WorkingEnvSpec {
-	return ghost.WorkingEnvSpec{
+func (gf globalFlags) WorkingEnvSpec() types.WorkingEnvSpec {
+	return types.WorkingEnvSpec{
 		SrcDir:          gf.srcDir,
 		GhostWorkingDir: gf.ghostWorkDir,
 		GhostRepo:       gf.ghostRepo,

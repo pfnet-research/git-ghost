@@ -1,4 +1,4 @@
-package ghost
+package types
 
 import (
 	"git-ghost/pkg/ghost/git"

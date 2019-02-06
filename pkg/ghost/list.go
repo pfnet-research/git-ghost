@@ -3,6 +3,7 @@ package ghost
 import (
 	"bytes"
 	"fmt"
+	"git-ghost/pkg/ghost/types"
 	"git-ghost/pkg/util"
 
 	log "github.com/Sirupsen/logrus"
@@ -10,16 +11,16 @@ import (
 
 // ListOptions represents arg for List func
 type ListOptions struct {
-	WorkingEnvSpec
-	*ListCommitsBranchSpec
-	*ListDiffBranchSpec
+	types.WorkingEnvSpec
+	*types.ListCommitsBranchSpec
+	*types.ListDiffBranchSpec
 }
 
 // ListResult contains results of List func
 
 type ListResult struct {
-	LocalBaseBranches LocalBaseBranches
-	LocalModBranches  LocalModBranches
+	types.LocalBaseBranches
+	types.LocalModBranches
 }
 
 // List returns ghost branches list per ghost branch type

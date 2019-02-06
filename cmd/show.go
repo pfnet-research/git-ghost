@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"git-ghost/pkg/ghost"
+	"git-ghost/pkg/ghost/types"
 	"os"
 
 	log "github.com/Sirupsen/logrus"
@@ -88,7 +89,7 @@ func runShowCommitsCommand(cmd *cobra.Command, args []string) {
 
 	options := ghost.ShowOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		LocalBaseBranchSpec: &ghost.LocalBaseBranchSpec{
+		LocalBaseBranchSpec: &types.LocalBaseBranchSpec{
 			Prefix:              globalOpts.ghostPrefix,
 			RemoteBaseCommitish: arg.commitsFrom,
 			LocalBaseCommitish:  arg.commitsTo,
@@ -147,8 +148,8 @@ func runShowDiffCommand(cmd *cobra.Command, args []string) {
 
 	options := ghost.ShowOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		PullableLocalModBranchSpec: &ghost.PullableLocalModBranchSpec{
-			LocalModBranchSpec: ghost.LocalModBranchSpec{
+		PullableLocalModBranchSpec: &types.PullableLocalModBranchSpec{
+			LocalModBranchSpec: types.LocalModBranchSpec{
 				Prefix:             globalOpts.ghostPrefix,
 				LocalBaseCommitish: arg.diffFrom,
 			},
@@ -191,13 +192,13 @@ func runShowAllCommand(cmd *cobra.Command, args []string) {
 
 	options := ghost.ShowOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		LocalBaseBranchSpec: &ghost.LocalBaseBranchSpec{
+		LocalBaseBranchSpec: &types.LocalBaseBranchSpec{
 			Prefix:              globalOpts.ghostPrefix,
 			RemoteBaseCommitish: showCommitsArg.commitsFrom,
 			LocalBaseCommitish:  showCommitsArg.commitsTo,
 		},
-		PullableLocalModBranchSpec: &ghost.PullableLocalModBranchSpec{
-			LocalModBranchSpec: ghost.LocalModBranchSpec{
+		PullableLocalModBranchSpec: &types.PullableLocalModBranchSpec{
+			LocalModBranchSpec: types.LocalModBranchSpec{
 				Prefix:             globalOpts.ghostPrefix,
 				LocalBaseCommitish: showDiffArg.diffFrom,
 			},

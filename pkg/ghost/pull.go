@@ -1,6 +1,7 @@
 package ghost
 
 import (
+	"git-ghost/pkg/ghost/types"
 	"git-ghost/pkg/util"
 
 	log "github.com/Sirupsen/logrus"
@@ -8,12 +9,12 @@ import (
 
 // PullOptions represents arg for Pull func
 type PullOptions struct {
-	WorkingEnvSpec
-	*LocalBaseBranchSpec
-	*PullableLocalModBranchSpec
+	types.WorkingEnvSpec
+	*types.LocalBaseBranchSpec
+	*types.PullableLocalModBranchSpec
 }
 
-func pullAndApply(spec PullableGhostBranchSpec, we WorkingEnv) error {
+func pullAndApply(spec types.PullableGhostBranchSpec, we types.WorkingEnv) error {
 	pulledBranch, err := spec.PullBranch(we)
 	if err != nil {
 		return err
@@ -24,11 +25,11 @@ func pullAndApply(spec PullableGhostBranchSpec, we WorkingEnv) error {
 // Pull pulls ghost branches and apply to workind directory
 func Pull(options PullOptions) error {
 	log.WithFields(util.ToFields(options)).Debug("pull command with")
-	we, err := options.WorkingEnvSpec.initialize()
+	we, err := options.WorkingEnvSpec.Initialize()
 	if err != nil {
 		return err
 	}
-	defer we.clean()
+	defer we.Clean()
 
 	if options.LocalBaseBranchSpec != nil {
 		err := pullAndApply(*options.LocalBaseBranchSpec, *we)
