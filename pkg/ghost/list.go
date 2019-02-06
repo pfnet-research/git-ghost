@@ -8,17 +8,21 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+// ListOptions represents arg for List func
 type ListOptions struct {
 	WorkingEnvSpec
 	*ListCommitsBranchSpec
 	*ListDiffBranchSpec
 }
 
+// ListResult contains results of List func
+
 type ListResult struct {
 	LocalBaseBranches LocalBaseBranches
 	LocalModBranches  LocalModBranches
 }
 
+// List returns ghost branches list per ghost branch type
 func List(options ListOptions) (*ListResult, error) {
 	log.WithFields(util.ToFields(options)).Debug("list command with")
 
@@ -48,6 +52,7 @@ func List(options ListOptions) (*ListResult, error) {
 	return &res, nil
 }
 
+// PrettyString pretty prints ListResult
 func (res *ListResult) PrettyString() string {
 	// TODO: Make it prettier
 	var buffer bytes.Buffer

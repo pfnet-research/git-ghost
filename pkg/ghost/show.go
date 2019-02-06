@@ -7,6 +7,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+// ShowOptions represents arg for Pull func
 type ShowOptions struct {
 	WorkingEnvSpec
 	*LocalBaseBranchSpec
@@ -32,6 +33,7 @@ func pullAndshow(branchSpec PullableGhostBranchSpec, we WorkingEnv, writer io.Wr
 	return nil
 }
 
+// Show writes ghost branches contents to option.Writer
 func Show(options ShowOptions) error {
 	log.WithFields(util.ToFields(options)).Debug("pull command with")
 

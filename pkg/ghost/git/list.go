@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+// ListGhostBranchNames returns all ghost branchnames for fromComittish..toComittish.
+// You can use wildcard in fromComittish and toComittish
 func ListGhostBranchNames(repo, prefix, fromComittish, toComittish string) ([]string, error) {
 	fromPattern := "*"
 	toPattern := "*"

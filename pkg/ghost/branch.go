@@ -14,10 +14,17 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+// GhostBranch is an interface representing a ghost branch.
+//
+// It is created from GhostBranchSpec/PullableGhostBranchSpec
 type GhostBranch interface {
+	// BranchName returns its full branch name on git repository
 	BranchName() string
+	// FileName returns a file name contained in the GhostBranch
 	FileName() string
+	// Show writes contents of this ghost branch on passed working env to writer
 	Show(we WorkingEnv, writer io.Writer) error
+	// Apply applies contents(diff or patch) of this ghost branch on passed working env
 	Apply(we WorkingEnv) error
 }
 
@@ -25,40 +32,59 @@ type GhostBranch interface {
 var _ GhostBranch = LocalBaseBranch{}
 var _ GhostBranch = LocalModBranch{}
 
+// LocalBaseBranch represents a local base branch
+//
+// This contains patches for RemoteBaseCommit..LocalBaseCommit
 type LocalBaseBranch struct {
 	Prefix           string
 	RemoteBaseCommit string
 	LocalBaseCommit  string
 }
 
+// LocalModBranch represents a local mod branch
+//
+// This contains diff
+// - whose content hash value is LocalModHash
+// - which is generated on LocalBaseCommit
 type LocalModBranch struct {
-	Prefix          string
+	// Prefix is a prefix of branch name
+	Prefix string
+	// LocalBaseCommit is full commit hash to which this local mod branch's diff contains
 	LocalBaseCommit string
-	LocalModHash    string
+	// LocalModHash is a hash value of its diff
+	LocalModHash string
 }
 
+// LocalBaseBranches is an alias for []LocalBaseBranch
 type LocalBaseBranches []LocalBaseBranch
+
+// LocalModBranches is an alias for []LocalModBranch
 type LocalModBranches []LocalModBranch
 
 var localBaseBranchNamePattern = regexp.MustCompile(`^([a-z0-9]+)/([a-f0-9]+)-([a-f0-9]+)$`)
 var localModBranchNamePattern = regexp.MustCompile(`^([a-z0-9]+)/([a-f0-9]+)/([a-f0-9]+)$`)
 
+// BranchName returns its full branch name on git repository
 func (b LocalBaseBranch) BranchName() string {
 	return fmt.Sprintf("%s/%s-%s", b.Prefix, b.RemoteBaseCommit, b.LocalBaseCommit)
 }
 
+// FileName returns a file name containing this GhostBranch
 func (b LocalBaseBranch) FileName() string {
 	return "commits.patch"
 }
 
+// BranchName returns its full branch name on git repository
 func (b LocalModBranch) BranchName() string {
 	return fmt.Sprintf("%s/%s/%s", b.Prefix, b.LocalBaseCommit, b.LocalModHash)
 }
 
+// FileName returns a file name containing this GhostBranch
 func (b LocalModBranch) FileName() string {
 	return "local-mod.patch"
 }
 
+// CreateGhostBranchByName instantiates GhostBranch object from branchname
 func CreateGhostBranchByName(branchName string) GhostBranch {
 	m := localBaseBranchNamePattern.FindStringSubmatch(branchName)
 	if len(m) > 0 {
@@ -79,6 +105,7 @@ func CreateGhostBranchByName(branchName string) GhostBranch {
 	return nil
 }
 
+// Sort sorts passed branches in lexicographic order of BranchName()
 func (branches LocalBaseBranches) Sort() {
 	sortFunc := func(i, j int) bool {
 		return branches[i].BranchName() < branches[j].BranchName()
@@ -86,6 +113,7 @@ func (branches LocalBaseBranches) Sort() {
 	sort.Slice(branches, sortFunc)
 }
 
+// AsGhostBranches just lifts item type to GhostBranch
 func (branches LocalBaseBranches) AsGhostBranches() []GhostBranch {
 	ghostBranches := make([]GhostBranch, len(branches))
 	for i, branch := range branches {
@@ -94,6 +122,7 @@ func (branches LocalBaseBranches) AsGhostBranches() []GhostBranch {
 	return ghostBranches
 }
 
+// Sort sorts passed branches in lexicographic order of BranchName()
 func (branches LocalModBranches) Sort() {
 	sortFunc := func(i, j int) bool {
 		return branches[i].BranchName() < branches[j].BranchName()
@@ -101,6 +130,7 @@ func (branches LocalModBranches) Sort() {
 	sort.Slice(branches, sortFunc)
 }
 
+// AsGhostBranches just lifts item type to GhostBranch
 func (branches LocalModBranches) AsGhostBranches() []GhostBranch {
 	ghostBranches := make([]GhostBranch, len(branches))
 	for i, branch := range branches {
@@ -155,10 +185,12 @@ func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string) error {
 	}
 }
 
+// Show writes contents of this ghost branch on passed working env to writer
 func (bs LocalBaseBranch) Show(we WorkingEnv, writer io.Writer) error {
 	return show(bs, we, writer)
 }
 
+// Apply applies contents(diff or patch) of this ghost branch on passed working env
 func (bs LocalBaseBranch) Apply(we WorkingEnv) error {
 	err := apply(bs, we, bs.RemoteBaseCommit)
 	if err != nil {
@@ -167,10 +199,12 @@ func (bs LocalBaseBranch) Apply(we WorkingEnv) error {
 	return nil
 }
 
+// Show writes contents of this ghost branch on passed working env to writer
 func (bs LocalModBranch) Show(we WorkingEnv, writer io.Writer) error {
 	return show(bs, we, writer)
 }
 
+// Apply applies contents(diff or patch) of this ghost branch on passed working env
 func (bs LocalModBranch) Apply(we WorkingEnv) error {
 	err := apply(bs, we, bs.LocalBaseCommit)
 	if err != nil {

@@ -4,18 +4,26 @@ import (
 	"git-ghost/pkg/ghost/git"
 )
 
+// ListCommitsBranchSpec is spec for list commits branch
 type ListCommitsBranchSpec struct {
-	Prefix   string
+	// Prefix is a prefix of branch name
+	Prefix string
+	// HashFrom is comittish value to list HashFrom..HashTo
 	HashFrom string
-	HashTo   string
+	// HashTo is a comittish value to list HashFrom..HashTo
+	HashTo string
 }
 
+// ListCommitsBranchSpec is spec for list diff branch
 type ListDiffBranchSpec struct {
-	Prefix   string
+	Prefix string
+	// HashFrom is comittish value to list HashFrom..HashTo
 	HashFrom string
-	HashTo   string
+	// HashTo is a comittish value to list HashFrom..HashTo
+	HashTo string
 }
 
+// Resolve resolves commitish values in ListCommitsBranchSpec as full commit hash
 func (ls *ListCommitsBranchSpec) Resolve(srcDir string) *ListCommitsBranchSpec {
 	newSpec := *ls
 	if ls.HashFrom != "" {
@@ -27,6 +35,7 @@ func (ls *ListCommitsBranchSpec) Resolve(srcDir string) *ListCommitsBranchSpec {
 	return &newSpec
 }
 
+// GetBranches returns LocalBaseBranches from spec
 func (ls *ListCommitsBranchSpec) GetBranches(repo string) (LocalBaseBranches, error) {
 	branchNames, err := git.ListGhostBranchNames(repo, ls.Prefix, ls.HashFrom, ls.HashTo)
 	if err != nil {
@@ -42,6 +51,7 @@ func (ls *ListCommitsBranchSpec) GetBranches(repo string) (LocalBaseBranches, er
 	return branches, nil
 }
 
+// Resolve resolves commitish values in ListDiffBranchSpec as full commit hash
 func (ls *ListDiffBranchSpec) Resolve(srcDir string) *ListDiffBranchSpec {
 	newSpec := *ls
 	if ls.HashFrom != "" {
@@ -50,6 +60,7 @@ func (ls *ListDiffBranchSpec) Resolve(srcDir string) *ListDiffBranchSpec {
 	return &newSpec
 }
 
+// GetBranches returns LocalModBranches from spec
 func (ls *ListDiffBranchSpec) GetBranches(repo string) (LocalModBranches, error) {
 	branchNames, err := git.ListGhostBranchNames(repo, ls.Prefix, ls.HashFrom, ls.HashTo)
 	if err != nil {

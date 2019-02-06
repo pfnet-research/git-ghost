@@ -13,6 +13,7 @@ import (
 	multierror "github.com/hashicorp/go-multierror"
 )
 
+// CreateDiffBundleFile creates patches for fromComittish..toComittish and save it to filepath
 func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) error {
 	f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
@@ -62,6 +63,7 @@ func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) erro
 	return nil
 }
 
+// ApplyDiffBundleFile apply a patch file created in CreateDiffBundleFile
 func ApplyDiffBundleFile(dir, filepath string) error {
 	var errs error
 	err := util.JustRunCmd(
@@ -85,6 +87,7 @@ func ApplyDiffBundleFile(dir, filepath string) error {
 	return errs
 }
 
+// CreateDiffPatchFile creates a diff from comittish to current working state of `dir` and save it to filepath
 func CreateDiffPatchFile(dir, filepath, comittish string) error {
 	f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
@@ -131,6 +134,7 @@ func CreateDiffPatchFile(dir, filepath, comittish string) error {
 	return nil
 }
 
+// ApplyDiffPatchFile apply a diff file created by CreateDiffPatchFile
 func ApplyDiffPatchFile(dir, filepath string) error {
 	return util.JustRunCmd(
 		exec.Command("git", "-C", dir, "apply", filepath),

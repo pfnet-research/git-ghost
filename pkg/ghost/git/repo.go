@@ -10,6 +10,8 @@ var (
 	ORIGIN string = "origin"
 )
 
+// InitializeGitDir clone repo to dir.
+// if you set empty branchname, it will checkout default branch of repo.
 func InitializeGitDir(dir, repo, branch string) error {
 	args := []string{"clone", "-q", "-o", ORIGIN}
 	if branch != "" {
@@ -20,6 +22,7 @@ func InitializeGitDir(dir, repo, branch string) error {
 	return util.JustRunCmd(cmd)
 }
 
+// CommitAndPush commits and push to its origin
 func CommitAndPush(dir, filename, message, comittish string) error {
 	err := CommitFile(dir, filename, message)
 	if err != nil {
@@ -32,6 +35,7 @@ func CommitAndPush(dir, filename, message, comittish string) error {
 	return nil
 }
 
+// CommitFile commits a file
 func CommitFile(dir, filename, message string) error {
 	err := util.JustRunCmd(
 		exec.Command("git", "-C", dir, "add", filename),
@@ -44,6 +48,7 @@ func CommitFile(dir, filename, message string) error {
 	)
 }
 
+// DeleteRemoteBranches delete branches from its origin
 func DeleteRemoteBranches(dir string, branchNames ...string) error {
 	args := []string{"-C", dir, "push", "origin"}
 	for _, name := range branchNames {
@@ -54,6 +59,7 @@ func DeleteRemoteBranches(dir string, branchNames ...string) error {
 	)
 }
 
+// Push pushes current HEAD to its origin
 func Push(dir string, comittishes ...string) error {
 	args := []string{"-C", dir, "push", "origin"}
 	args = append(args, comittishes...)
@@ -62,18 +68,21 @@ func Push(dir string, comittishes ...string) error {
 	)
 }
 
+// Pull pulls comittish from its origin
 func Pull(dir, comittish string) error {
 	return util.JustRunCmd(
 		exec.Command("git", "-C", dir, "pull", "origin", comittish),
 	)
 }
 
+// CreateOrphanBranch creates an orphan branch on dir
 func CreateOrphanBranch(dir, branch string) error {
 	return util.JustRunCmd(
 		exec.Command("git", "-C", dir, "checkout", "--orphan", branch),
 	)
 }
 
+// ResetHardToBranch reset dir to branch with --hard option
 func ResetHardToBranch(dir, branch string) error {
 	return util.JustRunCmd(
 		exec.Command("git", "-C", dir, "reset", "--hard", branch),

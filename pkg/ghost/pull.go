@@ -6,6 +6,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+// PullOptions represents arg for Pull func
 type PullOptions struct {
 	WorkingEnvSpec
 	*LocalBaseBranchSpec
@@ -20,6 +21,7 @@ func pullAndApply(spec PullableGhostBranchSpec, we WorkingEnv) error {
 	return pulledBranch.Apply(we)
 }
 
+// Pull pulls ghost branches and apply to workind directory
 func Pull(options PullOptions) error {
 	log.WithFields(util.ToFields(options)).Debug("pull command with")
 	we, err := options.WorkingEnvSpec.initialize()
