@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"git-ghost/pkg/ghost/types"
 	"git-ghost/pkg/util"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -19,8 +20,8 @@ type ListOptions struct {
 // ListResult contains results of List func
 
 type ListResult struct {
-	types.LocalBaseBranches
-	types.LocalModBranches
+	*types.LocalBaseBranches
+	*types.LocalModBranches
 }
 
 // List returns ghost branches list per ghost branch type
@@ -35,7 +36,7 @@ func List(options ListOptions) (*ListResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		res.LocalBaseBranches = branches
+		res.LocalBaseBranches = &branches
 	}
 
 	if options.ListDiffBranchSpec != nil {
@@ -44,38 +45,85 @@ func List(options ListOptions) (*ListResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		res.LocalModBranches = branches
+		res.LocalModBranches = &branches
 	}
-
-	res.LocalBaseBranches.Sort()
-	res.LocalModBranches.Sort()
 
 	return &res, nil
 }
 
 // PrettyString pretty prints ListResult
-func (res *ListResult) PrettyString() string {
+func (res *ListResult) PrettyString(headers bool, output string) string {
 	// TODO: Make it prettier
 	var buffer bytes.Buffer
-	if len(res.LocalBaseBranches) > 0 {
-		buffer.WriteString("Local Base Branches:\n")
-		buffer.WriteString("\n")
+	if res.LocalBaseBranches != nil {
+		branches := *res.LocalBaseBranches
+		branches.Sort()
+		if headers {
+			buffer.WriteString("Local Base Branches:\n")
+			buffer.WriteString("\n")
+			columns := []string{}
+			switch output {
+			case "only-from":
+				columns = append(columns, fmt.Sprintf("%-40s", "Remote Base"))
+			case "only-to":
+				columns = append(columns, fmt.Sprintf("%-40s", "Local Base"))
+			default:
+				columns = append(columns, fmt.Sprintf("%-40s", "Remote Base"))
+				columns = append(columns, fmt.Sprintf("%-40s", "Local Base"))
+			}
+			buffer.WriteString(fmt.Sprintf("%s\n", strings.Join(columns, " ")))
+		}
+		for _, branch := range branches {
+			columns := []string{}
+			switch output {
+			case "only-from":
+				columns = append(columns, branch.RemoteBaseCommit)
+			case "only-to":
+				columns = append(columns, branch.LocalBaseCommit)
+			default:
+				columns = append(columns, branch.RemoteBaseCommit)
+				columns = append(columns, branch.LocalBaseCommit)
+			}
+			buffer.WriteString(fmt.Sprintf("%s\n", strings.Join(columns, " ")))
+		}
+		if headers {
+			buffer.WriteString("\n")
+		}
 	}
-	for _, branch := range res.LocalBaseBranches {
-		buffer.WriteString(fmt.Sprintf("%s => %s\n", branch.RemoteBaseCommit, branch.LocalBaseCommit))
-	}
-	if len(res.LocalBaseBranches) > 0 {
-		buffer.WriteString("\n")
-	}
-	if len(res.LocalModBranches) > 0 {
-		buffer.WriteString("Local Mod Branches:\n")
-		buffer.WriteString("\n")
-	}
-	for _, branch := range res.LocalModBranches {
-		buffer.WriteString(fmt.Sprintf("%s -> %s\n", branch.LocalBaseCommit, branch.LocalModHash))
-	}
-	if len(res.LocalModBranches) > 0 {
-		buffer.WriteString("\n")
+	if res.LocalModBranches != nil {
+		branches := *res.LocalModBranches
+		branches.Sort()
+		if headers {
+			buffer.WriteString("Local Mod Branches:\n")
+			buffer.WriteString("\n")
+			columns := []string{}
+			switch output {
+			case "only-from":
+				columns = append(columns, fmt.Sprintf("%-40s", "Local Base"))
+			case "only-to":
+				columns = append(columns, fmt.Sprintf("%-40s", "Local Mod"))
+			default:
+				columns = append(columns, fmt.Sprintf("%-40s", "Local Base"))
+				columns = append(columns, fmt.Sprintf("%-40s", "Local Mod"))
+			}
+			buffer.WriteString(fmt.Sprintf("%s\n", strings.Join(columns, " ")))
+		}
+		for _, branch := range branches {
+			columns := []string{}
+			switch output {
+			case "only-from":
+				columns = append(columns, branch.LocalBaseCommit)
+			case "only-to":
+				columns = append(columns, branch.LocalModHash)
+			default:
+				columns = append(columns, branch.LocalBaseCommit)
+				columns = append(columns, branch.LocalModHash)
+			}
+			buffer.WriteString(fmt.Sprintf("%s\n", strings.Join(columns, " ")))
+		}
+		if headers {
+			buffer.WriteString("\n")
+		}
 	}
 	return buffer.String()
 }

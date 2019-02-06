@@ -16,14 +16,11 @@ _git_ghost ()
 {
 	__start_git-ghost
 }
-`
-	// TODO: add the following code to bashCompletionFunc after implmenting list command which only prints from-hashes.
-	_ = `
 __git-ghost_get_hash() {
 	local ghost_out
-	# Should print only from-hashes and only to-hashes
-	if ghost_out=$(git-ghost list --no-headers --from "*$1" 2>/dev/null); then
-	    __git-ghost_debug "${FUNCNAME[0]}: ${ghost_out}"
+	# TODO: Support second and third argument completion
+	if ghost_out=$(git-ghost list -o only-from --no-headers --from "$1*" | uniq 2>/dev/null); then
+	    __git-ghost_debug "${FUNCNAME[0]}: ${ghost_out} -- $cur"
 	    COMPREPLY+=( $( compgen -W "${ghost_out[*]}" -- "$cur" ) )
 	fi
 }
@@ -33,6 +30,11 @@ __git-ghost_custom_func() {
 		git-ghost_pull_diff | git-ghost_pull_commits | git-ghost_pull_all | \
 		git-ghost_show_diff | git-ghost_show_commits | git-ghost_show_all )
 			__git-ghost_get_hash
+			return
+			;;
+		git-ghost_list_diff | git-ghost_list_commits | git-ghost_list_all | \
+		git-ghost_delete_diff | git-ghost_delete_commits | git-ghost_delete_all )
+			# TODO: Support --from and --to completion
 			return
 			;;
 		*)

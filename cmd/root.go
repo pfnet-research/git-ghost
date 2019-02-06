@@ -17,6 +17,7 @@ type globalFlags struct {
 	ghostPrefix  string
 	ghostRepo    string
 	verbose      bool
+	quiet        bool
 }
 
 func (gf globalFlags) WorkingEnvSpec() types.WorkingEnvSpec {
@@ -50,6 +51,8 @@ var RootCmd = &cobra.Command{
 		}
 		if globalOpts.verbose {
 			log.SetLevel(log.DebugLevel)
+		} else {
+			log.SetLevel(log.ErrorLevel)
 		}
 		return nil
 	},
@@ -69,7 +72,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostPrefix, "ghost-prefix", ghostPrefixEnv, "prefix of ghost branch name")
 	ghostRepoEnv := os.Getenv("GHOST_REPO")
 	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostRepo, "ghost-repo", ghostRepoEnv, "git remote url for ghosts repository")
-	RootCmd.PersistentFlags().BoolVar(&globalOpts.verbose, "verbose", false, "verbose mode")
+	RootCmd.PersistentFlags().BoolVarP(&globalOpts.verbose, "verbose", "v", false, "verbose mode")
 	RootCmd.AddCommand(versionCmd)
 }
 
