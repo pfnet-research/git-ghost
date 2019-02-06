@@ -18,8 +18,8 @@ _git_ghost ()
 }
 __git-ghost_get_hash() {
 	local ghost_out
-	if ghost_out=$(git-ghost list -o only-from --no-headers --from "*$1" | uniq 2>/dev/null); then
-	    __git-ghost_debug "${FUNCNAME[0]}: ${ghost_out}"
+	if ghost_out=$(git-ghost list -o only-from --no-headers --from "$1*" | uniq 2>/dev/null); then
+	    __git-ghost_debug "${FUNCNAME[0]}: ${ghost_out} -- $cur"
 	    COMPREPLY+=( $( compgen -W "${ghost_out[*]}" -- "$cur" ) )
 	fi
 }
