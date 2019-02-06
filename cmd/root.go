@@ -17,6 +17,7 @@ type globalFlags struct {
 	ghostPrefix  string
 	ghostRepo    string
 	verbose      bool
+	quiet        bool
 }
 
 func (gf globalFlags) WorkingEnvSpec() types.WorkingEnvSpec {
@@ -50,6 +51,8 @@ var RootCmd = &cobra.Command{
 		}
 		if globalOpts.verbose {
 			log.SetLevel(log.DebugLevel)
+		} else {
+			log.SetLevel(log.ErrorLevel)
 		}
 		return nil
 	},
