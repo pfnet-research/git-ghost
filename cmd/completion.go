@@ -16,13 +16,9 @@ _git_ghost ()
 {
 	__start_git-ghost
 }
-`
-	// TODO: add the following code to bashCompletionFunc after implmenting list command which only prints from-hashes.
-	_ = `
 __git-ghost_get_hash() {
 	local ghost_out
-	# Should print only from-hashes and only to-hashes
-	if ghost_out=$(git-ghost list --no-headers --from "*$1" 2>/dev/null); then
+	if ghost_out=$(git-ghost list -o only-from --no-headers --from "*$1" | uniq 2>/dev/null); then
 	    __git-ghost_debug "${FUNCNAME[0]}: ${ghost_out}"
 	    COMPREPLY+=( $( compgen -W "${ghost_out[*]}" -- "$cur" ) )
 	fi
