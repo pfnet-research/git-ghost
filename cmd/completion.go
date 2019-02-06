@@ -61,10 +61,6 @@ var completionCmd = &cobra.Command{
 `,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 {
-			cmd.HelpFunc()(cmd, args)
-			os.Exit(1)
-		}
 		shell := args[0]
 		RootCmd.BashCompletionFunction = bashCompletionFunc
 		availableCompletions := map[string]func(io.Writer) error{
