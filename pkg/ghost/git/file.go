@@ -14,7 +14,7 @@ import (
 )
 
 func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) error {
-	f, err := os.Create(filepath)
+	f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func ApplyDiffBundleFile(dir, filepath string) error {
 }
 
 func CreateDiffPatchFile(dir, filepath, comittish string) error {
-	f, err := os.Create(filepath)
+	f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
