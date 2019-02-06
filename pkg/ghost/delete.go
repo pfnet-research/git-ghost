@@ -36,7 +36,6 @@ func Delete(options DeleteOptions) (*DeleteResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		branches.Sort()
 		res.LocalBaseBranches = &branches
 	}
 
@@ -46,7 +45,6 @@ func Delete(options DeleteOptions) (*DeleteResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		branches.Sort()
 		res.LocalModBranches = &branches
 	}
 
@@ -94,7 +92,9 @@ func (res *DeleteResult) PrettyString() string {
 	if res.LocalBaseBranches != nil {
 		buffer.WriteString("Deleted Local Base Branches:\n")
 		buffer.WriteString("\n")
-		for _, branch := range *res.LocalBaseBranches {
+		branches := *res.LocalBaseBranches
+		branches.Sort()
+		for _, branch := range branches {
 			buffer.WriteString(fmt.Sprintf("%s => %s\n", branch.RemoteBaseCommit, branch.LocalBaseCommit))
 		}
 		buffer.WriteString("\n")
@@ -102,7 +102,9 @@ func (res *DeleteResult) PrettyString() string {
 	if res.LocalModBranches != nil {
 		buffer.WriteString("Deleted Local Mod Branches:\n")
 		buffer.WriteString("\n")
-		for _, branch := range *res.LocalModBranches {
+		branches := *res.LocalModBranches
+		branches.Sort()
+		for _, branch := range branches {
 			buffer.WriteString(fmt.Sprintf("%s -> %s\n", branch.LocalBaseCommit, branch.LocalModHash))
 		}
 		buffer.WriteString("\n")

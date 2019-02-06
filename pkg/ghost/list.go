@@ -35,7 +35,6 @@ func List(options ListOptions) (*ListResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		branches.Sort()
 		res.LocalBaseBranches = &branches
 	}
 
@@ -45,7 +44,6 @@ func List(options ListOptions) (*ListResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		branches.Sort()
 		res.LocalModBranches = &branches
 	}
 
@@ -59,7 +57,9 @@ func (res *ListResult) PrettyString() string {
 	if res.LocalBaseBranches != nil {
 		buffer.WriteString("Local Base Branches:\n")
 		buffer.WriteString("\n")
-		for _, branch := range *res.LocalBaseBranches {
+		branches := *res.LocalBaseBranches
+		branches.Sort()
+		for _, branch := range branches {
 			buffer.WriteString(fmt.Sprintf("%s => %s\n", branch.RemoteBaseCommit, branch.LocalBaseCommit))
 		}
 		buffer.WriteString("\n")
@@ -67,7 +67,9 @@ func (res *ListResult) PrettyString() string {
 	if res.LocalModBranches != nil {
 		buffer.WriteString("Local Mod Branches:\n")
 		buffer.WriteString("\n")
-		for _, branch := range *res.LocalModBranches {
+		branches := *res.LocalModBranches
+		branches.Sort()
+		for _, branch := range branches {
 			buffer.WriteString(fmt.Sprintf("%s -> %s\n", branch.LocalBaseCommit, branch.LocalModHash))
 		}
 		buffer.WriteString("\n")
