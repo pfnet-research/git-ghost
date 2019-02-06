@@ -5,6 +5,8 @@ import (
 	"git-ghost/pkg/ghost"
 	"git-ghost/pkg/ghost/types"
 	"os"
+	"regexp"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -14,9 +16,14 @@ func init() {
 	RootCmd.AddCommand(NewListCommand())
 }
 
+var outputTypes = []string{"only-from", "only-to"}
+var regexpOutputPattern = regexp.MustCompile("^(|" + strings.Join(outputTypes, "|") + ")$")
+
 type listFlags struct {
-	hashFrom string
-	hashTo   string
+	hashFrom  string
+	hashTo    string
+	noHeaders bool
+	output    string
 }
 
 func NewListCommand() *cobra.Command {
@@ -54,6 +61,8 @@ func NewListCommand() *cobra.Command {
 	})
 	command.PersistentFlags().StringVar(&listFlags.hashFrom, "from", "", "commit or diff hash to which ghost branches are listed.")
 	command.PersistentFlags().StringVar(&listFlags.hashTo, "to", "", "commit or diff hash from which ghost branches are listed.")
+	command.PersistentFlags().BoolVar(&listFlags.noHeaders, "no-headers", false, "When using the default, only-from or only-to output format, don't print headers (default print headers).")
+	command.PersistentFlags().StringVarP(&listFlags.output, "output", "o", "", "Output format. One of: only-from|only-to")
 	return command
 }
 
@@ -82,7 +91,7 @@ func runListCommitsCommand(flags *listFlags) func(cmd *cobra.Command, args []str
 			log.Error(err)
 			os.Exit(1)
 		}
-		fmt.Printf(res.PrettyString())
+		fmt.Printf(res.PrettyString(!flags.noHeaders, flags.output))
 	}
 }
 
@@ -111,7 +120,7 @@ func runListDiffCommand(flags *listFlags) func(cmd *cobra.Command, args []string
 			log.Error(err)
 			os.Exit(1)
 		}
-		fmt.Printf(res.PrettyString())
+		fmt.Printf(res.PrettyString(!flags.noHeaders, flags.output))
 	}
 }
 
@@ -145,10 +154,13 @@ func runListAllCommand(flags *listFlags) func(cmd *cobra.Command, args []string)
 			log.Error(err)
 			os.Exit(1)
 		}
-		fmt.Printf(res.PrettyString())
+		fmt.Printf(res.PrettyString(!flags.noHeaders, flags.output))
 	}
 }
 
 func (flags listFlags) validate() error {
+	if !regexpOutputPattern.MatchString(flags.output) {
+		return fmt.Errorf("output must be one of %v", outputTypes)
+	}
 	return nil
 }

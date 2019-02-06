@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"git-ghost/pkg/ghost/types"
 	"git-ghost/pkg/util"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -51,30 +52,78 @@ func List(options ListOptions) (*ListResult, error) {
 }
 
 // PrettyString pretty prints ListResult
-func (res *ListResult) PrettyString() string {
+func (res *ListResult) PrettyString(headers bool, output string) string {
 	// TODO: Make it prettier
 	var buffer bytes.Buffer
 	if res.LocalBaseBranches != nil {
-		buffer.WriteString("Local Base Branches:\n")
-		buffer.WriteString("\n")
-		buffer.WriteString(fmt.Sprintf("%-40s %-40s\n", "Remote Base", "Local Base"))
 		branches := *res.LocalBaseBranches
 		branches.Sort()
-		for _, branch := range branches {
-			buffer.WriteString(fmt.Sprintf("%s %s\n", branch.RemoteBaseCommit, branch.LocalBaseCommit))
+		if headers {
+			buffer.WriteString("Local Base Branches:\n")
+			buffer.WriteString("\n")
+			columns := []string{}
+			switch output {
+			case "only-from":
+				columns = append(columns, fmt.Sprintf("%-40s", "Remote Base"))
+			case "only-to":
+				columns = append(columns, fmt.Sprintf("%-40s", "Local Base"))
+			default:
+				columns = append(columns, fmt.Sprintf("%-40s", "Remote Base"))
+				columns = append(columns, fmt.Sprintf("%-40s", "Local Base"))
+			}
+			buffer.WriteString(fmt.Sprintf("%s\n", strings.Join(columns, " ")))
 		}
-		buffer.WriteString("\n")
+		for _, branch := range branches {
+			columns := []string{}
+			switch output {
+			case "only-from":
+				columns = append(columns, branch.RemoteBaseCommit)
+			case "only-to":
+				columns = append(columns, branch.LocalBaseCommit)
+			default:
+				columns = append(columns, branch.RemoteBaseCommit)
+				columns = append(columns, branch.LocalBaseCommit)
+			}
+			buffer.WriteString(fmt.Sprintf("%s\n", strings.Join(columns, " ")))
+		}
+		if headers {
+			buffer.WriteString("\n")
+		}
 	}
 	if res.LocalModBranches != nil {
-		buffer.WriteString("Local Mod Branches:\n")
-		buffer.WriteString("\n")
-		buffer.WriteString(fmt.Sprintf("%-40s %-40s\n", "Local Base", "Local Mod"))
 		branches := *res.LocalModBranches
 		branches.Sort()
-		for _, branch := range branches {
-			buffer.WriteString(fmt.Sprintf("%s %s\n", branch.LocalBaseCommit, branch.LocalModHash))
+		if headers {
+			buffer.WriteString("Local Mod Branches:\n")
+			buffer.WriteString("\n")
+			columns := []string{}
+			switch output {
+			case "only-from":
+				columns = append(columns, fmt.Sprintf("%-40s", "Local Base"))
+			case "only-to":
+				columns = append(columns, fmt.Sprintf("%-40s", "Local Mod"))
+			default:
+				columns = append(columns, fmt.Sprintf("%-40s", "Local Base"))
+				columns = append(columns, fmt.Sprintf("%-40s", "Local Mod"))
+			}
+			buffer.WriteString(fmt.Sprintf("%s\n", strings.Join(columns, " ")))
 		}
-		buffer.WriteString("\n")
+		for _, branch := range branches {
+			columns := []string{}
+			switch output {
+			case "only-from":
+				columns = append(columns, branch.LocalBaseCommit)
+			case "only-to":
+				columns = append(columns, branch.LocalModHash)
+			default:
+				columns = append(columns, branch.LocalBaseCommit)
+				columns = append(columns, branch.LocalModHash)
+			}
+			buffer.WriteString(fmt.Sprintf("%s\n", strings.Join(columns, " ")))
+		}
+		if headers {
+			buffer.WriteString("\n")
+		}
 	}
 	return buffer.String()
 }
