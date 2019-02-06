@@ -20,8 +20,8 @@ type DeleteOptions struct {
 
 // DeleteResult contains deleted ghost branches in Delete func
 type DeleteResult struct {
-	types.LocalBaseBranches
-	types.LocalModBranches
+	*types.LocalBaseBranches
+	*types.LocalModBranches
 }
 
 // Delete deletes ghost branches from ghost repo and returns deleted branches
@@ -36,7 +36,8 @@ func Delete(options DeleteOptions) (*DeleteResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		res.LocalBaseBranches = branches
+		branches.Sort()
+		res.LocalBaseBranches = &branches
 	}
 
 	if options.ListDiffBranchSpec != nil {
@@ -45,7 +46,8 @@ func Delete(options DeleteOptions) (*DeleteResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		res.LocalModBranches = branches
+		branches.Sort()
+		res.LocalModBranches = &branches
 	}
 
 	workingEnv, err := options.WorkingEnvSpec.Initialize()
@@ -68,16 +70,14 @@ func Delete(options DeleteOptions) (*DeleteResult, error) {
 		return git.DeleteRemoteBranches(workingEnv.GhostDir, branchNames...)
 	}
 
-	if len(res.LocalBaseBranches) > 0 {
-		res.LocalBaseBranches.Sort()
+	if res.LocalBaseBranches != nil {
 		err := deleteBranches(res.LocalBaseBranches.AsGhostBranches(), options.Dryrun)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if len(res.LocalModBranches) > 0 {
-		res.LocalModBranches.Sort()
+	if res.LocalModBranches != nil {
 		err := deleteBranches(res.LocalModBranches.AsGhostBranches(), options.Dryrun)
 		if err != nil {
 			return nil, err
@@ -91,24 +91,20 @@ func Delete(options DeleteOptions) (*DeleteResult, error) {
 func (res *DeleteResult) PrettyString() string {
 	// TODO: Make it prettier
 	var buffer bytes.Buffer
-	if len(res.LocalBaseBranches) > 0 {
+	if res.LocalBaseBranches != nil {
 		buffer.WriteString("Deleted Local Base Branches:\n")
 		buffer.WriteString("\n")
-	}
-	for _, branch := range res.LocalBaseBranches {
-		buffer.WriteString(fmt.Sprintf("%s => %s\n", branch.RemoteBaseCommit, branch.LocalBaseCommit))
-	}
-	if len(res.LocalBaseBranches) > 0 {
+		for _, branch := range *res.LocalBaseBranches {
+			buffer.WriteString(fmt.Sprintf("%s => %s\n", branch.RemoteBaseCommit, branch.LocalBaseCommit))
+		}
 		buffer.WriteString("\n")
 	}
-	if len(res.LocalModBranches) > 0 {
+	if res.LocalModBranches != nil {
 		buffer.WriteString("Deleted Local Mod Branches:\n")
 		buffer.WriteString("\n")
-	}
-	for _, branch := range res.LocalModBranches {
-		buffer.WriteString(fmt.Sprintf("%s -> %s\n", branch.LocalBaseCommit, branch.LocalModHash))
-	}
-	if len(res.LocalModBranches) > 0 {
+		for _, branch := range *res.LocalModBranches {
+			buffer.WriteString(fmt.Sprintf("%s -> %s\n", branch.LocalBaseCommit, branch.LocalModHash))
+		}
 		buffer.WriteString("\n")
 	}
 	return buffer.String()

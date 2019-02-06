@@ -19,8 +19,8 @@ type ListOptions struct {
 // ListResult contains results of List func
 
 type ListResult struct {
-	types.LocalBaseBranches
-	types.LocalModBranches
+	*types.LocalBaseBranches
+	*types.LocalModBranches
 }
 
 // List returns ghost branches list per ghost branch type
@@ -35,7 +35,8 @@ func List(options ListOptions) (*ListResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		res.LocalBaseBranches = branches
+		branches.Sort()
+		res.LocalBaseBranches = &branches
 	}
 
 	if options.ListDiffBranchSpec != nil {
@@ -44,11 +45,9 @@ func List(options ListOptions) (*ListResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		res.LocalModBranches = branches
+		branches.Sort()
+		res.LocalModBranches = &branches
 	}
-
-	res.LocalBaseBranches.Sort()
-	res.LocalModBranches.Sort()
 
 	return &res, nil
 }
@@ -57,24 +56,20 @@ func List(options ListOptions) (*ListResult, error) {
 func (res *ListResult) PrettyString() string {
 	// TODO: Make it prettier
 	var buffer bytes.Buffer
-	if len(res.LocalBaseBranches) > 0 {
+	if res.LocalBaseBranches != nil {
 		buffer.WriteString("Local Base Branches:\n")
 		buffer.WriteString("\n")
-	}
-	for _, branch := range res.LocalBaseBranches {
-		buffer.WriteString(fmt.Sprintf("%s => %s\n", branch.RemoteBaseCommit, branch.LocalBaseCommit))
-	}
-	if len(res.LocalBaseBranches) > 0 {
+		for _, branch := range *res.LocalBaseBranches {
+			buffer.WriteString(fmt.Sprintf("%s => %s\n", branch.RemoteBaseCommit, branch.LocalBaseCommit))
+		}
 		buffer.WriteString("\n")
 	}
-	if len(res.LocalModBranches) > 0 {
+	if res.LocalModBranches != nil {
 		buffer.WriteString("Local Mod Branches:\n")
 		buffer.WriteString("\n")
-	}
-	for _, branch := range res.LocalModBranches {
-		buffer.WriteString(fmt.Sprintf("%s -> %s\n", branch.LocalBaseCommit, branch.LocalModHash))
-	}
-	if len(res.LocalModBranches) > 0 {
+		for _, branch := range *res.LocalModBranches {
+			buffer.WriteString(fmt.Sprintf("%s -> %s\n", branch.LocalBaseCommit, branch.LocalModHash))
+		}
 		buffer.WriteString("\n")
 	}
 	return buffer.String()
