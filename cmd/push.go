@@ -89,10 +89,10 @@ func runPushCommitsCommand(cmd *cobra.Command, args []string) {
 	}
 	options := ghost.PushOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		LocalBaseBranchSpec: &types.LocalBaseBranchSpec{
-			Prefix:              globalOpts.ghostPrefix,
-			RemoteBaseCommitish: pushArg.commitsFrom,
-			LocalBaseCommitish:  pushArg.commitsTo,
+		CommitsBranchSpec: &types.CommitsBranchSpec{
+			Prefix:        globalOpts.ghostPrefix,
+			CommitishFrom: pushArg.commitsFrom,
+			CommitishTo:   pushArg.commitsTo,
 		},
 	}
 
@@ -102,11 +102,11 @@ func runPushCommitsCommand(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	if result.LocalBaseBranch != nil {
+	if result.CommitsBranch != nil {
 		fmt.Printf(
 			"%s %s\n",
-			result.LocalBaseBranch.RemoteBaseCommit,
-			result.LocalBaseBranch.LocalBaseCommit,
+			result.CommitsBranch.CommitHashFrom,
+			result.CommitsBranch.CommitHashTo,
 		)
 	}
 }
@@ -143,9 +143,9 @@ func runPushDiffCommand(cmd *cobra.Command, args []string) {
 	}
 	options := ghost.PushOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		LocalModBranchSpec: &types.LocalModBranchSpec{
-			Prefix:             globalOpts.ghostPrefix,
-			LocalBaseCommitish: pushArg.diffFrom,
+		DiffBranchSpec: &types.DiffBranchSpec{
+			Prefix:        globalOpts.ghostPrefix,
+			ComittishFrom: pushArg.diffFrom,
 		},
 	}
 
@@ -155,8 +155,8 @@ func runPushDiffCommand(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	if result.LocalModBranch != nil {
-		fmt.Printf(result.LocalModBranch.LocalModHash)
+	if result.DiffBranch != nil {
+		fmt.Printf(result.DiffBranch.DiffHash)
 	}
 }
 
@@ -175,14 +175,14 @@ func runPushAllCommand(cmd *cobra.Command, args []string) {
 
 	options := ghost.PushOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		LocalBaseBranchSpec: &types.LocalBaseBranchSpec{
-			Prefix:              globalOpts.ghostPrefix,
-			RemoteBaseCommitish: pushCommitsArg.commitsFrom,
-			LocalBaseCommitish:  pushCommitsArg.commitsTo,
+		CommitsBranchSpec: &types.CommitsBranchSpec{
+			Prefix:        globalOpts.ghostPrefix,
+			CommitishFrom: pushCommitsArg.commitsFrom,
+			CommitishTo:   pushCommitsArg.commitsTo,
 		},
-		LocalModBranchSpec: &types.LocalModBranchSpec{
-			Prefix:             globalOpts.ghostPrefix,
-			LocalBaseCommitish: pushDiffArg.diffFrom,
+		DiffBranchSpec: &types.DiffBranchSpec{
+			Prefix:        globalOpts.ghostPrefix,
+			ComittishFrom: pushDiffArg.diffFrom,
 		},
 	}
 
@@ -192,15 +192,15 @@ func runPushAllCommand(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	if result.LocalBaseBranch != nil {
+	if result.CommitsBranch != nil {
 		fmt.Printf(
 			"%s %s\n",
-			result.LocalBaseBranch.RemoteBaseCommit,
-			result.LocalBaseBranch.LocalBaseCommit,
+			result.CommitsBranch.CommitHashFrom,
+			result.CommitsBranch.CommitHashTo,
 		)
 	}
 
-	if result.LocalModBranch != nil {
-		fmt.Printf(result.LocalModBranch.LocalModHash)
+	if result.DiffBranch != nil {
+		fmt.Printf(result.DiffBranch.DiffHash)
 	}
 }

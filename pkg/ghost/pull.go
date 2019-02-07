@@ -10,8 +10,8 @@ import (
 // PullOptions represents arg for Pull func
 type PullOptions struct {
 	types.WorkingEnvSpec
-	*types.LocalBaseBranchSpec
-	*types.PullableLocalModBranchSpec
+	*types.CommitsBranchSpec
+	*types.PullableDiffBranchSpec
 }
 
 func pullAndApply(spec types.PullableGhostBranchSpec, we types.WorkingEnv) error {
@@ -31,15 +31,15 @@ func Pull(options PullOptions) error {
 	}
 	defer we.Clean()
 
-	if options.LocalBaseBranchSpec != nil {
-		err := pullAndApply(*options.LocalBaseBranchSpec, *we)
+	if options.CommitsBranchSpec != nil {
+		err := pullAndApply(*options.CommitsBranchSpec, *we)
 		if err != nil {
 			return err
 		}
 	}
 
-	if options.PullableLocalModBranchSpec != nil {
-		return pullAndApply(*options.PullableLocalModBranchSpec, *we)
+	if options.PullableDiffBranchSpec != nil {
+		return pullAndApply(*options.PullableDiffBranchSpec, *we)
 	}
 
 	log.WithFields(util.ToFields(options)).Warn("pull command has nothing to do with")

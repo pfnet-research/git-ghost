@@ -28,66 +28,66 @@ type PullableGhostBranchSpec interface {
 }
 
 // ensuring interfaces
-var _ GhostBranchSpec = LocalBaseBranchSpec{}
-var _ GhostBranchSpec = LocalModBranchSpec{}
-var _ PullableGhostBranchSpec = LocalBaseBranchSpec{}
-var _ PullableGhostBranchSpec = PullableLocalModBranchSpec{}
+var _ GhostBranchSpec = CommitsBranchSpec{}
+var _ GhostBranchSpec = DiffBranchSpec{}
+var _ PullableGhostBranchSpec = CommitsBranchSpec{}
+var _ PullableGhostBranchSpec = PullableDiffBranchSpec{}
 
-// LocalBaseBranchSpec is a spec for creating local base branch
-type LocalBaseBranchSpec struct {
-	Prefix              string
-	RemoteBaseCommitish string
-	LocalBaseCommitish  string
+// CommitsBranchSpec is a spec for creating local base branch
+type CommitsBranchSpec struct {
+	Prefix        string
+	CommitishFrom string
+	CommitishTo   string
 }
 
-// LocalModBranchSpec is a spec for creating local mod branch
-type LocalModBranchSpec struct {
-	Prefix             string
-	LocalBaseCommitish string
+// DiffBranchSpec is a spec for creating local mod branch
+type DiffBranchSpec struct {
+	Prefix        string
+	ComittishFrom string
 }
 
-// PullableLocalModBranchSpec is a spec for pulling local base branch
-type PullableLocalModBranchSpec struct {
-	LocalModBranchSpec
-	LocalModHash string
+// PullableDiffBranchSpec is a spec for pulling local base branch
+type PullableDiffBranchSpec struct {
+	DiffBranchSpec
+	DiffHash string
 }
 
-// Resolve resolves comittish in LocalModBranchSpec as full commit hash values
-func (bs LocalBaseBranchSpec) Resolve(srcDir string) (*LocalBaseBranchSpec, error) {
-	err := git.ValidateComittish(srcDir, bs.RemoteBaseCommitish)
+// Resolve resolves comittish in DiffBranchSpec as full commit hash values
+func (bs CommitsBranchSpec) Resolve(srcDir string) (*CommitsBranchSpec, error) {
+	err := git.ValidateComittish(srcDir, bs.CommitishFrom)
 	if err != nil {
 		return nil, err
 	}
-	remoteBaseCommit := resolveComittishOr(srcDir, bs.RemoteBaseCommitish)
-	err = git.ValidateComittish(srcDir, bs.LocalBaseCommitish)
+	commitHashFrom := resolveComittishOr(srcDir, bs.CommitishFrom)
+	err = git.ValidateComittish(srcDir, bs.CommitishTo)
 	if err != nil {
 		return nil, err
 	}
-	localBaseCommit := resolveComittishOr(srcDir, bs.LocalBaseCommitish)
-	branch := &LocalBaseBranchSpec{
-		Prefix:              bs.Prefix,
-		RemoteBaseCommitish: remoteBaseCommit,
-		LocalBaseCommitish:  localBaseCommit,
+	commitHashTo := resolveComittishOr(srcDir, bs.CommitishTo)
+	branch := &CommitsBranchSpec{
+		Prefix:        bs.Prefix,
+		CommitishFrom: commitHashFrom,
+		CommitishTo:   commitHashTo,
 	}
 	return branch, nil
 }
 
 // PullBranch pulls a ghost branch on from ghost repo in WorkingEnv and returns a GhostBranch object
-func (bs LocalBaseBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
+func (bs CommitsBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
 	resolved, err := bs.Resolve(we.SrcDir)
 	if err != nil {
 		return nil, err
 	}
 
-	branch := &LocalBaseBranch{
-		Prefix:           resolved.Prefix,
-		RemoteBaseCommit: resolved.RemoteBaseCommitish,
-		LocalBaseCommit:  resolved.LocalBaseCommitish,
+	branch := &CommitsBranch{
+		Prefix:         resolved.Prefix,
+		CommitHashFrom: resolved.CommitishFrom,
+		CommitHashTo:   resolved.CommitishTo,
 	}
-	if branch.RemoteBaseCommit == branch.LocalBaseCommit {
+	if branch.CommitHashFrom == branch.CommitHashTo {
 		log.WithFields(log.Fields{
-			"from": branch.RemoteBaseCommit,
-			"to":   branch.LocalBaseCommit,
+			"from": branch.CommitHashFrom,
+			"to":   branch.CommitHashTo,
 		}).Warn("skipping pull and apply ghost commits branch because from-hash and to-hash is the same.")
 		return nil, nil
 	}
@@ -100,7 +100,7 @@ func (bs LocalBaseBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
 }
 
 // CreateBranch create a ghost branch on WorkingEnv and returns a GhostBranch object
-func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
+func (bs CommitsBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	dstDir := we.GhostDir
 	srcDir := we.SrcDir
 	resolved, err := bs.Resolve(we.SrcDir)
@@ -108,16 +108,16 @@ func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 		return nil, err
 	}
 
-	remoteBaseCommit := resolved.RemoteBaseCommitish
-	localBaseCommit := resolved.LocalBaseCommitish
-	if localBaseCommit == remoteBaseCommit {
+	commitHashFrom := resolved.CommitishFrom
+	commitHashTo := resolved.CommitishTo
+	if commitHashFrom == commitHashTo {
 		return nil, nil
 	}
 
-	branch := LocalBaseBranch{
-		Prefix:           resolved.Prefix,
-		LocalBaseCommit:  localBaseCommit,
-		RemoteBaseCommit: remoteBaseCommit,
+	branch := CommitsBranch{
+		Prefix:         resolved.Prefix,
+		CommitHashFrom: commitHashFrom,
+		CommitHashTo:   commitHashTo,
 	}
 	tmpFile, err := ioutil.TempFile("", "git-ghost-local-base")
 	if err != nil {
@@ -125,7 +125,7 @@ func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	}
 	tmpFile.Close()
 	defer os.Remove(tmpFile.Name())
-	err = git.CreateDiffBundleFile(srcDir, tmpFile.Name(), remoteBaseCommit, localBaseCommit)
+	err = git.CreateDiffBundleFile(srcDir, tmpFile.Name(), commitHashFrom, commitHashTo)
 	if err != nil {
 		return nil, err
 	}
@@ -146,35 +146,35 @@ func (bs LocalBaseBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	return &branch, nil
 }
 
-// Resolve resolves comittish in LocalModBranchSpec as full commit hash values
-func (bs LocalModBranchSpec) Resolve(srcDir string) (*LocalModBranchSpec, error) {
-	err := git.ValidateComittish(srcDir, bs.LocalBaseCommitish)
+// Resolve resolves comittish in DiffBranchSpec as full commit hash values
+func (bs DiffBranchSpec) Resolve(srcDir string) (*DiffBranchSpec, error) {
+	err := git.ValidateComittish(srcDir, bs.ComittishFrom)
 	if err != nil {
 		return nil, err
 	}
-	localBaseCommit := resolveComittishOr(srcDir, bs.LocalBaseCommitish)
-	return &LocalModBranchSpec{
-		Prefix:             bs.Prefix,
-		LocalBaseCommitish: localBaseCommit,
+	commitHashFrom := resolveComittishOr(srcDir, bs.ComittishFrom)
+	return &DiffBranchSpec{
+		Prefix:        bs.Prefix,
+		ComittishFrom: commitHashFrom,
 	}, nil
 }
 
 // CreateBranch create a ghost branch on WorkingEnv and returns a GhostBranch object
-func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
+func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	dstDir := we.GhostDir
 	srcDir := we.SrcDir
 	resolved, err := bs.Resolve(we.SrcDir)
 	if err != nil {
 		return nil, err
 	}
-	localBaseCommit := resolved.LocalBaseCommitish
+	commitHashFrom := resolved.ComittishFrom
 	tmpFile, err := ioutil.TempFile("", "git-ghost-local-mod")
 	if err != nil {
 		return nil, err
 	}
 	tmpFile.Close()
 	defer os.Remove(tmpFile.Name())
-	err = git.CreateDiffPatchFile(srcDir, tmpFile.Name(), localBaseCommit)
+	err = git.CreateDiffPatchFile(srcDir, tmpFile.Name(), commitHashFrom)
 	if err != nil {
 		return nil, err
 	}
@@ -191,10 +191,10 @@ func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	if err != nil {
 		return nil, err
 	}
-	branch := LocalModBranch{
-		Prefix:          resolved.Prefix,
-		LocalBaseCommit: localBaseCommit,
-		LocalModHash:    hash,
+	branch := DiffBranch{
+		Prefix:         resolved.Prefix,
+		CommitHashFrom: commitHashFrom,
+		DiffHash:       hash,
 	}
 	err = os.Rename(tmpFile.Name(), filepath.Join(dstDir, branch.FileName()))
 	if err != nil {
@@ -214,15 +214,15 @@ func (bs LocalModBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 }
 
 // PullBranch pulls a ghost branch on from ghost repo in WorkingEnv and returns a GhostBranch object
-func (bs PullableLocalModBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
+func (bs PullableDiffBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
 	resolved, err := bs.Resolve(we.SrcDir)
 	if err != nil {
 		return nil, err
 	}
-	branch := &LocalModBranch{
-		Prefix:          resolved.Prefix,
-		LocalBaseCommit: resolved.LocalBaseCommitish,
-		LocalModHash:    bs.LocalModHash,
+	branch := &DiffBranch{
+		Prefix:         resolved.Prefix,
+		CommitHashFrom: resolved.ComittishFrom,
+		DiffHash:       bs.DiffHash,
 	}
 	err = pull(branch, we)
 	if err != nil {

@@ -99,10 +99,10 @@ func runPullCommitsCommand(flags *pullFlags) func(cmd *cobra.Command, args []str
 
 		options := ghost.PullOptions{
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-			LocalBaseBranchSpec: &types.LocalBaseBranchSpec{
-				Prefix:              globalOpts.ghostPrefix,
-				RemoteBaseCommitish: arg.commitsFrom,
-				LocalBaseCommitish:  arg.commitsTo,
+			CommitsBranchSpec: &types.CommitsBranchSpec{
+				Prefix:        globalOpts.ghostPrefix,
+				CommitishFrom: arg.commitsFrom,
+				CommitishTo:   arg.commitsTo,
 			},
 			// ForceApply: flags.forceApply,
 		}
@@ -160,12 +160,12 @@ func runPullDiffCommand(flags *pullFlags) func(cmd *cobra.Command, args []string
 
 		options := ghost.PullOptions{
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-			PullableLocalModBranchSpec: &types.PullableLocalModBranchSpec{
-				LocalModBranchSpec: types.LocalModBranchSpec{
-					Prefix:             globalOpts.ghostPrefix,
-					LocalBaseCommitish: arg.diffFrom,
+			PullableDiffBranchSpec: &types.PullableDiffBranchSpec{
+				DiffBranchSpec: types.DiffBranchSpec{
+					Prefix:        globalOpts.ghostPrefix,
+					ComittishFrom: arg.diffFrom,
 				},
-				LocalModHash: arg.diffHash,
+				DiffHash: arg.diffHash,
 			},
 			// ForceApply: flags.forceApply,
 		}
@@ -206,17 +206,17 @@ func runPullAllCommand(flags *pullFlags) func(cmd *cobra.Command, args []string)
 
 		options := ghost.PullOptions{
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-			LocalBaseBranchSpec: &types.LocalBaseBranchSpec{
-				Prefix:              globalOpts.ghostPrefix,
-				RemoteBaseCommitish: pullCommitsArg.commitsFrom,
-				LocalBaseCommitish:  pullCommitsArg.commitsTo,
+			CommitsBranchSpec: &types.CommitsBranchSpec{
+				Prefix:        globalOpts.ghostPrefix,
+				CommitishFrom: pullCommitsArg.commitsFrom,
+				CommitishTo:   pullCommitsArg.commitsTo,
 			},
-			PullableLocalModBranchSpec: &types.PullableLocalModBranchSpec{
-				LocalModBranchSpec: types.LocalModBranchSpec{
-					Prefix:             globalOpts.ghostPrefix,
-					LocalBaseCommitish: pullDiffArg.diffFrom,
+			PullableDiffBranchSpec: &types.PullableDiffBranchSpec{
+				DiffBranchSpec: types.DiffBranchSpec{
+					Prefix:        globalOpts.ghostPrefix,
+					ComittishFrom: pullDiffArg.diffFrom,
 				},
-				LocalModHash: pullDiffArg.diffHash,
+				DiffHash: pullDiffArg.diffHash,
 			},
 			// ForceApply: flags.forceApply,
 		}

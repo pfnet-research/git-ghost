@@ -20,8 +20,8 @@ type ListOptions struct {
 // ListResult contains results of List func
 
 type ListResult struct {
-	*types.LocalBaseBranches
-	*types.LocalModBranches
+	*types.CommitsBranches
+	*types.DiffBranches
 }
 
 // List returns ghost branches list per ghost branch type
@@ -36,7 +36,7 @@ func List(options ListOptions) (*ListResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		res.LocalBaseBranches = &branches
+		res.CommitsBranches = &branches
 	}
 
 	if options.ListDiffBranchSpec != nil {
@@ -45,7 +45,7 @@ func List(options ListOptions) (*ListResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		res.LocalModBranches = &branches
+		res.DiffBranches = &branches
 	}
 
 	return &res, nil
@@ -55,8 +55,8 @@ func List(options ListOptions) (*ListResult, error) {
 func (res *ListResult) PrettyString(headers bool, output string) string {
 	// TODO: Make it prettier
 	var buffer bytes.Buffer
-	if res.LocalBaseBranches != nil {
-		branches := *res.LocalBaseBranches
+	if res.CommitsBranches != nil {
+		branches := *res.CommitsBranches
 		branches.Sort()
 		if headers {
 			buffer.WriteString("Local Base Branches:\n")
@@ -77,12 +77,12 @@ func (res *ListResult) PrettyString(headers bool, output string) string {
 			columns := []string{}
 			switch output {
 			case "only-from":
-				columns = append(columns, branch.RemoteBaseCommit)
+				columns = append(columns, branch.CommitHashFrom)
 			case "only-to":
-				columns = append(columns, branch.LocalBaseCommit)
+				columns = append(columns, branch.CommitHashTo)
 			default:
-				columns = append(columns, branch.RemoteBaseCommit)
-				columns = append(columns, branch.LocalBaseCommit)
+				columns = append(columns, branch.CommitHashFrom)
+				columns = append(columns, branch.CommitHashTo)
 			}
 			buffer.WriteString(fmt.Sprintf("%s\n", strings.Join(columns, " ")))
 		}
@@ -90,8 +90,8 @@ func (res *ListResult) PrettyString(headers bool, output string) string {
 			buffer.WriteString("\n")
 		}
 	}
-	if res.LocalModBranches != nil {
-		branches := *res.LocalModBranches
+	if res.DiffBranches != nil {
+		branches := *res.DiffBranches
 		branches.Sort()
 		if headers {
 			buffer.WriteString("Local Mod Branches:\n")
@@ -112,12 +112,12 @@ func (res *ListResult) PrettyString(headers bool, output string) string {
 			columns := []string{}
 			switch output {
 			case "only-from":
-				columns = append(columns, branch.LocalBaseCommit)
+				columns = append(columns, branch.CommitHashFrom)
 			case "only-to":
-				columns = append(columns, branch.LocalModHash)
+				columns = append(columns, branch.DiffHash)
 			default:
-				columns = append(columns, branch.LocalBaseCommit)
-				columns = append(columns, branch.LocalModHash)
+				columns = append(columns, branch.CommitHashFrom)
+				columns = append(columns, branch.DiffHash)
 			}
 			buffer.WriteString(fmt.Sprintf("%s\n", strings.Join(columns, " ")))
 		}
