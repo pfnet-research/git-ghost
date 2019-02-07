@@ -7,25 +7,26 @@ import (
 	"strings"
 )
 
-// ListGhostBranchNames returns all ghost branchnames for fromComittish..toComittish.
-// You can use wildcard in fromComittish and toComittish
-func ListGhostBranchNames(repo, prefix, fromComittish, toComittish string) ([]string, error) {
-	fromPattern := "*"
-	toPattern := "*"
-	if fromComittish != "" {
-		fromPattern = fromComittish
+// ListRemoteBranchNames returns remote branch names
+func ListRemoteBranchNames(repo string, branchnames []string) ([]string, error) {
+	if len(branchnames) == 0 {
+		return []string{}, nil
 	}
-	if toComittish != "" {
-		toPattern = toComittish
+
+	branchNamesToSearch := []string{}
+	for _, b := range branchnames {
+		prefixed := b
+		if !strings.HasPrefix(b, "refs/head/") {
+			prefixed = fmt.Sprintf("%s%s", "refs/head/", b)
+		}
+		branchNamesToSearch = append(branchNamesToSearch, prefixed)
 	}
-	output, err := util.JustOutputCmd(exec.Command("git",
-		"ls-remote", "-q", "--heads", "--refs", repo,
-		fmt.Sprintf("refs/heads/%s/%s-%s", prefix, fromPattern, toPattern),
-		fmt.Sprintf("refs/heads/%s/%s/%s", prefix, fromPattern, toPattern),
-	))
+	opts := append([]string{"ls-remote", "-q", "--heads", "--refs", repo}, branchNamesToSearch...)
+	output, err := util.JustOutputCmd(exec.Command("git", opts...))
 	if err != nil {
 		return []string{}, err
 	}
+
 	var branchNames []string
 	for _, line := range strings.Split(string(output), "\n") {
 		if line == "" {

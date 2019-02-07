@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"git-ghost/pkg/ghost/git"
 )
 
@@ -37,7 +38,7 @@ func (ls *ListCommitsBranchSpec) Resolve(srcDir string) *ListCommitsBranchSpec {
 
 // GetBranches returns CommitsBranches from spec
 func (ls *ListCommitsBranchSpec) GetBranches(repo string) (CommitsBranches, error) {
-	branchNames, err := git.ListGhostBranchNames(repo, ls.Prefix, ls.HashFrom, ls.HashTo)
+	branchNames, err := listGhostBranchNames(repo, ls.Prefix, ls.HashFrom, ls.HashTo)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +63,7 @@ func (ls *ListDiffBranchSpec) Resolve(srcDir string) *ListDiffBranchSpec {
 
 // GetBranches returns DiffBranches from spec
 func (ls *ListDiffBranchSpec) GetBranches(repo string) (DiffBranches, error) {
-	branchNames, err := git.ListGhostBranchNames(repo, ls.Prefix, ls.HashFrom, ls.HashTo)
+	branchNames, err := listGhostBranchNames(repo, ls.Prefix, ls.HashFrom, ls.HashTo)
 	if err != nil {
 		return nil, err
 	}
@@ -74,4 +75,25 @@ func (ls *ListDiffBranchSpec) GetBranches(repo string) (DiffBranches, error) {
 		}
 	}
 	return branches, nil
+}
+
+func listGhostBranchNames(repo, prefix, fromComittish, toComittish string) ([]string, error) {
+	fromPattern := "*"
+	toPattern := "*"
+	if fromComittish != "" {
+		fromPattern = fromComittish
+	}
+	if toComittish != "" {
+		toPattern = toComittish
+	}
+
+	branchNames, err := git.ListRemoteBranchNames(repo, []string{
+		fmt.Sprintf("%s/%s-%s", prefix, fromPattern, toPattern),
+		fmt.Sprintf("%s/%s/%s", prefix, fromPattern, toPattern),
+	})
+	if err != nil {
+		return []string{}, err
+	}
+
+	return branchNames, nil
 }
