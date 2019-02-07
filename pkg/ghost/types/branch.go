@@ -29,84 +29,84 @@ type GhostBranch interface {
 }
 
 // interface assetions
-var _ GhostBranch = LocalBaseBranch{}
-var _ GhostBranch = LocalModBranch{}
+var _ GhostBranch = CommitsBranch{}
+var _ GhostBranch = DiffBranch{}
 
-// LocalBaseBranch represents a local base branch
+// CommitsBranch represents a local base branch
 //
-// This contains patches for RemoteBaseCommit..LocalBaseCommit
-type LocalBaseBranch struct {
-	Prefix           string
-	RemoteBaseCommit string
-	LocalBaseCommit  string
+// This contains patches for CommitHashFrom..CommitHashTo
+type CommitsBranch struct {
+	Prefix         string
+	CommitHashFrom string
+	CommitHashTo   string
 }
 
-// LocalModBranch represents a local mod branch
+// DiffBranch represents a local mod branch
 //
 // This contains diff
-// - whose content hash value is LocalModHash
-// - which is generated on LocalBaseCommit
-type LocalModBranch struct {
+// - whose content hash value is DiffHash
+// - which is generated on CommitHashFrom
+type DiffBranch struct {
 	// Prefix is a prefix of branch name
 	Prefix string
-	// LocalBaseCommit is full commit hash to which this local mod branch's diff contains
-	LocalBaseCommit string
-	// LocalModHash is a hash value of its diff
-	LocalModHash string
+	// CommitHashFrom is full commit hash to which this local mod branch's diff contains
+	CommitHashFrom string
+	// DiffHash is a hash value of its diff
+	DiffHash string
 }
 
-// LocalBaseBranches is an alias for []LocalBaseBranch
-type LocalBaseBranches []LocalBaseBranch
+// CommitsBranches is an alias for []CommitsBranch
+type CommitsBranches []CommitsBranch
 
-// LocalModBranches is an alias for []LocalModBranch
-type LocalModBranches []LocalModBranch
+// DiffBranches is an alias for []DiffBranch
+type DiffBranches []DiffBranch
 
-var localBaseBranchNamePattern = regexp.MustCompile(`^([a-z0-9]+)/([a-f0-9]+)-([a-f0-9]+)$`)
-var localModBranchNamePattern = regexp.MustCompile(`^([a-z0-9]+)/([a-f0-9]+)/([a-f0-9]+)$`)
+var commitsBranchNamePattern = regexp.MustCompile(`^([a-z0-9]+)/([a-f0-9]+)-([a-f0-9]+)$`)
+var diffBranchNamePattern = regexp.MustCompile(`^([a-z0-9]+)/([a-f0-9]+)/([a-f0-9]+)$`)
 
 // BranchName returns its full branch name on git repository
-func (b LocalBaseBranch) BranchName() string {
-	return fmt.Sprintf("%s/%s-%s", b.Prefix, b.RemoteBaseCommit, b.LocalBaseCommit)
+func (b CommitsBranch) BranchName() string {
+	return fmt.Sprintf("%s/%s-%s", b.Prefix, b.CommitHashFrom, b.CommitHashTo)
 }
 
 // FileName returns a file name containing this GhostBranch
-func (b LocalBaseBranch) FileName() string {
+func (b CommitsBranch) FileName() string {
 	return "commits.patch"
 }
 
 // BranchName returns its full branch name on git repository
-func (b LocalModBranch) BranchName() string {
-	return fmt.Sprintf("%s/%s/%s", b.Prefix, b.LocalBaseCommit, b.LocalModHash)
+func (b DiffBranch) BranchName() string {
+	return fmt.Sprintf("%s/%s/%s", b.Prefix, b.CommitHashFrom, b.DiffHash)
 }
 
 // FileName returns a file name containing this GhostBranch
-func (b LocalModBranch) FileName() string {
+func (b DiffBranch) FileName() string {
 	return "local-mod.patch"
 }
 
 // CreateGhostBranchByName instantiates GhostBranch object from branchname
 func CreateGhostBranchByName(branchName string) GhostBranch {
-	m := localBaseBranchNamePattern.FindStringSubmatch(branchName)
+	m := commitsBranchNamePattern.FindStringSubmatch(branchName)
 	if len(m) > 0 {
-		return &LocalBaseBranch{
-			Prefix:           m[1],
-			RemoteBaseCommit: m[2],
-			LocalBaseCommit:  m[3],
+		return &CommitsBranch{
+			Prefix:         m[1],
+			CommitHashFrom: m[2],
+			CommitHashTo:   m[3],
 		}
 	}
-	m = localModBranchNamePattern.FindStringSubmatch(branchName)
+	m = diffBranchNamePattern.FindStringSubmatch(branchName)
 	if len(m) > 0 {
-		return &LocalModBranch{
-			Prefix:          m[1],
-			LocalBaseCommit: m[2],
-			LocalModHash:    m[3],
+		return &DiffBranch{
+			Prefix:         m[1],
+			CommitHashFrom: m[2],
+			DiffHash:       m[3],
 		}
 	}
 	return nil
 }
 
 // Sort sorts passed branches in lexicographic order of BranchName()
-func (branches LocalBaseBranches) Sort() {
+func (branches CommitsBranches) Sort() {
 	sortFunc := func(i, j int) bool {
 		return branches[i].BranchName() < branches[j].BranchName()
 	}
@@ -114,7 +114,7 @@ func (branches LocalBaseBranches) Sort() {
 }
 
 // AsGhostBranches just lifts item type to GhostBranch
-func (branches LocalBaseBranches) AsGhostBranches() []GhostBranch {
+func (branches CommitsBranches) AsGhostBranches() []GhostBranch {
 	ghostBranches := make([]GhostBranch, len(branches))
 	for i, branch := range branches {
 		ghostBranches[i] = branch
@@ -123,7 +123,7 @@ func (branches LocalBaseBranches) AsGhostBranches() []GhostBranch {
 }
 
 // Sort sorts passed branches in lexicographic order of BranchName()
-func (branches LocalModBranches) Sort() {
+func (branches DiffBranches) Sort() {
 	sortFunc := func(i, j int) bool {
 		return branches[i].BranchName() < branches[j].BranchName()
 	}
@@ -131,7 +131,7 @@ func (branches LocalModBranches) Sort() {
 }
 
 // AsGhostBranches just lifts item type to GhostBranch
-func (branches LocalModBranches) AsGhostBranches() []GhostBranch {
+func (branches DiffBranches) AsGhostBranches() []GhostBranch {
 	ghostBranches := make([]GhostBranch, len(branches))
 	for i, branch := range branches {
 		ghostBranches[i] = branch
@@ -175,9 +175,9 @@ func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string) error {
 
 	// TODO make this instance methods.
 	switch ghost.(type) {
-	case LocalBaseBranch:
+	case CommitsBranch:
 		return git.ApplyDiffBundleFile(we.SrcDir, path.Join(we.GhostDir, ghost.FileName()))
-	case LocalModBranch:
+	case DiffBranch:
 		return git.ApplyDiffPatchFile(we.SrcDir, path.Join(we.GhostDir, ghost.FileName()))
 
 	default:
@@ -186,13 +186,13 @@ func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string) error {
 }
 
 // Show writes contents of this ghost branch on passed working env to writer
-func (bs LocalBaseBranch) Show(we WorkingEnv, writer io.Writer) error {
+func (bs CommitsBranch) Show(we WorkingEnv, writer io.Writer) error {
 	return show(bs, we, writer)
 }
 
 // Apply applies contents(diff or patch) of this ghost branch on passed working env
-func (bs LocalBaseBranch) Apply(we WorkingEnv) error {
-	err := apply(bs, we, bs.RemoteBaseCommit)
+func (bs CommitsBranch) Apply(we WorkingEnv) error {
+	err := apply(bs, we, bs.CommitHashFrom)
 	if err != nil {
 		return err
 	}
@@ -200,13 +200,13 @@ func (bs LocalBaseBranch) Apply(we WorkingEnv) error {
 }
 
 // Show writes contents of this ghost branch on passed working env to writer
-func (bs LocalModBranch) Show(we WorkingEnv, writer io.Writer) error {
+func (bs DiffBranch) Show(we WorkingEnv, writer io.Writer) error {
 	return show(bs, we, writer)
 }
 
 // Apply applies contents(diff or patch) of this ghost branch on passed working env
-func (bs LocalModBranch) Apply(we WorkingEnv) error {
-	err := apply(bs, we, bs.LocalBaseCommit)
+func (bs DiffBranch) Apply(we WorkingEnv) error {
+	err := apply(bs, we, bs.CommitHashFrom)
 	if err != nil {
 		return err
 	}

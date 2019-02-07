@@ -35,16 +35,16 @@ func (ls *ListCommitsBranchSpec) Resolve(srcDir string) *ListCommitsBranchSpec {
 	return &newSpec
 }
 
-// GetBranches returns LocalBaseBranches from spec
-func (ls *ListCommitsBranchSpec) GetBranches(repo string) (LocalBaseBranches, error) {
+// GetBranches returns CommitsBranches from spec
+func (ls *ListCommitsBranchSpec) GetBranches(repo string) (CommitsBranches, error) {
 	branchNames, err := git.ListGhostBranchNames(repo, ls.Prefix, ls.HashFrom, ls.HashTo)
 	if err != nil {
 		return nil, err
 	}
-	var branches LocalBaseBranches
+	var branches CommitsBranches
 	for _, name := range branchNames {
 		branch := CreateGhostBranchByName(name)
-		if br, ok := branch.(*LocalBaseBranch); ok {
+		if br, ok := branch.(*CommitsBranch); ok {
 			branches = append(branches, *br)
 		}
 	}
@@ -60,16 +60,16 @@ func (ls *ListDiffBranchSpec) Resolve(srcDir string) *ListDiffBranchSpec {
 	return &newSpec
 }
 
-// GetBranches returns LocalModBranches from spec
-func (ls *ListDiffBranchSpec) GetBranches(repo string) (LocalModBranches, error) {
+// GetBranches returns DiffBranches from spec
+func (ls *ListDiffBranchSpec) GetBranches(repo string) (DiffBranches, error) {
 	branchNames, err := git.ListGhostBranchNames(repo, ls.Prefix, ls.HashFrom, ls.HashTo)
 	if err != nil {
 		return nil, err
 	}
-	var branches LocalModBranches
+	var branches DiffBranches
 	for _, name := range branchNames {
 		branch := CreateGhostBranchByName(name)
-		if br, ok := branch.(*LocalModBranch); ok {
+		if br, ok := branch.(*DiffBranch); ok {
 			branches = append(branches, *br)
 		}
 	}

@@ -11,14 +11,14 @@ import (
 // PushOptions represents arg for Push func
 type PushOptions struct {
 	types.WorkingEnvSpec
-	*types.LocalBaseBranchSpec
-	*types.LocalModBranchSpec
+	*types.CommitsBranchSpec
+	*types.DiffBranchSpec
 }
 
 // PushResult contains resultant ghost branches of Push func
 type PushResult struct {
-	*types.LocalBaseBranch
-	*types.LocalModBranch
+	*types.CommitsBranch
+	*types.DiffBranch
 }
 
 // Push pushes create ghost branches and push them to remote ghost repository
@@ -26,22 +26,22 @@ func Push(options PushOptions) (*PushResult, error) {
 	log.WithFields(util.ToFields(options)).Debug("push command with")
 
 	var result PushResult
-	if options.LocalBaseBranchSpec != nil {
-		branch, err := pushGhostBranch(options.LocalBaseBranchSpec, options.WorkingEnvSpec)
+	if options.CommitsBranchSpec != nil {
+		branch, err := pushGhostBranch(options.CommitsBranchSpec, options.WorkingEnvSpec)
 		if err != nil {
 			return nil, err
 		}
-		localBaseBranch, _ := branch.(*types.LocalBaseBranch)
-		result.LocalBaseBranch = localBaseBranch
+		commitsBranch, _ := branch.(*types.CommitsBranch)
+		result.CommitsBranch = commitsBranch
 	}
 
-	if options.LocalModBranchSpec != nil {
-		branch, err := pushGhostBranch(options.LocalModBranchSpec, options.WorkingEnvSpec)
+	if options.DiffBranchSpec != nil {
+		branch, err := pushGhostBranch(options.DiffBranchSpec, options.WorkingEnvSpec)
 		if err != nil {
 			return nil, err
 		}
-		localModBranch, _ := branch.(*types.LocalModBranch)
-		result.LocalModBranch = localModBranch
+		diffBranch, _ := branch.(*types.DiffBranch)
+		result.DiffBranch = diffBranch
 	}
 
 	return &result, nil

@@ -11,8 +11,8 @@ import (
 // ShowOptions represents arg for Pull func
 type ShowOptions struct {
 	types.WorkingEnvSpec
-	*types.LocalBaseBranchSpec
-	*types.PullableLocalModBranchSpec
+	*types.CommitsBranchSpec
+	*types.PullableDiffBranchSpec
 	// if you want to consume and transform the output of `ghost.Show()`,
 	// Please use `io.Pipe()` as below,
 	// ```
@@ -38,25 +38,25 @@ func pullAndshow(branchSpec types.PullableGhostBranchSpec, we types.WorkingEnv, 
 func Show(options ShowOptions) error {
 	log.WithFields(util.ToFields(options)).Debug("pull command with")
 
-	if options.LocalBaseBranchSpec != nil {
+	if options.CommitsBranchSpec != nil {
 		we, err := options.WorkingEnvSpec.Initialize()
 		if err != nil {
 			return err
 		}
 		defer we.Clean()
-		err = pullAndshow(options.LocalBaseBranchSpec, *we, options.Writer)
+		err = pullAndshow(options.CommitsBranchSpec, *we, options.Writer)
 		if err != nil {
 			return err
 		}
 	}
 
-	if options.PullableLocalModBranchSpec != nil {
+	if options.PullableDiffBranchSpec != nil {
 		we, err := options.WorkingEnvSpec.Initialize()
 		if err != nil {
 			return err
 		}
 		defer we.Clean()
-		return pullAndshow(options.PullableLocalModBranchSpec, *we, options.Writer)
+		return pullAndshow(options.PullableDiffBranchSpec, *we, options.Writer)
 	}
 
 	log.WithFields(util.ToFields(options)).Warn("show command has nothing to do with")

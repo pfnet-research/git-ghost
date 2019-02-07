@@ -89,10 +89,10 @@ func runShowCommitsCommand(cmd *cobra.Command, args []string) {
 
 	options := ghost.ShowOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		LocalBaseBranchSpec: &types.LocalBaseBranchSpec{
-			Prefix:              globalOpts.ghostPrefix,
-			RemoteBaseCommitish: arg.commitsFrom,
-			LocalBaseCommitish:  arg.commitsTo,
+		CommitsBranchSpec: &types.CommitsBranchSpec{
+			Prefix:        globalOpts.ghostPrefix,
+			CommitishFrom: arg.commitsFrom,
+			CommitishTo:   arg.commitsTo,
 		},
 		Writer: os.Stdout,
 	}
@@ -148,12 +148,12 @@ func runShowDiffCommand(cmd *cobra.Command, args []string) {
 
 	options := ghost.ShowOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		PullableLocalModBranchSpec: &types.PullableLocalModBranchSpec{
-			LocalModBranchSpec: types.LocalModBranchSpec{
-				Prefix:             globalOpts.ghostPrefix,
-				LocalBaseCommitish: arg.diffFrom,
+		PullableDiffBranchSpec: &types.PullableDiffBranchSpec{
+			DiffBranchSpec: types.DiffBranchSpec{
+				Prefix:        globalOpts.ghostPrefix,
+				ComittishFrom: arg.diffFrom,
 			},
-			LocalModHash: arg.diffHash,
+			DiffHash: arg.diffHash,
 		},
 		Writer: os.Stdout,
 	}
@@ -192,17 +192,17 @@ func runShowAllCommand(cmd *cobra.Command, args []string) {
 
 	options := ghost.ShowOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
-		LocalBaseBranchSpec: &types.LocalBaseBranchSpec{
-			Prefix:              globalOpts.ghostPrefix,
-			RemoteBaseCommitish: showCommitsArg.commitsFrom,
-			LocalBaseCommitish:  showCommitsArg.commitsTo,
+		CommitsBranchSpec: &types.CommitsBranchSpec{
+			Prefix:        globalOpts.ghostPrefix,
+			CommitishFrom: showCommitsArg.commitsFrom,
+			CommitishTo:   showCommitsArg.commitsTo,
 		},
-		PullableLocalModBranchSpec: &types.PullableLocalModBranchSpec{
-			LocalModBranchSpec: types.LocalModBranchSpec{
-				Prefix:             globalOpts.ghostPrefix,
-				LocalBaseCommitish: showDiffArg.diffFrom,
+		PullableDiffBranchSpec: &types.PullableDiffBranchSpec{
+			DiffBranchSpec: types.DiffBranchSpec{
+				Prefix:        globalOpts.ghostPrefix,
+				ComittishFrom: showDiffArg.diffFrom,
 			},
-			LocalModHash: showDiffArg.diffHash,
+			DiffHash: showDiffArg.diffHash,
 		},
 		Writer: os.Stdout,
 	}
