@@ -174,6 +174,9 @@ func (bs DiffBranchSpec) Resolve(srcDir string) (*DiffBranchSpec, error) {
 		}
 		if islink {
 			err := util.WalkSymlink(srcDir, p, func(pp string) error {
+				if filepath.IsAbs(p) {
+					return fmt.Errorf("symlink to absolute path is not supported")
+				}
 				resolved, err := resolveFilepath(srcDir, pp)
 				if err != nil {
 					return err
@@ -299,8 +302,7 @@ func resolveComittishOr(srcDir string, commitishToResolve string) string {
 
 func resolveFilepath(dir, p string) (string, error) {
 	absp := p
-	if filepath.IsAbs(p) {
-	} else {
+	if !filepath.IsAbs(p) {
 		absp = filepath.Clean(filepath.Join(dir, p))
 	}
 	relp, err := filepath.Rel(dir, absp)
@@ -314,7 +316,7 @@ func resolveFilepath(dir, p string) (string, error) {
 		"relp": relp,
 	}).Debugf("resolved path")
 	if strings.HasPrefix(relp, "../") {
-		return "", fmt.Errorf("%s is not located in %s", p)
+		return "", fmt.Errorf("%s is not located in %s", p, dir)
 	}
 	isdir, err := util.IsDir(relp)
 	if err != nil {
