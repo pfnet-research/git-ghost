@@ -142,7 +142,7 @@ func CreateTestIncludeLinkFile(ghostDir *util.WorkDir) func(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		stdout, _, err := srcDir.RunCommmand("git", "ghost", "push", "--include", "included_link")
+		stdout, _, err := srcDir.RunCommmand("git", "ghost", "push", "--include", "included_link", "--follow-symlinks")
 		if err != nil {
 			t.Fatal(err)
 		}
