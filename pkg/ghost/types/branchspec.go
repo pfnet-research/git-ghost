@@ -7,8 +7,10 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	multierror "github.com/hashicorp/go-multierror"
 )
 
 // GhostBranchSpec is an interface
@@ -42,8 +44,9 @@ type CommitsBranchSpec struct {
 
 // DiffBranchSpec is a spec for creating local mod branch
 type DiffBranchSpec struct {
-	Prefix        string
-	ComittishFrom string
+	Prefix            string
+	ComittishFrom     string
+	IncludedFilepaths []string
 }
 
 // PullableDiffBranchSpec is a spec for pulling local base branch
@@ -153,9 +156,45 @@ func (bs DiffBranchSpec) Resolve(srcDir string) (*DiffBranchSpec, error) {
 		return nil, err
 	}
 	commitHashFrom := resolveComittishOr(srcDir, bs.ComittishFrom)
+
+	var errs error
+	var includedFilepaths []string
+	for _, p := range bs.IncludedFilepaths {
+		resolved, err := resolveFilepath(srcDir, p)
+		if err != nil {
+			errs = multierror.Append(errs, err)
+			continue
+		}
+		includedFilepaths = append(includedFilepaths, resolved)
+
+		islink, err := util.IsSymlink(p)
+		if err != nil {
+			errs = multierror.Append(errs, err)
+			continue
+		}
+		if islink {
+			err := util.WalkSymlink(srcDir, p, func(pp string) error {
+				resolved, err := resolveFilepath(srcDir, pp)
+				if err != nil {
+					return err
+				}
+				includedFilepaths = append(includedFilepaths, resolved)
+				return nil
+			})
+			if err != nil {
+				errs = multierror.Append(errs, err)
+				continue
+			}
+		}
+	}
+	if errs != nil {
+		return nil, errs
+	}
+
 	return &DiffBranchSpec{
-		Prefix:        bs.Prefix,
-		ComittishFrom: commitHashFrom,
+		Prefix:            bs.Prefix,
+		ComittishFrom:     commitHashFrom,
+		IncludedFilepaths: includedFilepaths,
 	}, nil
 }
 
@@ -178,6 +217,14 @@ func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if len(bs.IncludedFilepaths) > 0 {
+		err = git.AppendNonIndexedDiffFiles(srcDir, tmpFile.Name(), resolved.IncludedFilepaths)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	size, err := util.FileSize(tmpFile.Name())
 	if err != nil {
 		return nil, err
@@ -245,4 +292,33 @@ func resolveComittishOr(srcDir string, commitishToResolve string) string {
 		return commitishToResolve
 	}
 	return resolved
+}
+
+func resolveFilepath(dir, p string) (string, error) {
+	absp := p
+	if filepath.IsAbs(p) {
+	} else {
+		absp = filepath.Clean(filepath.Join(dir, p))
+	}
+	relp, err := filepath.Rel(dir, absp)
+	if err != nil {
+		return "", err
+	}
+	log.WithFields(log.Fields{
+		"dir":  dir,
+		"path": p,
+		"absp": absp,
+		"relp": relp,
+	}).Debugf("resolved path")
+	if strings.HasPrefix(relp, "../") {
+		return "", fmt.Errorf("%s is not located in %s", p)
+	}
+	isdir, err := util.IsDir(relp)
+	if err != nil {
+		return "", err
+	}
+	if isdir {
+		return "", fmt.Errorf("directory diff is not supported")
+	}
+	return relp, nil
 }

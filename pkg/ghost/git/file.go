@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"syscall"
 
 	log "github.com/Sirupsen/logrus"
 	multierror "github.com/hashicorp/go-multierror"
@@ -132,6 +133,34 @@ func CreateDiffPatchFile(dir, filepath, comittish string) error {
 		}
 	}
 	return nil
+}
+
+// AppendNonIndexedDiffFiles appends non-indexed diff files
+func AppendNonIndexedDiffFiles(dir, filepath string, nonIndexedFilepaths []string) error {
+	f, err := os.OpenFile(filepath, os.O_APPEND|os.O_WRONLY, 0600)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	var errs error
+	for _, p := range nonIndexedFilepaths {
+		cmd := exec.Command("git", "-C", dir, "diff", "--patience", "--binary", "--no-index", os.DevNull, p)
+		cmd.Stdout = f
+		err = util.JustRunCmd(cmd)
+		if err != nil {
+			if exiterr, ok := err.(*exec.ExitError); ok {
+				if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
+					// exit 1 is valid for git diff
+					if status.ExitStatus() == 1 {
+						continue
+					}
+				}
+			}
+			errs = multierror.Append(errs, err)
+		}
+	}
+	return errs
 }
 
 // ApplyDiffPatchFile apply a diff file created by CreateDiffPatchFile
