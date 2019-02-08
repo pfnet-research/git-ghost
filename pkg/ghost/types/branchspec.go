@@ -47,6 +47,7 @@ type DiffBranchSpec struct {
 	Prefix            string
 	ComittishFrom     string
 	IncludedFilepaths []string
+	FollowSymlinks    bool
 }
 
 // PullableDiffBranchSpec is a spec for pulling local base branch
@@ -167,26 +168,30 @@ func (bs DiffBranchSpec) Resolve(srcDir string) (*DiffBranchSpec, error) {
 		}
 		includedFilepaths = append(includedFilepaths, resolved)
 
-		islink, err := util.IsSymlink(p)
-		if err != nil {
-			errs = multierror.Append(errs, err)
-			continue
-		}
-		if islink {
-			err := util.WalkSymlink(srcDir, p, func(pp string) error {
-				if filepath.IsAbs(p) {
-					return fmt.Errorf("symlink to absolute path is not supported")
-				}
-				resolved, err := resolveFilepath(srcDir, pp)
-				if err != nil {
-					return err
-				}
-				includedFilepaths = append(includedFilepaths, resolved)
-				return nil
-			})
+		if bs.FollowSymlinks {
+			islink, err := util.IsSymlink(p)
 			if err != nil {
 				errs = multierror.Append(errs, err)
 				continue
+			}
+			if islink {
+				paths := []string{p}
+				err := util.WalkSymlink(srcDir, p, func(pp string) error {
+					if filepath.IsAbs(pp) {
+						return fmt.Errorf("symlink to absolute path is not supported: %s", strings.Join(paths, " -> "))
+					}
+					resolved, err := resolveFilepath(srcDir, pp)
+					if err != nil {
+						return err
+					}
+					includedFilepaths = append(includedFilepaths, resolved)
+					paths = append(paths, pp)
+					return nil
+				})
+				if err != nil {
+					errs = multierror.Append(errs, err)
+					continue
+				}
 			}
 		}
 	}

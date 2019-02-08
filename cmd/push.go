@@ -12,6 +12,7 @@ import (
 
 type pushFlags struct {
 	includedFilepaths []string
+	followSymlinks    bool
 }
 
 func init() {
@@ -52,6 +53,7 @@ func NewPushCommand() *cobra.Command {
 	})
 
 	command.PersistentFlags().StringSliceVarP(&flags.includedFilepaths, "include", "I", []string{}, "include a non-indexed file, this flag can be repeated to specify multiple files.")
+	command.PersistentFlags().BoolVar(&flags.followSymlinks, "follow-symlinks", false, "follow symlinks inside the repository.")
 
 	return command
 }
@@ -160,6 +162,7 @@ func runPushDiffCommand(flags *pushFlags) func(cmd *cobra.Command, args []string
 				Prefix:            globalOpts.ghostPrefix,
 				ComittishFrom:     pushArg.diffFrom,
 				IncludedFilepaths: flags.includedFilepaths,
+				FollowSymlinks:    flags.followSymlinks,
 			},
 		}
 
@@ -200,6 +203,7 @@ func runPushAllCommand(flags *pushFlags) func(cmd *cobra.Command, args []string)
 				Prefix:            globalOpts.ghostPrefix,
 				ComittishFrom:     pushDiffArg.diffFrom,
 				IncludedFilepaths: flags.includedFilepaths,
+				FollowSymlinks:    flags.followSymlinks,
 			},
 		}
 
