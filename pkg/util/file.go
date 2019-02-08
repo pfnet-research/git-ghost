@@ -17,7 +17,7 @@ func FileSize(filepath string) (int64, error) {
 }
 
 // WalkSymlink reads a symlink and call a given callback until the resolved path is not a symlink.WalkSymlink
-func WalkSymlink(dir, path string, cb func(string) error) error {
+func WalkSymlink(dir, path string, cb func([]string, string) error) error {
 	abspath := path
 	if !filepath.IsAbs(path) {
 		abspath = filepath.Clean(filepath.Join(dir, path))
@@ -31,6 +31,7 @@ func WalkSymlink(dir, path string, cb func(string) error) error {
 	}
 
 	resolved := abspath
+	paths := []string{path}
 	for {
 		abspath = resolved
 		if !filepath.IsAbs(resolved) {
@@ -47,11 +48,12 @@ func WalkSymlink(dir, path string, cb func(string) error) error {
 		if err != nil {
 			return err
 		}
-		err = cb(path)
+		err = cb(paths, path)
 		if err != nil {
 			return err
 		}
 		resolved = path
+		paths = append(paths, path)
 	}
 	return nil
 }

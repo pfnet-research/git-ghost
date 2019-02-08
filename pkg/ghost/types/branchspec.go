@@ -35,6 +35,9 @@ var _ GhostBranchSpec = DiffBranchSpec{}
 var _ PullableGhostBranchSpec = CommitsBranchSpec{}
 var _ PullableGhostBranchSpec = PullableDiffBranchSpec{}
 
+// Constants
+const maxSymlinkDepth = 3
+
 // CommitsBranchSpec is a spec for creating local base branch
 type CommitsBranchSpec struct {
 	Prefix        string
@@ -175,17 +178,18 @@ func (bs DiffBranchSpec) Resolve(srcDir string) (*DiffBranchSpec, error) {
 				continue
 			}
 			if islink {
-				paths := []string{p}
-				err := util.WalkSymlink(srcDir, p, func(pp string) error {
+				err := util.WalkSymlink(srcDir, p, func(paths []string, pp string) error {
+					if len(paths) > maxSymlinkDepth {
+						return fmt.Errorf("symlink is too deep (< %d): %s", maxSymlinkDepth, strings.Join(paths, " -> "))
+					}
 					if filepath.IsAbs(pp) {
-						return fmt.Errorf("symlink to absolute path is not supported: %s", strings.Join(paths, " -> "))
+						return fmt.Errorf("symlink to absolute path is not supported: %s -> %s", strings.Join(paths, " -> "), pp)
 					}
 					resolved, err := resolveFilepath(srcDir, pp)
 					if err != nil {
 						return err
 					}
 					includedFilepaths = append(includedFilepaths, resolved)
-					paths = append(paths, pp)
 					return nil
 				})
 				if err != nil {
