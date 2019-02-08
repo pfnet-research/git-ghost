@@ -190,6 +190,9 @@ func (bs DiffBranchSpec) Resolve(srcDir string) (*DiffBranchSpec, error) {
 	if errs != nil {
 		return nil, errs
 	}
+	if len(includedFilepaths) > 0 {
+		includedFilepaths = util.UniqueStringSlice(includedFilepaths)
+	}
 
 	return &DiffBranchSpec{
 		Prefix:            bs.Prefix,
