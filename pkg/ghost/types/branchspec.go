@@ -316,14 +316,14 @@ func resolveFilepath(dir, p string) (string, error) {
 		"relp": relp,
 	}).Debugf("resolved path")
 	if strings.HasPrefix(relp, "../") {
-		return "", fmt.Errorf("%s is not located in %s", p, dir)
+		return "", fmt.Errorf("%s is not located in the source directory", p)
 	}
 	isdir, err := util.IsDir(relp)
 	if err != nil {
 		return "", err
 	}
 	if isdir {
-		return "", fmt.Errorf("directory diff is not supported")
+		return "", fmt.Errorf("directory diff is not supported: %s", p)
 	}
 	return relp, nil
 }
