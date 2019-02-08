@@ -29,27 +29,11 @@ func TestAll(t *testing.T) {
 
 func CreateTestBasicScenario(ghostDir *util.WorkDir) func(t *testing.T) {
 	return func(t *testing.T) {
-		srcDir, err := util.CreateGitWorkDir()
+		srcDir, dstDir, err := setupBasicEnv(ghostDir)
 		if err != nil {
 			t.Fatal(err)
 		}
 		defer srcDir.Remove()
-
-		err = setupBasicGitRepo(srcDir)
-		if err != nil {
-			t.Fatal(err)
-		}
-		srcDir.Env = map[string]string{
-			"GHOST_REPO": ghostDir.Dir,
-		}
-
-		dstDir, err := util.CloneWorkDir(srcDir)
-		if err != nil {
-			t.Fatal(err)
-		}
-		dstDir.Env = map[string]string{
-			"GHOST_REPO": ghostDir.Dir,
-		}
 		defer dstDir.Remove()
 
 		// Make one modification
@@ -93,27 +77,11 @@ func CreateTestBasicScenario(ghostDir *util.WorkDir) func(t *testing.T) {
 
 func CreateTestIncludeFile(ghostDir *util.WorkDir) func(t *testing.T) {
 	return func(t *testing.T) {
-		srcDir, err := util.CreateGitWorkDir()
+		srcDir, dstDir, err := setupBasicEnv(ghostDir)
 		if err != nil {
 			t.Fatal(err)
 		}
 		defer srcDir.Remove()
-
-		err = setupBasicGitRepo(srcDir)
-		if err != nil {
-			t.Fatal(err)
-		}
-		srcDir.Env = map[string]string{
-			"GHOST_REPO": ghostDir.Dir,
-		}
-
-		dstDir, err := util.CloneWorkDir(srcDir)
-		if err != nil {
-			t.Fatal(err)
-		}
-		dstDir.Env = map[string]string{
-			"GHOST_REPO": ghostDir.Dir,
-		}
 		defer dstDir.Remove()
 
 		// Make one modification
@@ -149,27 +117,11 @@ func CreateTestIncludeFile(ghostDir *util.WorkDir) func(t *testing.T) {
 
 func CreateTestIncludeLinkFile(ghostDir *util.WorkDir) func(t *testing.T) {
 	return func(t *testing.T) {
-		srcDir, err := util.CreateGitWorkDir()
+		srcDir, dstDir, err := setupBasicEnv(ghostDir)
 		if err != nil {
 			t.Fatal(err)
 		}
 		defer srcDir.Remove()
-
-		err = setupBasicGitRepo(srcDir)
-		if err != nil {
-			t.Fatal(err)
-		}
-		srcDir.Env = map[string]string{
-			"GHOST_REPO": ghostDir.Dir,
-		}
-
-		dstDir, err := util.CloneWorkDir(srcDir)
-		if err != nil {
-			t.Fatal(err)
-		}
-		dstDir.Env = map[string]string{
-			"GHOST_REPO": ghostDir.Dir,
-		}
 		defer dstDir.Remove()
 
 		// Make one modification
@@ -212,6 +164,32 @@ func CreateTestIncludeLinkFile(ghostDir *util.WorkDir) func(t *testing.T) {
 		}
 		assert.Equal(t, "this is an included file\n", stdout)
 	}
+}
+
+func setupBasicEnv(workDir *util.WorkDir) (*util.WorkDir, *util.WorkDir, error) {
+	srcDir, err := util.CreateGitWorkDir()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	err = setupBasicGitRepo(srcDir)
+	if err != nil {
+		srcDir.Remove()
+		return nil, nil, err
+	}
+	srcDir.Env = map[string]string{
+		"GHOST_REPO": workDir.Dir,
+	}
+
+	dstDir, err := util.CloneWorkDir(srcDir)
+	if err != nil {
+		srcDir.Remove()
+		return nil, nil, err
+	}
+	dstDir.Env = map[string]string{
+		"GHOST_REPO": workDir.Dir,
+	}
+	return srcDir, dstDir, nil
 }
 
 func setupBasicGitRepo(wd *util.WorkDir) error {
