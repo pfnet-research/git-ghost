@@ -29,7 +29,7 @@ func Pull(options PullOptions) error {
 	if err != nil {
 		return err
 	}
-	defer we.Clean()
+	defer util.LogError(we.Clean)
 
 	if options.CommitsBranchSpec != nil {
 		err := pullAndApply(*options.CommitsBranchSpec, *we)

@@ -43,7 +43,7 @@ func Show(options ShowOptions) error {
 		if err != nil {
 			return err
 		}
-		defer we.Clean()
+		defer util.LogError(we.Clean)
 		err = pullAndshow(options.CommitsBranchSpec, *we, options.Writer)
 		if err != nil {
 			return err
@@ -55,7 +55,7 @@ func Show(options ShowOptions) error {
 		if err != nil {
 			return err
 		}
-		defer we.Clean()
+		defer util.LogError(we.Clean)
 		return pullAndshow(options.PullableDiffBranchSpec, *we, options.Writer)
 	}
 
