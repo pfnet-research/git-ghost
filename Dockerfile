@@ -27,9 +27,9 @@ RUN curl -sLo- https://github.com/alecthomas/gometalinter/releases/download/v${G
 
 
 ####################################################################################################
-# git-ghost-build
+# git-ghost-dev
 ####################################################################################################
-FROM builder as git-ghost-build
+FROM builder as git-ghost-dev
 
 # A dummy directory is created under $GOPATH/src/dummy so we are able to use dep
 # to install all the packages of our dep lock file
@@ -57,7 +57,7 @@ RUN apt-get update && apt-get install -y \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --from=git-ghost-build /go/src/git-ghost/bin/git-ghost /usr/local/bin/
+COPY --from=git-ghost-dev /go/src/git-ghost/bin/git-ghost /usr/local/bin/
 
 COPY hack/create-test-repo.sh /work/create-test-repo.sh
 RUN mkdir -p /work/local /work/remote /work/ghost-repo
@@ -69,9 +69,9 @@ WORKDIR /work/local
 ####################################################################################################
 # git-ghost-e2e
 ####################################################################################################
-FROM git-ghost-build as git-ghost-e2e
+FROM git-ghost-dev as git-ghost-e2e
 
-COPY --from=git-ghost-build /go/src/git-ghost/bin/git-ghost /usr/local/bin/
+COPY --from=git-ghost-dev /go/src/git-ghost/bin/git-ghost /usr/local/bin/
 WORKDIR /go/src/git-ghost
 RUN git config --global user.email you@example.com \
     && git config --global user.name "Your Name"
@@ -86,4 +86,4 @@ RUN apt-get update && apt-get install -y \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --from=git-ghost-build /go/src/git-ghost/bin/git-ghost /usr/local/bin/
+COPY --from=git-ghost-dev /go/src/git-ghost/bin/git-ghost /usr/local/bin/
