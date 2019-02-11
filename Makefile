@@ -4,12 +4,13 @@ VERSION     := $(shell cat ${PROJECTROOT}/VERSION)
 REVISION    := $(shell git rev-parse --short HEAD)
 IMAGE_PREFIX:=
 IMAGE_TAG   ?= $(VERSION)
+OUTDIR      ?= $(PROJECTROOT)/bin
 
 LDFLAGS := -ldflags="-s -w -X \"git-ghost/cmd.Version=$(VERSION)\" -X \"git-ghost/cmd.Revision=$(REVISION)\" -extldflags \"-static\""
 
 .PHONY: build
 build: deps
-	go build -tags netgo -installsuffix netgo $(LDFLAGS) -o bin/$(NAME) $(PROJECTROOT)
+	go build -tags netgo -installsuffix netgo $(LDFLAGS) -o $(OUTDIR)/$(NAME)
 
 .PHONY: build-linux-amd64
 build-linux-amd64:
@@ -51,6 +52,10 @@ build-windows:
 .PHONY: build-all
 build-all: build-linux build-darwin build-windows
 
+.PHONY: build-all-in-docker
+docker-build-all: build-image-dev
+	docker run --rm -v $(PROJECTROOT)/bin:/tmp/git-ghost/bin $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) make build-all OUTDIR=/tmp/git-ghost/bin
+
 .PHONY: lint
 lint:
 	gometalinter --config gometalinter.json ./...
@@ -58,6 +63,10 @@ lint:
 .PHONY: deps
 deps:
 	dep ensure
+
+.PHONY: build-image-dev
+build-image-dev:
+	docker build --build-arg NAME=$(NAME) --build-arg VERSION=$(VERSION) --build-arg REVISION=$(REVISION) -t $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) --target git-ghost-dev $(PROJECTROOT)
 
 .PHONY: build-image-test
 build-image-test:
