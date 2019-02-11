@@ -149,11 +149,9 @@ func runShowDiffCommand(cmd *cobra.Command, args []string) {
 	options := ghost.ShowOptions{
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 		PullableDiffBranchSpec: &types.PullableDiffBranchSpec{
-			DiffBranchSpec: types.DiffBranchSpec{
-				Prefix:        globalOpts.ghostPrefix,
-				ComittishFrom: arg.diffFrom,
-			},
-			DiffHash: arg.diffHash,
+			Prefix:        globalOpts.ghostPrefix,
+			ComittishFrom: arg.diffFrom,
+			DiffHash:      arg.diffHash,
 		},
 		Writer: os.Stdout,
 	}
@@ -198,11 +196,9 @@ func runShowAllCommand(cmd *cobra.Command, args []string) {
 			CommitishTo:   showCommitsArg.commitsTo,
 		},
 		PullableDiffBranchSpec: &types.PullableDiffBranchSpec{
-			DiffBranchSpec: types.DiffBranchSpec{
-				Prefix:        globalOpts.ghostPrefix,
-				ComittishFrom: showDiffArg.diffFrom,
-			},
-			DiffHash: showDiffArg.diffHash,
+			Prefix:        globalOpts.ghostPrefix,
+			ComittishFrom: showDiffArg.diffFrom,
+			DiffHash:      showDiffArg.diffHash,
 		},
 		Writer: os.Stdout,
 	}

@@ -55,8 +55,9 @@ type DiffBranchSpec struct {
 
 // PullableDiffBranchSpec is a spec for pulling local base branch
 type PullableDiffBranchSpec struct {
-	DiffBranchSpec
-	DiffHash string
+	Prefix        string
+	ComittishFrom string
+	DiffHash      string
 }
 
 // Resolve resolves comittish in DiffBranchSpec as full commit hash values
@@ -273,6 +274,21 @@ func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	}
 
 	return &branch, nil
+}
+
+// Resolve resolves comittish in PullableDiffBranchSpec as full commit hash values
+func (bs PullableDiffBranchSpec) Resolve(srcDir string) (*PullableDiffBranchSpec, error) {
+	err := git.ValidateComittish(srcDir, bs.ComittishFrom)
+	if err != nil {
+		return nil, err
+	}
+	commitHashFrom := resolveComittishOr(srcDir, bs.ComittishFrom)
+
+	return &PullableDiffBranchSpec{
+		Prefix:        bs.Prefix,
+		ComittishFrom: commitHashFrom,
+		DiffHash:      bs.DiffHash,
+	}, nil
 }
 
 // PullBranch pulls a ghost branch on from ghost repo in WorkingEnv and returns a GhostBranch object
