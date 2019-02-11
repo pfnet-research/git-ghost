@@ -57,7 +57,7 @@ docker-build-all: build-image-dev
 	docker run --rm -v $(PROJECTROOT)/bin:/tmp/git-ghost/bin $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) make build-all OUTDIR=/tmp/git-ghost/bin
 
 .PHONY: lint
-lint:
+lint: deps
 	gometalinter --config gometalinter.json ./...
 
 .PHONY: deps
