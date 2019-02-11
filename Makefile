@@ -60,6 +60,10 @@ docker-build-all: build-image-dev
 lint: deps
 	gometalinter --config gometalinter.json ./...
 
+.PHONY: docker-lint
+docker-lint: build-image-dev
+	@docker run $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) make lint
+
 .PHONY: deps
 deps:
 	dep ensure
