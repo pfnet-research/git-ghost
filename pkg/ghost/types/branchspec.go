@@ -123,7 +123,7 @@ func (bs CommitsBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	if err != nil {
 		return nil, err
 	}
-	tmpFile.Close()
+	util.LogError(tmpFile.Close)
 	defer util.LogError(func() error { return os.Remove(tmpFile.Name()) })
 	err = git.CreateDiffBundleFile(srcDir, tmpFile.Name(), commitHashFrom, commitHashTo)
 	if err != nil {
@@ -172,7 +172,7 @@ func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	if err != nil {
 		return nil, err
 	}
-	tmpFile.Close()
+	util.LogError(tmpFile.Close)
 	defer util.LogError(func() error { return os.Remove(tmpFile.Name()) })
 	err = git.CreateDiffPatchFile(srcDir, tmpFile.Name(), commitHashFrom)
 	if err != nil {

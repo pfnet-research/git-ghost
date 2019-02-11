@@ -14,7 +14,7 @@ func init() {
 }
 
 type pullFlags struct {
-	forceApply bool
+	// forceApply bool
 }
 
 func NewPullCommand() *cobra.Command {
