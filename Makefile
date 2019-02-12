@@ -73,7 +73,8 @@ release-assets: guard-RELEASE_TAG build-image-dev
 		done"
 
 .PHONY: release-image
-release-image: guard-RELEASE_TAG build-image-cli
+release-image: guard-RELEASE_TAG
+	make build-image-cli IMAGE_TAG=$(RELEASE_TAG)
 	docker push -t $(IMAGE_PREFIX)git-ghost-cli:$(RELEASE_TAG)
 
 .PHONY: lint
