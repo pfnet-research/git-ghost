@@ -17,7 +17,6 @@ type globalFlags struct {
 	ghostPrefix  string
 	ghostRepo    string
 	verbose      bool
-	quiet        bool
 }
 
 func (gf globalFlags) WorkingEnvSpec() types.WorkingEnvSpec {

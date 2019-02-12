@@ -52,7 +52,7 @@ func pushGhostBranch(branchSpec types.GhostBranchSpec, workingEnvSpec types.Work
 	if err != nil {
 		return nil, err
 	}
-	defer workingEnv.Clean()
+	defer util.LogError(workingEnv.Clean)
 	dstDir := workingEnv.GhostDir
 	branch, err := branchSpec.CreateBranch(*workingEnv)
 	if err != nil {

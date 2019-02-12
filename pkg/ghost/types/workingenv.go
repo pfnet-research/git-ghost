@@ -44,6 +44,6 @@ func (weSpec WorkingEnvSpec) Initialize() (*WorkingEnv, error) {
 	}, nil
 }
 
-func (weSpec WorkingEnv) Clean() {
-	os.RemoveAll(weSpec.GhostDir)
+func (weSpec WorkingEnv) Clean() error {
+	return os.RemoveAll(weSpec.GhostDir)
 }

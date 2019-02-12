@@ -19,7 +19,7 @@ func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) erro
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer util.LogError(f.Close)
 
 	cmd := exec.Command("git", "-C", dir,
 		"log", "-p", "--reverse", "--pretty=email", "--stat", "-m", "--first-parent", "--binary",
@@ -31,7 +31,7 @@ func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) erro
 	if err != nil {
 		return err
 	}
-	defer reader.Close()
+	defer util.LogError(reader.Close)
 	err = cmd.Start()
 	if err != nil {
 		s := stderr.String()
@@ -93,7 +93,7 @@ func CreateDiffPatchFile(dir, filepath, comittish string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer util.LogError(f.Close)
 
 	cmd := exec.Command("git", "-C", dir, "diff", "--patience", "--binary", comittish)
 	stderr := bytes.NewBufferString("")
@@ -102,7 +102,7 @@ func CreateDiffPatchFile(dir, filepath, comittish string) error {
 	if err != nil {
 		return err
 	}
-	defer reader.Close()
+	defer util.LogError(reader.Close)
 	err = cmd.Start()
 	if err != nil {
 		s := stderr.String()
