@@ -7,8 +7,10 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	multierror "github.com/hashicorp/go-multierror"
 )
 
 // GhostBranchSpec is an interface
@@ -33,6 +35,9 @@ var _ GhostBranchSpec = DiffBranchSpec{}
 var _ PullableGhostBranchSpec = CommitsBranchSpec{}
 var _ PullableGhostBranchSpec = PullableDiffBranchSpec{}
 
+// Constants
+const maxSymlinkDepth = 3
+
 // CommitsBranchSpec is a spec for creating local base branch
 type CommitsBranchSpec struct {
 	Prefix        string
@@ -42,14 +47,17 @@ type CommitsBranchSpec struct {
 
 // DiffBranchSpec is a spec for creating local mod branch
 type DiffBranchSpec struct {
-	Prefix        string
-	ComittishFrom string
+	Prefix            string
+	ComittishFrom     string
+	IncludedFilepaths []string
+	FollowSymlinks    bool
 }
 
 // PullableDiffBranchSpec is a spec for pulling local base branch
 type PullableDiffBranchSpec struct {
-	DiffBranchSpec
-	DiffHash string
+	Prefix        string
+	ComittishFrom string
+	DiffHash      string
 }
 
 // Resolve resolves comittish in DiffBranchSpec as full commit hash values
@@ -153,9 +161,56 @@ func (bs DiffBranchSpec) Resolve(srcDir string) (*DiffBranchSpec, error) {
 		return nil, err
 	}
 	commitHashFrom := resolveComittishOr(srcDir, bs.ComittishFrom)
+
+	var errs error
+	var includedFilepaths []string
+	for _, p := range bs.IncludedFilepaths {
+		resolved, err := resolveFilepath(srcDir, p)
+		if err != nil {
+			errs = multierror.Append(errs, err)
+			continue
+		}
+		includedFilepaths = append(includedFilepaths, resolved)
+
+		if bs.FollowSymlinks {
+			islink, err := util.IsSymlink(p)
+			if err != nil {
+				errs = multierror.Append(errs, err)
+				continue
+			}
+			if islink {
+				err := util.WalkSymlink(srcDir, p, func(paths []string, pp string) error {
+					if len(paths) > maxSymlinkDepth {
+						return fmt.Errorf("symlink is too deep (< %d): %s", maxSymlinkDepth, strings.Join(paths, " -> "))
+					}
+					if filepath.IsAbs(pp) {
+						return fmt.Errorf("symlink to absolute path is not supported: %s -> %s", strings.Join(paths, " -> "), pp)
+					}
+					resolved, err := resolveFilepath(srcDir, pp)
+					if err != nil {
+						return err
+					}
+					includedFilepaths = append(includedFilepaths, resolved)
+					return nil
+				})
+				if err != nil {
+					errs = multierror.Append(errs, err)
+					continue
+				}
+			}
+		}
+	}
+	if errs != nil {
+		return nil, errs
+	}
+	if len(includedFilepaths) > 0 {
+		includedFilepaths = util.UniqueStringSlice(includedFilepaths)
+	}
+
 	return &DiffBranchSpec{
-		Prefix:        bs.Prefix,
-		ComittishFrom: commitHashFrom,
+		Prefix:            bs.Prefix,
+		ComittishFrom:     commitHashFrom,
+		IncludedFilepaths: includedFilepaths,
 	}, nil
 }
 
@@ -178,6 +233,14 @@ func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if len(bs.IncludedFilepaths) > 0 {
+		err = git.AppendNonIndexedDiffFiles(srcDir, tmpFile.Name(), resolved.IncludedFilepaths)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	size, err := util.FileSize(tmpFile.Name())
 	if err != nil {
 		return nil, err
@@ -213,6 +276,21 @@ func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	return &branch, nil
 }
 
+// Resolve resolves comittish in PullableDiffBranchSpec as full commit hash values
+func (bs PullableDiffBranchSpec) Resolve(srcDir string) (*PullableDiffBranchSpec, error) {
+	err := git.ValidateComittish(srcDir, bs.ComittishFrom)
+	if err != nil {
+		return nil, err
+	}
+	commitHashFrom := resolveComittishOr(srcDir, bs.ComittishFrom)
+
+	return &PullableDiffBranchSpec{
+		Prefix:        bs.Prefix,
+		ComittishFrom: commitHashFrom,
+		DiffHash:      bs.DiffHash,
+	}, nil
+}
+
 // PullBranch pulls a ghost branch on from ghost repo in WorkingEnv and returns a GhostBranch object
 func (bs PullableDiffBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
 	resolved, err := bs.Resolve(we.SrcDir)
@@ -245,4 +323,32 @@ func resolveComittishOr(srcDir string, commitishToResolve string) string {
 		return commitishToResolve
 	}
 	return resolved
+}
+
+func resolveFilepath(dir, p string) (string, error) {
+	absp := p
+	if !filepath.IsAbs(p) {
+		absp = filepath.Clean(filepath.Join(dir, p))
+	}
+	relp, err := filepath.Rel(dir, absp)
+	if err != nil {
+		return "", err
+	}
+	log.WithFields(log.Fields{
+		"dir":  dir,
+		"path": p,
+		"absp": absp,
+		"relp": relp,
+	}).Debugf("resolved path")
+	if strings.HasPrefix(relp, "../") {
+		return "", fmt.Errorf("%s is not located in the source directory", p)
+	}
+	isdir, err := util.IsDir(relp)
+	if err != nil {
+		return "", err
+	}
+	if isdir {
+		return "", fmt.Errorf("directory diff is not supported: %s", p)
+	}
+	return relp, nil
 }

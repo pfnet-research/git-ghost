@@ -161,11 +161,9 @@ func runPullDiffCommand(flags *pullFlags) func(cmd *cobra.Command, args []string
 		options := ghost.PullOptions{
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 			PullableDiffBranchSpec: &types.PullableDiffBranchSpec{
-				DiffBranchSpec: types.DiffBranchSpec{
-					Prefix:        globalOpts.ghostPrefix,
-					ComittishFrom: arg.diffFrom,
-				},
-				DiffHash: arg.diffHash,
+				Prefix:        globalOpts.ghostPrefix,
+				ComittishFrom: arg.diffFrom,
+				DiffHash:      arg.diffHash,
 			},
 			// ForceApply: flags.forceApply,
 		}
@@ -212,11 +210,9 @@ func runPullAllCommand(flags *pullFlags) func(cmd *cobra.Command, args []string)
 				CommitishTo:   pullCommitsArg.commitsTo,
 			},
 			PullableDiffBranchSpec: &types.PullableDiffBranchSpec{
-				DiffBranchSpec: types.DiffBranchSpec{
-					Prefix:        globalOpts.ghostPrefix,
-					ComittishFrom: pullDiffArg.diffFrom,
-				},
-				DiffHash: pullDiffArg.diffHash,
+				Prefix:        globalOpts.ghostPrefix,
+				ComittishFrom: pullDiffArg.diffFrom,
+				DiffHash:      pullDiffArg.diffHash,
 			},
 			// ForceApply: flags.forceApply,
 		}
