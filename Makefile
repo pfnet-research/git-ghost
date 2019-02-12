@@ -70,19 +70,19 @@ deps:
 
 .PHONY: build-image-dev
 build-image-dev:
-	docker build --build-arg NAME=$(NAME) --build-arg VERSION=$(VERSION) --build-arg REVISION=$(REVISION) -t $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) --target git-ghost-dev $(PROJECTROOT)
+	docker build -t $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) --target git-ghost-dev $(PROJECTROOT)
 
 .PHONY: build-image-test
 build-image-test:
-	docker build --build-arg NAME=$(NAME) --build-arg VERSION=$(VERSION) --build-arg REVISION=$(REVISION) -t $(IMAGE_PREFIX)git-ghost-test:$(IMAGE_TAG) --target git-ghost-test $(PROJECTROOT)
+	docker build -t $(IMAGE_PREFIX)git-ghost-test:$(IMAGE_TAG) --target git-ghost-test $(PROJECTROOT)
 
 .PHONY: build-image-e2e
 build-image-e2e:
-	docker build --build-arg NAME=$(NAME) --build-arg VERSION=$(VERSION) --build-arg REVISION=$(REVISION) -t $(IMAGE_PREFIX)git-ghost-e2e:$(IMAGE_TAG) --target git-ghost-e2e $(PROJECTROOT)
+	docker build -t $(IMAGE_PREFIX)git-ghost-e2e:$(IMAGE_TAG) --target git-ghost-e2e $(PROJECTROOT)
 
 .PHONY: build-image-cli
 build-image-cli:
-	docker build --build-arg NAME=$(NAME) --build-arg VERSION=$(VERSION) --build-arg REVISION=$(REVISION) -t $(IMAGE_PREFIX)git-ghost-cli:$(IMAGE_TAG) --target git-ghost-cli $(PROJECTROOT)
+	docker build -t $(IMAGE_PREFIX)git-ghost-cli:$(IMAGE_TAG) --target git-ghost-cli $(PROJECTROOT)
 
 .PHONY: build-image-all
 build-image-all: build-image-test build-image-e2e build-image-cli
