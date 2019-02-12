@@ -11,6 +11,10 @@ GITHUB_USER ?=
 GITHUB_REPO ?=
 GITHUB_TOKEN ?=
 DOCKER_GITHUB_ENV_FLAGS := -e GITHUB_API=$(GITHUB_API) -e GITHUB_USER=$(GITHUB_USER) -e GITHUB_REPO=$(GITHUB_REPO) -e GITHUB_TOKEN=$(GITHUB_TOKEN)
+DOCKER_REGISTRY_USER     ?=
+DOCKER_REGISTRY_PASSWORD ?=
+DOCKER_REGISTRY_HOST     ?=
+DOCKER_REGISTRY_REPO     ?=
 
 LDFLAGS := -ldflags="-s -w -X \"git-ghost/cmd.Version=$(VERSION)\" -X \"git-ghost/cmd.Revision=$(REVISION)\" -extldflags \"-static\""
 
@@ -74,8 +78,9 @@ release-assets: guard-RELEASE_TAG build-image-dev
 
 .PHONY: release-image
 release-image: guard-RELEASE_TAG
-	make build-image-cli IMAGE_TAG=$(RELEASE_TAG)
-	docker push $(IMAGE_PREFIX)git-ghost-cli:$(RELEASE_TAG)
+	docker login -u ${DOCKER_REGISTRY_USER} -p ${DOCKER_REGISTRY_PASSWORD} ${DOCKER_REGISTRY_HOST}
+	make build-image-cli IMAGE_PREFIX=${DOCKER_REGISTRY_HOST}/${DOCKER_REGISTRY_REPO}/ IMAGE_TAG=$(RELEASE_TAG)
+	docker push ${DOCKER_REGISTRY_HOST}/${DOCKER_REGISTRY_REPO}/git-ghost-cli:$(RELEASE_TAG)
 
 .PHONY: lint
 lint: deps
