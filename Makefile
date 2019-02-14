@@ -11,10 +11,6 @@ GITHUB_USER ?=
 GITHUB_REPO ?=
 GITHUB_TOKEN ?=
 DOCKER_GITHUB_ENV_FLAGS := -e GITHUB_API=$(GITHUB_API) -e GITHUB_USER=$(GITHUB_USER) -e GITHUB_REPO=$(GITHUB_REPO) -e GITHUB_TOKEN=$(GITHUB_TOKEN)
-DOCKER_REGISTRY_USER     ?=
-DOCKER_REGISTRY_PASSWORD ?=
-DOCKER_REGISTRY_HOST     ?=
-DOCKER_REGISTRY_REPO     ?=
 
 LDFLAGS := -ldflags="-s -w -X \"git-ghost/cmd.Version=$(VERSION)\" -X \"git-ghost/cmd.Revision=$(REVISION)\" -extldflags \"-static\""
 
@@ -56,19 +52,19 @@ build-all: build-linux build-darwin build-windows
 
 .PHONY: build-all-in-docker
 docker-build-all: build-image-dev
-	docker run --rm -v $(OUTDIR):/tmp/git-ghost/bin $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) make build-all OUTDIR=/tmp/git-ghost/bin
+	docker run --rm -v $(OUTDIR):/tmp/git-ghost/bin $(IMAGE_PREFIX)git-ghost-dev:$(RELEASE_TAG) make build-all OUTDIR=/tmp/git-ghost/bin
 
 .PHONY: release
 release: guard-RELEASE_TAG
-	make build-image-dev IMAGE_PREFIX=${DOCKER_REGISTRY_HOST}/${DOCKER_REGISTRY_REPO}/ IMAGE_TAG=$(RELEASE_TAG)
-	docker run --rm $(DOCKER_GITHUB_ENV_FLAGS) ${DOCKER_REGISTRY_HOST}/${DOCKER_REGISTRY_REPO}/git-ghost-dev:$(IMAGE_TAG) github-release release --tag $(RELEASE_TAG)
+	make build-image-dev IMAGE_TAG=$(RELEASE_TAG)
+	docker run --rm $(DOCKER_GITHUB_ENV_FLAGS) $(IMAGE_PREFIX)/git-ghost-dev:$(RELEASE_TAG) github-release release --tag $(RELEASE_TAG)
 	make release-assets
-	make release-image IMAGE_PREFIX=${DOCKER_REGISTRY_HOST}/${DOCKER_REGISTRY_REPO}/ IMAGE_TAG=$(RELEASE_TAG)
+	make release-image IMAGE_TAG=$(RELEASE_TAG)
 
 .PHONY: release-assets
 release-assets: guard-RELEASE_TAG
-	make build-image-dev IMAGE_PREFIX=${DOCKER_REGISTRY_HOST}/${DOCKER_REGISTRY_REPO}/ IMAGE_TAG=$(RELEASE_TAG)
-	docker run --rm $(DOCKER_GITHUB_ENV_FLAGS) ${DOCKER_REGISTRY_HOST}/${DOCKER_REGISTRY_REPO}/git-ghost-dev:$(IMAGE_TAG) /bin/bash -c "\
+	make build-image-dev IMAGE_TAG=$(RELEASE_TAG)
+	docker run --rm $(DOCKER_GITHUB_ENV_FLAGS) $(IMAGE_PREFIX)/git-ghost-dev:$(RELEASE_TAG) /bin/bash -c "\
 	  set -eux; \
 		make build-all OUTDIR=/tmp/git-ghost/dist; \
 		for target in linux-amd64 darwin-amd64 windows-amd64; do \
@@ -80,9 +76,8 @@ release-assets: guard-RELEASE_TAG
 
 .PHONY: release-image
 release-image: guard-RELEASE_TAG
-	make build-image-cli IMAGE_PREFIX=${DOCKER_REGISTRY_HOST}/${DOCKER_REGISTRY_REPO}/ IMAGE_TAG=$(RELEASE_TAG)
-	docker login -u ${DOCKER_REGISTRY_USER} -p ${DOCKER_REGISTRY_PASSWORD} ${DOCKER_REGISTRY_HOST}
-	docker push ${DOCKER_REGISTRY_HOST}/${DOCKER_REGISTRY_REPO}/git-ghost-cli:$(RELEASE_TAG)
+	make build-image-cli IMAGE_TAG=$(RELEASE_TAG)
+	docker push $(IMAGE_PREFIX)/git-ghost-cli:$(RELEASE_TAG)
 
 .PHONY: lint
 lint: deps
