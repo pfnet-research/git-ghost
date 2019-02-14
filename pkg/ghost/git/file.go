@@ -141,7 +141,7 @@ func AppendNonIndexedDiffFiles(dir, filepath string, nonIndexedFilepaths []strin
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer util.LogError(f.Close)
 
 	var errs error
 	for _, p := range nonIndexedFilepaths {
