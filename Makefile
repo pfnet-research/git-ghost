@@ -57,14 +57,14 @@ docker-build-all: build-image-dev
 .PHONY: release
 release: guard-RELEASE_TAG
 	make build-image-dev IMAGE_TAG=$(RELEASE_TAG)
-	docker run --rm $(DOCKER_GITHUB_ENV_FLAGS) $(IMAGE_PREFIX)/git-ghost-dev:$(RELEASE_TAG) github-release release --tag $(RELEASE_TAG)
+	docker run --rm $(DOCKER_GITHUB_ENV_FLAGS) $(IMAGE_PREFIX)git-ghost-dev:$(RELEASE_TAG) github-release release --tag $(RELEASE_TAG)
 	make release-assets
 	make release-image IMAGE_TAG=$(RELEASE_TAG)
 
 .PHONY: release-assets
 release-assets: guard-RELEASE_TAG
 	make build-image-dev IMAGE_TAG=$(RELEASE_TAG)
-	docker run --rm $(DOCKER_GITHUB_ENV_FLAGS) $(IMAGE_PREFIX)/git-ghost-dev:$(RELEASE_TAG) /bin/bash -c "\
+	docker run --rm $(DOCKER_GITHUB_ENV_FLAGS) $(IMAGE_PREFIX)git-ghost-dev:$(RELEASE_TAG) /bin/bash -c "\
 	  set -eux; \
 		make build-all OUTDIR=/tmp/git-ghost/dist; \
 		for target in linux-amd64 darwin-amd64 windows-amd64; do \
@@ -77,7 +77,7 @@ release-assets: guard-RELEASE_TAG
 .PHONY: release-image
 release-image: guard-RELEASE_TAG
 	make build-image-cli IMAGE_TAG=$(RELEASE_TAG)
-	docker push $(IMAGE_PREFIX)/git-ghost-cli:$(RELEASE_TAG)
+	docker push $(IMAGE_PREFIX)git-ghost-cli:$(RELEASE_TAG)
 
 .PHONY: lint
 lint: deps
