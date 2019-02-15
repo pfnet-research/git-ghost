@@ -12,6 +12,10 @@ LDFLAGS := -ldflags="-s -w -X \"git-ghost/cmd.Version=$(VERSION)\" -X \"git-ghos
 build: deps
 	go build -tags netgo -installsuffix netgo $(LDFLAGS) -o $(OUTDIR)/$(NAME)
 
+.PHONY: install
+install:
+	go install -tags netgo -installsuffix netgo $(LDFLAGS)
+
 .PHONY: build-linux-amd64
 build-linux-amd64:
 	make build \
