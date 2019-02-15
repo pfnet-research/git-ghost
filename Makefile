@@ -90,6 +90,14 @@ build-image-all: build-image-test build-image-e2e build-image-cli
 test: deps
 	@go test -v $(PROJECTROOT)/...
 
+.PHONY: shell
+shell: build-image-cli
+	docker run -it $(IMAGE_PREFIX)git-ghost-cli:$(IMAGE_TAG) bash
+
+.PHONY: test-shell
+test-shell: build-image-test
+	docker run -it $(IMAGE_PREFIX)git-ghost-test:$(IMAGE_TAG) bash
+
 .PHONY: e2e
 e2e:
 	@go test -v $(PROJECTROOT)/test/e2e/e2e_test.go
