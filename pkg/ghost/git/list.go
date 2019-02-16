@@ -16,8 +16,8 @@ func ListRemoteBranchNames(repo string, branchnames []string) ([]string, error) 
 	branchNamesToSearch := []string{}
 	for _, b := range branchnames {
 		prefixed := b
-		if !strings.HasPrefix(b, "refs/head/") {
-			prefixed = fmt.Sprintf("%s%s", "refs/head/", b)
+		if !strings.HasPrefix(b, "refs/heads/") {
+			prefixed = fmt.Sprintf("%s%s", "refs/heads/", b)
 		}
 		branchNamesToSearch = append(branchNamesToSearch, prefixed)
 	}
