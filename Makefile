@@ -103,7 +103,7 @@ test-shell: build-image-test
 	docker run -it $(IMAGE_PREFIX)git-ghost-test:$(IMAGE_TAG) bash
 
 .PHONY: e2e
-e2e:
+e2e: build
 	@go test -v $(PROJECTROOT)/test/e2e/e2e_test.go
 
 .PHONY: docker-e2e
