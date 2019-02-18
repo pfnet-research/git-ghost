@@ -9,6 +9,7 @@ import (
 type GitGhostError interface {
 	StackTrace() errors.StackTrace
 	Error() string
+	Cause() error
 }
 
 // LogErrorWithStack emits a log message with errors.GitGhostError level and stack trace with debug level

@@ -96,7 +96,7 @@ func CreateTestIncludeFile(ghostDir *util.WorkDir) func(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		stdout, _, err := srcDir.RunCommmand("git", "ghost", "push", "--include", "included_file")
+		stdout, _, err := srcDir.RunCommmand("git", "ghost", "-vvv", "push", "--include", "included_file")
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -148,9 +148,9 @@ func AppendNonIndexedDiffFiles(dir, filepath string, nonIndexedFilepaths []strin
 	for _, p := range nonIndexedFilepaths {
 		cmd := exec.Command("git", "-C", dir, "diff", "--patience", "--binary", "--no-index", os.DevNull, p)
 		cmd.Stdout = f
-		err = util.JustRunCmd(cmd)
-		if err != nil {
-			if exiterr, ok := err.(*exec.ExitError); ok {
+		ggerr := util.JustRunCmd(cmd)
+		if ggerr != nil {
+			if exiterr, ok := ggerr.Cause().(*exec.ExitError); ok {
 				if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
 					// exit 1 is valid for git diff
 					if status.ExitStatus() == 1 {
@@ -158,7 +158,7 @@ func AppendNonIndexedDiffFiles(dir, filepath string, nonIndexedFilepaths []strin
 					}
 				}
 			}
-			errs = multierror.Append(errs, err)
+			errs = multierror.Append(errs, ggerr)
 		}
 	}
 	return errors.WithStack(errs)
