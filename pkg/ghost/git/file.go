@@ -20,7 +20,7 @@ func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) erro
 	if err != nil {
 		return err
 	}
-	defer util.LogError(f.Close)
+	defer util.LogDeferredError(f.Close)
 
 	cmd := exec.Command("git", "-C", dir,
 		"log", "-p", "--reverse", "--pretty=email", "--stat", "-m", "--first-parent", "--binary",
@@ -32,7 +32,7 @@ func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) erro
 	if err != nil {
 		return err
 	}
-	defer util.LogError(reader.Close)
+	defer util.LogDeferredError(reader.Close)
 	err = cmd.Start()
 	if err != nil {
 		s := stderr.String()
@@ -94,7 +94,7 @@ func CreateDiffPatchFile(dir, filepath, comittish string) error {
 	if err != nil {
 		return err
 	}
-	defer util.LogError(f.Close)
+	defer util.LogDeferredError(f.Close)
 
 	cmd := exec.Command("git", "-C", dir, "diff", "--patience", "--binary", comittish)
 	stderr := bytes.NewBufferString("")
@@ -103,7 +103,7 @@ func CreateDiffPatchFile(dir, filepath, comittish string) error {
 	if err != nil {
 		return err
 	}
-	defer util.LogError(reader.Close)
+	defer util.LogDeferredError(reader.Close)
 	err = cmd.Start()
 	if err != nil {
 		s := stderr.String()
@@ -141,7 +141,7 @@ func AppendNonIndexedDiffFiles(dir, filepath string, nonIndexedFilepaths []strin
 	if err != nil {
 		return err
 	}
-	defer util.LogError(f.Close)
+	defer util.LogDeferredError(f.Close)
 
 	var errs error
 	for _, p := range nonIndexedFilepaths {
