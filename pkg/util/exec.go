@@ -2,7 +2,7 @@ package util
 
 import (
 	"bytes"
-	"errors"
+	"git-ghost/pkg/util/errors"
 	"os"
 	"os/exec"
 	"strings"
@@ -10,7 +10,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-func JustOutputCmd(cmd *exec.Cmd) ([]byte, error) {
+func JustOutputCmd(cmd *exec.Cmd) ([]byte, errors.GitGhostError) {
 	wd, _ := os.Getwd()
 	log.WithFields(log.Fields{
 		"pwd":     wd,
@@ -24,12 +24,12 @@ func JustOutputCmd(cmd *exec.Cmd) ([]byte, error) {
 		if s != "" {
 			return []byte{}, errors.New(s)
 		}
-		return []byte{}, err
+		return []byte{}, errors.WithStack(err)
 	}
-	return bytes, err
+	return bytes, nil
 }
 
-func JustRunCmd(cmd *exec.Cmd) error {
+func JustRunCmd(cmd *exec.Cmd) errors.GitGhostError {
 	wd, _ := os.Getwd()
 	log.WithFields(log.Fields{
 		"pwd":     wd,
@@ -43,7 +43,7 @@ func JustRunCmd(cmd *exec.Cmd) error {
 		if s != "" {
 			return errors.New(s)
 		}
-		return err
+		return errors.WithStack(err)
 	}
 	return nil
 }

@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"git-ghost/pkg/ghost/git"
 	"git-ghost/pkg/ghost/types"
+	"git-ghost/pkg/util/errors"
 	"os"
 
 	log "github.com/Sirupsen/logrus"
@@ -82,7 +82,7 @@ var versionCmd = &cobra.Command{
 	},
 }
 
-func validateEnvironment() error {
+func validateEnvironment() errors.GitGhostError {
 	err := git.ValidateGit()
 	if err != nil {
 		return errors.New("git is required")
@@ -90,7 +90,7 @@ func validateEnvironment() error {
 	return nil
 }
 
-func (flags *globalFlags) SetDefaults() error {
+func (flags *globalFlags) SetDefaults() errors.GitGhostError {
 	if globalOpts.srcDir == "" {
 		globalOpts.srcDir = os.Getenv("PWD")
 	}
@@ -110,13 +110,13 @@ func (flags *globalFlags) SetDefaults() error {
 	return nil
 }
 
-func (flags *globalFlags) Validate() error {
+func (flags *globalFlags) Validate() errors.GitGhostError {
 	if flags.srcDir == "" {
 		return errors.New("src-dir must be specified")
 	}
 	_, err := os.Stat(flags.ghostWorkDir)
 	if err != nil {
-		return fmt.Errorf("ghost-working-dir is not found (value: %v)", flags.ghostWorkDir)
+		return errors.Errorf("ghost-working-dir is not found (value: %v)", flags.ghostWorkDir)
 	}
 	if flags.ghostPrefix == "" {
 		return errors.New("ghost-prefix must be specified")

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"git-ghost/pkg/ghost/git"
 	"git-ghost/pkg/util"
+	"git-ghost/pkg/util/errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -18,7 +19,7 @@ import (
 // GhostBranchSpec is a specification for creating ghost branch
 type GhostBranchSpec interface {
 	// CreateBranch create a ghost branch on WorkingEnv and returns a GhostBranch object
-	CreateBranch(we WorkingEnv) (GhostBranch, error)
+	CreateBranch(we WorkingEnv) (GhostBranch, errors.GitGhostError)
 }
 
 // PullableGhostBranchSpec is an interface
@@ -26,7 +27,7 @@ type GhostBranchSpec interface {
 // PullableGhostBranchSpec is a specification for pulling ghost branch from ghost repo
 type PullableGhostBranchSpec interface {
 	// PullBranch pulls a ghost branch on from ghost repo in WorkingEnv and returns a GhostBranch object
-	PullBranch(we WorkingEnv) (GhostBranch, error)
+	PullBranch(we WorkingEnv) (GhostBranch, errors.GitGhostError)
 }
 
 // ensuring interfaces
@@ -61,7 +62,7 @@ type PullableDiffBranchSpec struct {
 }
 
 // Resolve resolves comittish in DiffBranchSpec as full commit hash values
-func (bs CommitsBranchSpec) Resolve(srcDir string) (*CommitsBranchSpec, error) {
+func (bs CommitsBranchSpec) Resolve(srcDir string) (*CommitsBranchSpec, errors.GitGhostError) {
 	err := git.ValidateComittish(srcDir, bs.CommitishFrom)
 	if err != nil {
 		return nil, err
@@ -81,7 +82,7 @@ func (bs CommitsBranchSpec) Resolve(srcDir string) (*CommitsBranchSpec, error) {
 }
 
 // PullBranch pulls a ghost branch on from ghost repo in WorkingEnv and returns a GhostBranch object
-func (bs CommitsBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
+func (bs CommitsBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, errors.GitGhostError) {
 	resolved, err := bs.Resolve(we.SrcDir)
 	if err != nil {
 		return nil, err
@@ -108,12 +109,12 @@ func (bs CommitsBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
 }
 
 // CreateBranch create a ghost branch on WorkingEnv and returns a GhostBranch object
-func (bs CommitsBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
+func (bs CommitsBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.GitGhostError) {
 	dstDir := we.GhostDir
 	srcDir := we.SrcDir
-	resolved, err := bs.Resolve(we.SrcDir)
-	if err != nil {
-		return nil, err
+	resolved, ggerr := bs.Resolve(we.SrcDir)
+	if ggerr != nil {
+		return nil, ggerr
 	}
 
 	commitHashFrom := resolved.CommitishFrom
@@ -129,33 +130,33 @@ func (bs CommitsBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	}
 	tmpFile, err := ioutil.TempFile("", "git-ghost-local-base")
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	util.LogDeferredError(tmpFile.Close)
 	defer util.LogDeferredError(func() error { return os.Remove(tmpFile.Name()) })
-	err = git.CreateDiffBundleFile(srcDir, tmpFile.Name(), commitHashFrom, commitHashTo)
-	if err != nil {
-		return nil, err
+	ggerr = git.CreateDiffBundleFile(srcDir, tmpFile.Name(), commitHashFrom, commitHashTo)
+	if ggerr != nil {
+		return nil, ggerr
 	}
 	err = os.Rename(tmpFile.Name(), filepath.Join(dstDir, branch.FileName()))
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
-	err = git.CreateOrphanBranch(dstDir, branch.BranchName())
-	if err != nil {
-		return nil, err
+	ggerr = git.CreateOrphanBranch(dstDir, branch.BranchName())
+	if ggerr != nil {
+		return nil, ggerr
 	}
-	err = git.CommitFile(dstDir, branch.FileName(), fmt.Sprintf("Create ghost commit"))
-	if err != nil {
-		return nil, err
+	ggerr = git.CommitFile(dstDir, branch.FileName(), fmt.Sprintf("Create ghost commit"))
+	if ggerr != nil {
+		return nil, ggerr
 	}
 
 	return &branch, nil
 }
 
 // Resolve resolves comittish in DiffBranchSpec as full commit hash values
-func (bs DiffBranchSpec) Resolve(srcDir string) (*DiffBranchSpec, error) {
+func (bs DiffBranchSpec) Resolve(srcDir string) (*DiffBranchSpec, errors.GitGhostError) {
 	err := git.ValidateComittish(srcDir, bs.ComittishFrom)
 	if err != nil {
 		return nil, err
@@ -179,16 +180,16 @@ func (bs DiffBranchSpec) Resolve(srcDir string) (*DiffBranchSpec, error) {
 				continue
 			}
 			if islink {
-				err := util.WalkSymlink(srcDir, p, func(paths []string, pp string) error {
+				err := util.WalkSymlink(srcDir, p, func(paths []string, pp string) errors.GitGhostError {
 					if len(paths) > maxSymlinkDepth {
-						return fmt.Errorf("symlink is too deep (< %d): %s", maxSymlinkDepth, strings.Join(paths, " -> "))
+						return errors.Errorf("symlink is too deep (< %d): %s", maxSymlinkDepth, strings.Join(paths, " -> "))
 					}
 					if filepath.IsAbs(pp) {
-						return fmt.Errorf("symlink to absolute path is not supported: %s -> %s", strings.Join(paths, " -> "), pp)
+						return errors.Errorf("symlink to absolute path is not supported: %s -> %s", strings.Join(paths, " -> "), pp)
 					}
 					resolved, err := resolveFilepath(srcDir, pp)
 					if err != nil {
-						return err
+						return errors.WithStack(err)
 					}
 					includedFilepaths = append(includedFilepaths, resolved)
 					return nil
@@ -201,7 +202,7 @@ func (bs DiffBranchSpec) Resolve(srcDir string) (*DiffBranchSpec, error) {
 		}
 	}
 	if errs != nil {
-		return nil, errs
+		return nil, errors.WithStack(errs)
 	}
 	if len(includedFilepaths) > 0 {
 		includedFilepaths = util.UniqueStringSlice(includedFilepaths)
@@ -215,35 +216,35 @@ func (bs DiffBranchSpec) Resolve(srcDir string) (*DiffBranchSpec, error) {
 }
 
 // CreateBranch create a ghost branch on WorkingEnv and returns a GhostBranch object
-func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
+func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.GitGhostError) {
 	dstDir := we.GhostDir
 	srcDir := we.SrcDir
-	resolved, err := bs.Resolve(we.SrcDir)
-	if err != nil {
-		return nil, err
+	resolved, ggerr := bs.Resolve(we.SrcDir)
+	if ggerr != nil {
+		return nil, ggerr
 	}
 	commitHashFrom := resolved.ComittishFrom
 	tmpFile, err := ioutil.TempFile("", "git-ghost-local-mod")
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	util.LogDeferredError(tmpFile.Close)
 	defer util.LogDeferredError(func() error { return os.Remove(tmpFile.Name()) })
 	err = git.CreateDiffPatchFile(srcDir, tmpFile.Name(), commitHashFrom)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	if len(bs.IncludedFilepaths) > 0 {
 		err = git.AppendNonIndexedDiffFiles(srcDir, tmpFile.Name(), resolved.IncludedFilepaths)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 	}
 
 	size, err := util.FileSize(tmpFile.Name())
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	if size == 0 {
@@ -252,7 +253,7 @@ func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 
 	hash, err := util.GenerateFileContentHash(tmpFile.Name())
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	branch := DiffBranch{
 		Prefix:         resolved.Prefix,
@@ -261,26 +262,26 @@ func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, error) {
 	}
 	err = os.Rename(tmpFile.Name(), filepath.Join(dstDir, branch.FileName()))
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	err = git.CreateOrphanBranch(dstDir, branch.BranchName())
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	err = git.CommitFile(dstDir, branch.FileName(), fmt.Sprintf("Create ghost commit"))
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	return &branch, nil
 }
 
 // Resolve resolves comittish in PullableDiffBranchSpec as full commit hash values
-func (bs PullableDiffBranchSpec) Resolve(srcDir string) (*PullableDiffBranchSpec, error) {
+func (bs PullableDiffBranchSpec) Resolve(srcDir string) (*PullableDiffBranchSpec, errors.GitGhostError) {
 	err := git.ValidateComittish(srcDir, bs.ComittishFrom)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	commitHashFrom := resolveComittishOr(srcDir, bs.ComittishFrom)
 
@@ -292,7 +293,7 @@ func (bs PullableDiffBranchSpec) Resolve(srcDir string) (*PullableDiffBranchSpec
 }
 
 // PullBranch pulls a ghost branch on from ghost repo in WorkingEnv and returns a GhostBranch object
-func (bs PullableDiffBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) {
+func (bs PullableDiffBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, errors.GitGhostError) {
 	resolved, err := bs.Resolve(we.SrcDir)
 	if err != nil {
 		return nil, err
@@ -309,7 +310,7 @@ func (bs PullableDiffBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, error) 
 	return branch, nil
 }
 
-func pull(ghost GhostBranch, we WorkingEnv) error {
+func pull(ghost GhostBranch, we WorkingEnv) errors.GitGhostError {
 	return git.ResetHardToBranch(we.GhostDir, git.ORIGIN+"/"+ghost.BranchName())
 }
 
@@ -325,14 +326,14 @@ func resolveComittishOr(srcDir string, commitishToResolve string) string {
 	return resolved
 }
 
-func resolveFilepath(dir, p string) (string, error) {
+func resolveFilepath(dir, p string) (string, errors.GitGhostError) {
 	absp := p
 	if !filepath.IsAbs(p) {
 		absp = filepath.Clean(filepath.Join(dir, p))
 	}
 	relp, err := filepath.Rel(dir, absp)
 	if err != nil {
-		return "", err
+		return "", errors.WithStack(err)
 	}
 	log.WithFields(log.Fields{
 		"dir":  dir,
@@ -341,14 +342,14 @@ func resolveFilepath(dir, p string) (string, error) {
 		"relp": relp,
 	}).Debugf("resolved path")
 	if strings.HasPrefix(relp, "../") {
-		return "", fmt.Errorf("%s is not located in the source directory", p)
+		return "", errors.Errorf("%s is not located in the source directory", p)
 	}
 	isdir, err := util.IsDir(relp)
 	if err != nil {
-		return "", err
+		return "", errors.WithStack(err)
 	}
 	if isdir {
-		return "", fmt.Errorf("directory diff is not supported: %s", p)
+		return "", errors.Errorf("directory diff is not supported: %s", p)
 	}
 	return relp, nil
 }

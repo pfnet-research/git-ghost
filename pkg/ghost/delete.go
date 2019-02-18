@@ -6,6 +6,7 @@ import (
 	"git-ghost/pkg/ghost/git"
 	"git-ghost/pkg/ghost/types"
 	"git-ghost/pkg/util"
+	"git-ghost/pkg/util/errors"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -25,7 +26,7 @@ type DeleteResult struct {
 }
 
 // Delete deletes ghost branches from ghost repo and returns deleted branches
-func Delete(options DeleteOptions) (*DeleteResult, error) {
+func Delete(options DeleteOptions) (*DeleteResult, errors.GitGhostError) {
 	log.WithFields(util.ToFields(options)).Debug("delete command with")
 
 	res := DeleteResult{}
@@ -34,7 +35,7 @@ func Delete(options DeleteOptions) (*DeleteResult, error) {
 		resolved := options.ListCommitsBranchSpec.Resolve(options.SrcDir)
 		branches, err := resolved.GetBranches(options.GhostRepo)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		res.CommitsBranches = &branches
 	}
@@ -43,18 +44,18 @@ func Delete(options DeleteOptions) (*DeleteResult, error) {
 		resolved := options.ListDiffBranchSpec.Resolve(options.SrcDir)
 		branches, err := resolved.GetBranches(options.GhostRepo)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		res.DiffBranches = &branches
 	}
 
 	workingEnv, err := options.WorkingEnvSpec.Initialize()
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
-	defer util.LogDeferredError(workingEnv.Clean)
+	defer util.LogDeferredGitGhostError(workingEnv.Clean)
 
-	deleteBranches := func(branches []types.GhostBranch, dryrun bool) error {
+	deleteBranches := func(branches []types.GhostBranch, dryrun bool) errors.GitGhostError {
 		var branchNames []string
 		for _, branch := range branches {
 			branchNames = append(branchNames, branch.BranchName())
@@ -65,20 +66,21 @@ func Delete(options DeleteOptions) (*DeleteResult, error) {
 		if dryrun {
 			return nil
 		}
-		return git.DeleteRemoteBranches(workingEnv.GhostDir, branchNames...)
+		err := git.DeleteRemoteBranches(workingEnv.GhostDir, branchNames...)
+		return errors.WithStack(err)
 	}
 
 	if res.CommitsBranches != nil {
 		err := deleteBranches(res.CommitsBranches.AsGhostBranches(), options.Dryrun)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 	}
 
 	if res.DiffBranches != nil {
 		err := deleteBranches(res.DiffBranches.AsGhostBranches(), options.Dryrun)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 	}
 

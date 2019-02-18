@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"git-ghost/pkg/ghost"
 	"git-ghost/pkg/ghost/types"
+	"git-ghost/pkg/util/errors"
 	"os"
 	"regexp"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -70,7 +70,7 @@ func runListCommitsCommand(flags *listFlags) func(cmd *cobra.Command, args []str
 	return func(cmd *cobra.Command, args []string) {
 		err := flags.validate()
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 		opts := ghost.ListOptions{
@@ -88,7 +88,7 @@ func runListCommitsCommand(flags *listFlags) func(cmd *cobra.Command, args []str
 
 		res, err := ghost.List(opts)
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 		fmt.Printf(res.PrettyString(!flags.noHeaders, flags.output))
@@ -99,7 +99,7 @@ func runListDiffCommand(flags *listFlags) func(cmd *cobra.Command, args []string
 	return func(cmd *cobra.Command, args []string) {
 		err := flags.validate()
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 		opts := ghost.ListOptions{
@@ -117,7 +117,7 @@ func runListDiffCommand(flags *listFlags) func(cmd *cobra.Command, args []string
 
 		res, err := ghost.List(opts)
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 		fmt.Printf(res.PrettyString(!flags.noHeaders, flags.output))
@@ -128,7 +128,7 @@ func runListAllCommand(flags *listFlags) func(cmd *cobra.Command, args []string)
 	return func(cmd *cobra.Command, args []string) {
 		err := flags.validate()
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 		opts := ghost.ListOptions{
@@ -151,16 +151,16 @@ func runListAllCommand(flags *listFlags) func(cmd *cobra.Command, args []string)
 
 		res, err := ghost.List(opts)
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 		fmt.Printf(res.PrettyString(!flags.noHeaders, flags.output))
 	}
 }
 
-func (flags listFlags) validate() error {
+func (flags listFlags) validate() errors.GitGhostError {
 	if !regexpOutputPattern.MatchString(flags.output) {
-		return fmt.Errorf("output must be one of %v", outputTypes)
+		return errors.Errorf("output must be one of %v", outputTypes)
 	}
 	return nil
 }

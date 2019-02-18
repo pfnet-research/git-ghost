@@ -2,6 +2,7 @@ package types
 
 import (
 	"git-ghost/pkg/ghost/git"
+	"git-ghost/pkg/util/errors"
 	"io/ioutil"
 	"os"
 
@@ -24,14 +25,14 @@ type WorkingEnv struct {
 	GhostDir string
 }
 
-func (weSpec WorkingEnvSpec) Initialize() (*WorkingEnv, error) {
+func (weSpec WorkingEnvSpec) Initialize() (*WorkingEnv, errors.GitGhostError) {
 	ghostDir, err := ioutil.TempDir(weSpec.GhostWorkingDir, "git-ghost-")
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
-	err = git.InitializeGitDir(ghostDir, weSpec.GhostRepo, "")
-	if err != nil {
-		return nil, err
+	ggerr := git.InitializeGitDir(ghostDir, weSpec.GhostRepo, "")
+	if ggerr != nil {
+		return nil, ggerr
 	}
 
 	log.WithFields(log.Fields{
@@ -44,6 +45,6 @@ func (weSpec WorkingEnvSpec) Initialize() (*WorkingEnv, error) {
 	}, nil
 }
 
-func (weSpec WorkingEnv) Clean() error {
-	return os.RemoveAll(weSpec.GhostDir)
+func (weSpec WorkingEnv) Clean() errors.GitGhostError {
+	return errors.WithStack(os.RemoveAll(weSpec.GhostDir))
 }

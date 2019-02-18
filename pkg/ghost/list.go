@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"git-ghost/pkg/ghost/types"
 	"git-ghost/pkg/util"
+	"git-ghost/pkg/util/errors"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -25,7 +26,7 @@ type ListResult struct {
 }
 
 // List returns ghost branches list per ghost branch type
-func List(options ListOptions) (*ListResult, error) {
+func List(options ListOptions) (*ListResult, errors.GitGhostError) {
 	log.WithFields(util.ToFields(options)).Debug("list command with")
 
 	res := ListResult{}
@@ -34,7 +35,7 @@ func List(options ListOptions) (*ListResult, error) {
 		resolved := options.ListCommitsBranchSpec.Resolve(options.SrcDir)
 		branches, err := resolved.GetBranches(options.GhostRepo)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		res.CommitsBranches = &branches
 	}
@@ -43,7 +44,7 @@ func List(options ListOptions) (*ListResult, error) {
 		resolved := options.ListDiffBranchSpec.Resolve(options.SrcDir)
 		branches, err := resolved.GetBranches(options.GhostRepo)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		res.DiffBranches = &branches
 	}

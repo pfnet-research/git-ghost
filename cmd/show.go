@@ -3,6 +3,7 @@ package cmd
 import (
 	"git-ghost/pkg/ghost"
 	"git-ghost/pkg/ghost/types"
+	"git-ghost/pkg/util/errors"
 	"os"
 
 	log "github.com/Sirupsen/logrus"
@@ -70,7 +71,7 @@ func newShowCommitsArg(args []string) showCommitsArg {
 	return arg
 }
 
-func (arg showCommitsArg) validate() error {
+func (arg showCommitsArg) validate() errors.GitGhostError {
 	if err := nonEmpty("commit-from", arg.commitsFrom); err != nil {
 		return err
 	}
@@ -83,7 +84,7 @@ func (arg showCommitsArg) validate() error {
 func runShowCommitsCommand(cmd *cobra.Command, args []string) {
 	arg := newShowCommitsArg(args)
 	if err := arg.validate(); err != nil {
-		log.Error(err)
+		errors.LogErrorWithStack(err)
 		os.Exit(1)
 	}
 
@@ -99,7 +100,7 @@ func runShowCommitsCommand(cmd *cobra.Command, args []string) {
 
 	err := ghost.Show(options)
 	if err != nil {
-		log.Error(err)
+		errors.LogErrorWithStack(err)
 		os.Exit(1)
 	}
 }
@@ -129,7 +130,7 @@ func newShowDiffArg(args []string) showDiffArg {
 	return arg
 }
 
-func (arg showDiffArg) validate() error {
+func (arg showDiffArg) validate() errors.GitGhostError {
 	if err := nonEmpty("diff-from-hash", arg.diffFrom); err != nil {
 		return err
 	}
@@ -142,7 +143,7 @@ func (arg showDiffArg) validate() error {
 func runShowDiffCommand(cmd *cobra.Command, args []string) {
 	arg := newShowDiffArg(args)
 	if err := arg.validate(); err != nil {
-		log.Error(err)
+		errors.LogErrorWithStack(err)
 		os.Exit(1)
 	}
 
@@ -158,7 +159,7 @@ func runShowDiffCommand(cmd *cobra.Command, args []string) {
 
 	err := ghost.Show(options)
 	if err != nil {
-		log.Error(err)
+		errors.LogErrorWithStack(err)
 		os.Exit(1)
 	}
 }
@@ -180,11 +181,11 @@ func runShowAllCommand(cmd *cobra.Command, args []string) {
 	}
 
 	if err := showCommitsArg.validate(); err != nil {
-		log.Error(err)
+		errors.LogErrorWithStack(err)
 		os.Exit(1)
 	}
 	if err := showDiffArg.validate(); err != nil {
-		log.Error(err)
+		errors.LogErrorWithStack(err)
 		os.Exit(1)
 	}
 
@@ -205,7 +206,7 @@ func runShowAllCommand(cmd *cobra.Command, args []string) {
 
 	err := ghost.Show(options)
 	if err != nil {
-		log.Error(err)
+		errors.LogErrorWithStack(err)
 		os.Exit(1)
 	}
 }

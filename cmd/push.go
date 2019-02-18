@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"git-ghost/pkg/ghost"
 	"git-ghost/pkg/ghost/types"
+	"git-ghost/pkg/util/errors"
 	"os"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -77,7 +77,7 @@ func newPushCommitsArg(args []string) pushCommitsArg {
 	return pushCommitsArg
 }
 
-func (arg pushCommitsArg) validate() error {
+func (arg pushCommitsArg) validate() errors.GitGhostError {
 	if err := nonEmpty("commit-from", arg.commitsFrom); err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func runPushCommitsCommand(flags *pushFlags) func(cmd *cobra.Command, args []str
 	return func(cmd *cobra.Command, args []string) {
 		pushArg := newPushCommitsArg(args)
 		if err := pushArg.validate(); err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 		options := ghost.PushOptions{
@@ -111,7 +111,7 @@ func runPushCommitsCommand(flags *pushFlags) func(cmd *cobra.Command, args []str
 
 		result, err := ghost.Push(options)
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 
@@ -139,7 +139,7 @@ func newPushDiffArg(args []string) pushDiffArg {
 	return pushDiffArg
 }
 
-func (arg pushDiffArg) validate() error {
+func (arg pushDiffArg) validate() errors.GitGhostError {
 	if err := nonEmpty("diff-from", arg.diffFrom); err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func runPushDiffCommand(flags *pushFlags) func(cmd *cobra.Command, args []string
 	return func(cmd *cobra.Command, args []string) {
 		pushArg := newPushDiffArg(args)
 		if err := pushArg.validate(); err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 		options := ghost.PushOptions{
@@ -168,7 +168,7 @@ func runPushDiffCommand(flags *pushFlags) func(cmd *cobra.Command, args []string
 
 		result, err := ghost.Push(options)
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 
@@ -182,13 +182,13 @@ func runPushAllCommand(flags *pushFlags) func(cmd *cobra.Command, args []string)
 	return func(cmd *cobra.Command, args []string) {
 		pushCommitsArg := newPushCommitsArg(args[0:1])
 		if err := pushCommitsArg.validate(); err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 
 		pushDiffArg := newPushDiffArg(args[1:])
 		if err := pushDiffArg.validate(); err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 
@@ -209,7 +209,7 @@ func runPushAllCommand(flags *pushFlags) func(cmd *cobra.Command, args []string)
 
 		result, err := ghost.Push(options)
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"git-ghost/pkg/ghost/git"
 	"git-ghost/pkg/util"
+	"git-ghost/pkg/util/errors"
 	"io"
 	"os/exec"
 	"path"
@@ -23,9 +24,9 @@ type GhostBranch interface {
 	// FileName returns a file name contained in the GhostBranch
 	FileName() string
 	// Show writes contents of this ghost branch on passed working env to writer
-	Show(we WorkingEnv, writer io.Writer) error
+	Show(we WorkingEnv, writer io.Writer) errors.GitGhostError
 	// Apply applies contents(diff or patch) of this ghost branch on passed working env
-	Apply(we WorkingEnv) error
+	Apply(we WorkingEnv) errors.GitGhostError
 }
 
 // interface assetions
@@ -139,13 +140,13 @@ func (branches DiffBranches) AsGhostBranches() []GhostBranch {
 	return ghostBranches
 }
 
-func show(ghost GhostBranch, we WorkingEnv, writer io.Writer) error {
+func show(ghost GhostBranch, we WorkingEnv, writer io.Writer) errors.GitGhostError {
 	cmd := exec.Command("git", "-C", we.GhostDir, "--no-pager", "cat-file", "-p", fmt.Sprintf("HEAD:%s", ghost.FileName()))
 	cmd.Stdout = writer
 	return util.JustRunCmd(cmd)
 }
 
-func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string) error {
+func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string) errors.GitGhostError {
 	log.WithFields(util.MergeFields(
 		util.ToFields(ghost),
 		log.Fields{
@@ -181,17 +182,17 @@ func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string) error {
 		return git.ApplyDiffPatchFile(we.SrcDir, path.Join(we.GhostDir, ghost.FileName()))
 
 	default:
-		return fmt.Errorf("not supported on type = %+v", reflect.TypeOf(ghost))
+		return errors.Errorf("not supported on type = %+v", reflect.TypeOf(ghost))
 	}
 }
 
 // Show writes contents of this ghost branch on passed working env to writer
-func (bs CommitsBranch) Show(we WorkingEnv, writer io.Writer) error {
+func (bs CommitsBranch) Show(we WorkingEnv, writer io.Writer) errors.GitGhostError {
 	return show(bs, we, writer)
 }
 
 // Apply applies contents(diff or patch) of this ghost branch on passed working env
-func (bs CommitsBranch) Apply(we WorkingEnv) error {
+func (bs CommitsBranch) Apply(we WorkingEnv) errors.GitGhostError {
 	err := apply(bs, we, bs.CommitHashFrom)
 	if err != nil {
 		return err
@@ -200,12 +201,12 @@ func (bs CommitsBranch) Apply(we WorkingEnv) error {
 }
 
 // Show writes contents of this ghost branch on passed working env to writer
-func (bs DiffBranch) Show(we WorkingEnv, writer io.Writer) error {
+func (bs DiffBranch) Show(we WorkingEnv, writer io.Writer) errors.GitGhostError {
 	return show(bs, we, writer)
 }
 
 // Apply applies contents(diff or patch) of this ghost branch on passed working env
-func (bs DiffBranch) Apply(we WorkingEnv) error {
+func (bs DiffBranch) Apply(we WorkingEnv) errors.GitGhostError {
 	err := apply(bs, we, bs.CommitHashFrom)
 	if err != nil {
 		return err

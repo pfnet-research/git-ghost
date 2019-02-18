@@ -2,9 +2,9 @@ package git
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"git-ghost/pkg/util"
+	"git-ghost/pkg/util/errors"
 	"io"
 	"os"
 	"os/exec"
@@ -15,10 +15,10 @@ import (
 )
 
 // CreateDiffBundleFile creates patches for fromComittish..toComittish and save it to filepath
-func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) error {
+func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) errors.GitGhostError {
 	f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	defer util.LogDeferredError(f.Close)
 
@@ -30,16 +30,17 @@ func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) erro
 	cmd.Stderr = stderr
 	reader, err := cmd.StdoutPipe()
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	defer util.LogDeferredError(reader.Close)
 	err = cmd.Start()
 	if err != nil {
 		s := stderr.String()
 		if s != "" {
-			return errors.New(s)
+			err := errors.New(s)
+			return errors.WithStack(err)
 		}
-		return err
+		return errors.WithStack(err)
 	}
 
 	total := 0
@@ -50,7 +51,7 @@ func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) erro
 			d := buf[:n]
 			_, err = f.Write(d)
 			if err != nil {
-				return err
+				return errors.WithStack(err)
 			}
 			total += n
 		}
@@ -58,14 +59,14 @@ func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) erro
 			if err == io.EOF {
 				break
 			}
-			return err
+			return errors.WithStack(err)
 		}
 	}
 	return nil
 }
 
 // ApplyDiffBundleFile apply a patch file created in CreateDiffBundleFile
-func ApplyDiffBundleFile(dir, filepath string) error {
+func ApplyDiffBundleFile(dir, filepath string) errors.GitGhostError {
 	var errs error
 	err := util.JustRunCmd(
 		exec.Command("git", "-C", dir, "am", filepath),
@@ -85,14 +86,14 @@ func ApplyDiffBundleFile(dir, filepath string) error {
 			errs = multierror.Append(errs, resetErr)
 		}
 	}
-	return errs
+	return errors.WithStack(errs)
 }
 
 // CreateDiffPatchFile creates a diff from comittish to current working state of `dir` and save it to filepath
-func CreateDiffPatchFile(dir, filepath, comittish string) error {
+func CreateDiffPatchFile(dir, filepath, comittish string) errors.GitGhostError {
 	f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	defer util.LogDeferredError(f.Close)
 
@@ -101,7 +102,7 @@ func CreateDiffPatchFile(dir, filepath, comittish string) error {
 	cmd.Stderr = stderr
 	reader, err := cmd.StdoutPipe()
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	defer util.LogDeferredError(reader.Close)
 	err = cmd.Start()
@@ -110,7 +111,7 @@ func CreateDiffPatchFile(dir, filepath, comittish string) error {
 		if s != "" {
 			return errors.New(s)
 		}
-		return err
+		return errors.WithStack(err)
 	}
 
 	total := 0
@@ -121,7 +122,7 @@ func CreateDiffPatchFile(dir, filepath, comittish string) error {
 			d := buf[:n]
 			_, err = f.Write(d)
 			if err != nil {
-				return err
+				return errors.WithStack(err)
 			}
 			total += n
 		}
@@ -129,17 +130,17 @@ func CreateDiffPatchFile(dir, filepath, comittish string) error {
 			if err == io.EOF {
 				break
 			}
-			return err
+			return errors.WithStack(err)
 		}
 	}
 	return nil
 }
 
 // AppendNonIndexedDiffFiles appends non-indexed diff files
-func AppendNonIndexedDiffFiles(dir, filepath string, nonIndexedFilepaths []string) error {
+func AppendNonIndexedDiffFiles(dir, filepath string, nonIndexedFilepaths []string) errors.GitGhostError {
 	f, err := os.OpenFile(filepath, os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	defer util.LogDeferredError(f.Close)
 
@@ -160,11 +161,11 @@ func AppendNonIndexedDiffFiles(dir, filepath string, nonIndexedFilepaths []strin
 			errs = multierror.Append(errs, err)
 		}
 	}
-	return errs
+	return errors.WithStack(errs)
 }
 
 // ApplyDiffPatchFile apply a diff file created by CreateDiffPatchFile
-func ApplyDiffPatchFile(dir, filepath string) error {
+func ApplyDiffPatchFile(dir, filepath string) errors.GitGhostError {
 	return util.JustRunCmd(
 		exec.Command("git", "-C", dir, "apply", filepath),
 	)
