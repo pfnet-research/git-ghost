@@ -178,7 +178,7 @@ func setupBasicEnv(workDir *util.WorkDir) (*util.WorkDir, *util.WorkDir, error) 
 		return nil, nil, err
 	}
 	srcDir.Env = map[string]string{
-		"GHOST_REPO": workDir.Dir,
+		"GIT_GHOST_REPO": workDir.Dir,
 	}
 
 	dstDir, err := util.CloneWorkDir(srcDir)
@@ -187,7 +187,7 @@ func setupBasicEnv(workDir *util.WorkDir) (*util.WorkDir, *util.WorkDir, error) 
 		return nil, nil, err
 	}
 	dstDir.Env = map[string]string{
-		"GHOST_REPO": workDir.Dir,
+		"GIT_GHOST_REPO": workDir.Dir,
 	}
 	return srcDir, dstDir, nil
 }
