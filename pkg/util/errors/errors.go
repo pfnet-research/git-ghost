@@ -14,7 +14,7 @@ type GitGhostError interface {
 // LogErrorWithStack emits a log message with errors.GitGhostError level and stack trace with debug level
 func LogErrorWithStack(err GitGhostError) {
 	log.Error(err)
-	log.Debugf("%+v", err)
+	log.Tracef("%+v", err)
 }
 
 func Errorf(s string, args ...interface{}) GitGhostError {
