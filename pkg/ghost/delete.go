@@ -52,7 +52,7 @@ func Delete(options DeleteOptions) (*DeleteResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer util.LogError(workingEnv.Clean)
+	defer util.LogDeferredError(workingEnv.Clean)
 
 	deleteBranches := func(branches []types.GhostBranch, dryrun bool) error {
 		var branchNames []string
