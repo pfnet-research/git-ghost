@@ -44,6 +44,10 @@ var RootCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		err = globalOpts.SetDefaults()
+		if err != nil {
+			return err
+		}
 		err = globalOpts.Validate()
 		if err != nil {
 			return err
@@ -61,16 +65,10 @@ var globalOpts globalFlags
 
 func init() {
 	cobra.OnInitialize()
-	currentDir := os.Getenv("PWD")
-	RootCmd.PersistentFlags().StringVar(&globalOpts.srcDir, "src-dir", currentDir, "source directory which you create ghost from")
-	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostWorkDir, "ghost-working-dir", os.TempDir(), "local root directory for git-ghost interacting with ghost repository")
-	ghostPrefixEnv := os.Getenv("GHOST_PREFIX")
-	if ghostPrefixEnv == "" {
-		ghostPrefixEnv = "ghost"
-	}
-	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostPrefix, "ghost-prefix", ghostPrefixEnv, "prefix of ghost branch name")
-	ghostRepoEnv := os.Getenv("GHOST_REPO")
-	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostRepo, "ghost-repo", ghostRepoEnv, "git remote url for ghosts repository")
+	RootCmd.PersistentFlags().StringVar(&globalOpts.srcDir, "src-dir", "", "source directory which you create ghost from (default to PWD env)")
+	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostWorkDir, "ghost-working-dir", "", "local root directory for git-ghost interacting with ghost repository (default to a temporary directory)")
+	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostPrefix, "ghost-prefix", "", "prefix of ghost branch name (default to GIT_GHOST_PREFIX env, or ghost)")
+	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostRepo, "ghost-repo", "", "git remote url for ghosts repository (default to GIT_GHOST_REPO env)")
 	RootCmd.PersistentFlags().BoolVarP(&globalOpts.verbose, "verbose", "v", false, "verbose mode")
 	RootCmd.AddCommand(versionCmd)
 }
@@ -88,6 +86,26 @@ func validateEnvironment() error {
 	err := git.ValidateGit()
 	if err != nil {
 		return errors.New("git is required")
+	}
+	return nil
+}
+
+func (flags *globalFlags) SetDefaults() error {
+	if globalOpts.srcDir == "" {
+		globalOpts.srcDir = os.Getenv("PWD")
+	}
+	if globalOpts.ghostWorkDir == "" {
+		globalOpts.ghostWorkDir = os.TempDir()
+	}
+	if globalOpts.ghostPrefix == "" {
+		ghostPrefixEnv := os.Getenv("GIT_GHOST_PREFIX")
+		if ghostPrefixEnv == "" {
+			ghostPrefixEnv = "ghost"
+		}
+		globalOpts.ghostPrefix = ghostPrefixEnv
+	}
+	if globalOpts.ghostRepo == "" {
+		globalOpts.ghostRepo = os.Getenv("GIT_GHOST_REPO")
 	}
 	return nil
 }
