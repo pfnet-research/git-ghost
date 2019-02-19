@@ -3,12 +3,13 @@ package git
 import (
 	"fmt"
 	"git-ghost/pkg/util"
+	"git-ghost/pkg/util/errors"
 	"os/exec"
 	"strings"
 )
 
 // ListRemoteBranchNames returns remote branch names
-func ListRemoteBranchNames(repo string, branchnames []string) ([]string, error) {
+func ListRemoteBranchNames(repo string, branchnames []string) ([]string, errors.GitGhostError) {
 	if len(branchnames) == 0 {
 		return []string{}, nil
 	}
@@ -24,7 +25,7 @@ func ListRemoteBranchNames(repo string, branchnames []string) ([]string, error) 
 	opts := append([]string{"ls-remote", "-q", "--heads", "--refs", repo}, branchNamesToSearch...)
 	output, err := util.JustOutputCmd(exec.Command("git", opts...))
 	if err != nil {
-		return []string{}, err
+		return []string{}, errors.WithStack(err)
 	}
 
 	var branchNames []string
@@ -34,7 +35,7 @@ func ListRemoteBranchNames(repo string, branchnames []string) ([]string, error) 
 		}
 		tokens := strings.Fields(line)
 		if len(tokens) != 2 {
-			return []string{}, fmt.Errorf("Got unexpected line: %s", line)
+			return []string{}, errors.Errorf("Got unexpected line: %s", line)
 		}
 		// Assume it starts from "refs/heads/"
 		name := tokens[1][11:]

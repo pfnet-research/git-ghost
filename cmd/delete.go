@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"git-ghost/pkg/ghost"
 	"git-ghost/pkg/ghost/types"
+	"git-ghost/pkg/util/errors"
 	"os"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -65,7 +65,7 @@ func runDeleteCommitsCommand(flags *deleteFlags) func(cmd *cobra.Command, args [
 	return func(cmd *cobra.Command, args []string) {
 		err := flags.validate()
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 		opts := ghost.DeleteOptions{
@@ -84,7 +84,7 @@ func runDeleteCommitsCommand(flags *deleteFlags) func(cmd *cobra.Command, args [
 
 		res, err := ghost.Delete(opts)
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 		fmt.Printf(res.PrettyString())
@@ -95,7 +95,7 @@ func runDeleteDiffCommand(flags *deleteFlags) func(cmd *cobra.Command, args []st
 	return func(cmd *cobra.Command, args []string) {
 		err := flags.validate()
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 		opts := ghost.DeleteOptions{
@@ -114,7 +114,7 @@ func runDeleteDiffCommand(flags *deleteFlags) func(cmd *cobra.Command, args []st
 
 		res, err := ghost.Delete(opts)
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 		fmt.Printf(res.PrettyString())
@@ -125,7 +125,7 @@ func runDeleteAllCommand(flags *deleteFlags) func(cmd *cobra.Command, args []str
 	return func(cmd *cobra.Command, args []string) {
 		err := flags.validate()
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 		opts := ghost.DeleteOptions{
@@ -149,16 +149,16 @@ func runDeleteAllCommand(flags *deleteFlags) func(cmd *cobra.Command, args []str
 
 		res, err := ghost.Delete(opts)
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 		fmt.Printf(res.PrettyString())
 	}
 }
 
-func (flags deleteFlags) validate() error {
+func (flags deleteFlags) validate() errors.GitGhostError {
 	if (flags.hashFrom == "" || flags.hashTo == "") && !flags.all && !flags.dryrun {
-		return fmt.Errorf("all must be set if multiple ghosts branches are deleted")
+		return errors.Errorf("all must be set if multiple ghosts branches are deleted")
 	}
 	return nil
 }

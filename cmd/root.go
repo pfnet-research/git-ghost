@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"git-ghost/pkg/ghost/git"
 	"git-ghost/pkg/ghost/types"
+	"git-ghost/pkg/util/errors"
 	"os"
 
 	log "github.com/Sirupsen/logrus"
@@ -16,7 +16,7 @@ type globalFlags struct {
 	ghostWorkDir string
 	ghostPrefix  string
 	ghostRepo    string
-	verbose      bool
+	verbose      int
 }
 
 func (gf globalFlags) WorkingEnvSpec() types.WorkingEnvSpec {
@@ -52,10 +52,15 @@ var RootCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		if globalOpts.verbose {
-			log.SetLevel(log.DebugLevel)
-		} else {
+		switch globalOpts.verbose {
+		case 0:
 			log.SetLevel(log.ErrorLevel)
+		case 1:
+			log.SetLevel(log.InfoLevel)
+		case 2:
+			log.SetLevel(log.DebugLevel)
+		case 3:
+			log.SetLevel(log.TraceLevel)
 		}
 		return nil
 	},
@@ -69,7 +74,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostWorkDir, "ghost-working-dir", "", "local root directory for git-ghost interacting with ghost repository (default to a temporary directory)")
 	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostPrefix, "ghost-prefix", "", "prefix of ghost branch name (default to GIT_GHOST_PREFIX env, or ghost)")
 	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostRepo, "ghost-repo", "", "git remote url for ghosts repository (default to GIT_GHOST_REPO env)")
-	RootCmd.PersistentFlags().BoolVarP(&globalOpts.verbose, "verbose", "v", false, "verbose mode")
+	RootCmd.PersistentFlags().CountVarP(&globalOpts.verbose, "verbose", "v", "verbose mode")
 	RootCmd.AddCommand(versionCmd)
 }
 
@@ -82,7 +87,7 @@ var versionCmd = &cobra.Command{
 	},
 }
 
-func validateEnvironment() error {
+func validateEnvironment() errors.GitGhostError {
 	err := git.ValidateGit()
 	if err != nil {
 		return errors.New("git is required")
@@ -90,7 +95,7 @@ func validateEnvironment() error {
 	return nil
 }
 
-func (flags *globalFlags) SetDefaults() error {
+func (flags *globalFlags) SetDefaults() errors.GitGhostError {
 	if globalOpts.srcDir == "" {
 		globalOpts.srcDir = os.Getenv("PWD")
 	}
@@ -110,13 +115,13 @@ func (flags *globalFlags) SetDefaults() error {
 	return nil
 }
 
-func (flags *globalFlags) Validate() error {
+func (flags *globalFlags) Validate() errors.GitGhostError {
 	if flags.srcDir == "" {
 		return errors.New("src-dir must be specified")
 	}
 	_, err := os.Stat(flags.ghostWorkDir)
 	if err != nil {
-		return fmt.Errorf("ghost-working-dir is not found (value: %v)", flags.ghostWorkDir)
+		return errors.Errorf("ghost-working-dir is not found (value: %v)", flags.ghostWorkDir)
 	}
 	if flags.ghostPrefix == "" {
 		return errors.New("ghost-prefix must be specified")

@@ -3,6 +3,7 @@ package cmd
 import (
 	"git-ghost/pkg/ghost"
 	"git-ghost/pkg/ghost/types"
+	"git-ghost/pkg/util/errors"
 	"os"
 
 	log "github.com/Sirupsen/logrus"
@@ -79,7 +80,7 @@ func newPullCommitsArg(args []string) pullCommitsArg {
 	return arg
 }
 
-func (arg pullCommitsArg) validate() error {
+func (arg pullCommitsArg) validate() errors.GitGhostError {
 	if err := nonEmpty("commit-from", arg.commitsFrom); err != nil {
 		return err
 	}
@@ -93,7 +94,7 @@ func runPullCommitsCommand(flags *pullFlags) func(cmd *cobra.Command, args []str
 	return func(cmd *cobra.Command, args []string) {
 		arg := newPullCommitsArg(args)
 		if err := arg.validate(); err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 
@@ -109,7 +110,7 @@ func runPullCommitsCommand(flags *pullFlags) func(cmd *cobra.Command, args []str
 
 		err := ghost.Pull(options)
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 	}
@@ -140,7 +141,7 @@ func newPullDiffArg(args []string) pullDiffArg {
 	return arg
 }
 
-func (arg pullDiffArg) validate() error {
+func (arg pullDiffArg) validate() errors.GitGhostError {
 	if err := nonEmpty("diff-from-hash", arg.diffFrom); err != nil {
 		return err
 	}
@@ -154,7 +155,7 @@ func runPullDiffCommand(flags *pullFlags) func(cmd *cobra.Command, args []string
 	return func(cmd *cobra.Command, args []string) {
 		arg := newPullDiffArg(args)
 		if err := arg.validate(); err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 
@@ -170,7 +171,7 @@ func runPullDiffCommand(flags *pullFlags) func(cmd *cobra.Command, args []string
 
 		err := ghost.Pull(options)
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 	}
@@ -194,11 +195,11 @@ func runPullAllCommand(flags *pullFlags) func(cmd *cobra.Command, args []string)
 		}
 
 		if err := pullCommitsArg.validate(); err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 		if err := pullDiffArg.validate(); err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 
@@ -219,7 +220,7 @@ func runPullAllCommand(flags *pullFlags) func(cmd *cobra.Command, args []string)
 
 		err := ghost.Pull(options)
 		if err != nil {
-			log.Error(err)
+			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 	}

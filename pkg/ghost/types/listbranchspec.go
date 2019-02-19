@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"git-ghost/pkg/ghost/git"
+	"git-ghost/pkg/util/errors"
 )
 
 // ListCommitsBranchSpec is spec for list commits branch
@@ -37,10 +38,10 @@ func (ls *ListCommitsBranchSpec) Resolve(srcDir string) *ListCommitsBranchSpec {
 }
 
 // GetBranches returns CommitsBranches from spec
-func (ls *ListCommitsBranchSpec) GetBranches(repo string) (CommitsBranches, error) {
+func (ls *ListCommitsBranchSpec) GetBranches(repo string) (CommitsBranches, errors.GitGhostError) {
 	branchNames, err := listGhostBranchNames(repo, ls.Prefix, ls.HashFrom, ls.HashTo)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	var branches CommitsBranches
 	for _, name := range branchNames {
@@ -62,10 +63,10 @@ func (ls *ListDiffBranchSpec) Resolve(srcDir string) *ListDiffBranchSpec {
 }
 
 // GetBranches returns DiffBranches from spec
-func (ls *ListDiffBranchSpec) GetBranches(repo string) (DiffBranches, error) {
+func (ls *ListDiffBranchSpec) GetBranches(repo string) (DiffBranches, errors.GitGhostError) {
 	branchNames, err := listGhostBranchNames(repo, ls.Prefix, ls.HashFrom, ls.HashTo)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	var branches DiffBranches
 	for _, name := range branchNames {
@@ -92,7 +93,7 @@ func listGhostBranchNames(repo, prefix, fromComittish, toComittish string) ([]st
 		fmt.Sprintf("%s/%s/%s", prefix, fromPattern, toPattern),
 	})
 	if err != nil {
-		return []string{}, err
+		return []string{}, errors.WithStack(err)
 	}
 
 	return branchNames, nil

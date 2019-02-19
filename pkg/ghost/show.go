@@ -3,6 +3,7 @@ package ghost
 import (
 	"git-ghost/pkg/ghost/types"
 	"git-ghost/pkg/util"
+	"git-ghost/pkg/util/errors"
 	"io"
 
 	log "github.com/Sirupsen/logrus"
@@ -23,19 +24,20 @@ type ShowOptions struct {
 	Writer io.Writer
 }
 
-func pullAndshow(branchSpec types.PullableGhostBranchSpec, we types.WorkingEnv, writer io.Writer) error {
+func pullAndshow(branchSpec types.PullableGhostBranchSpec, we types.WorkingEnv, writer io.Writer) errors.GitGhostError {
 	branch, err := branchSpec.PullBranch(we)
 	if err != nil {
 		return err
 	}
 	if branch != nil {
-		return branch.Show(we, writer)
+		err := branch.Show(we, writer)
+		return err
 	}
 	return nil
 }
 
 // Show writes ghost branches contents to option.Writer
-func Show(options ShowOptions) error {
+func Show(options ShowOptions) errors.GitGhostError {
 	log.WithFields(util.ToFields(options)).Debug("pull command with")
 
 	if options.CommitsBranchSpec != nil {
@@ -43,7 +45,7 @@ func Show(options ShowOptions) error {
 		if err != nil {
 			return err
 		}
-		defer util.LogDeferredError(we.Clean)
+		defer util.LogDeferredGitGhostError(we.Clean)
 		err = pullAndshow(options.CommitsBranchSpec, *we, options.Writer)
 		if err != nil {
 			return err
@@ -55,7 +57,7 @@ func Show(options ShowOptions) error {
 		if err != nil {
 			return err
 		}
-		defer util.LogDeferredError(we.Clean)
+		defer util.LogDeferredGitGhostError(we.Clean)
 		return pullAndshow(options.PullableDiffBranchSpec, *we, options.Writer)
 	}
 

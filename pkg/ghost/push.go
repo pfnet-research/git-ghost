@@ -4,6 +4,7 @@ import (
 	"git-ghost/pkg/ghost/git"
 	"git-ghost/pkg/ghost/types"
 	"git-ghost/pkg/util"
+	"git-ghost/pkg/util/errors"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -22,14 +23,14 @@ type PushResult struct {
 }
 
 // Push pushes create ghost branches and push them to remote ghost repository
-func Push(options PushOptions) (*PushResult, error) {
+func Push(options PushOptions) (*PushResult, errors.GitGhostError) {
 	log.WithFields(util.ToFields(options)).Debug("push command with")
 
 	var result PushResult
 	if options.CommitsBranchSpec != nil {
 		branch, err := pushGhostBranch(options.CommitsBranchSpec, options.WorkingEnvSpec)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		commitsBranch, _ := branch.(*types.CommitsBranch)
 		result.CommitsBranch = commitsBranch
@@ -38,7 +39,7 @@ func Push(options PushOptions) (*PushResult, error) {
 	if options.DiffBranchSpec != nil {
 		branch, err := pushGhostBranch(options.DiffBranchSpec, options.WorkingEnvSpec)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		diffBranch, _ := branch.(*types.DiffBranch)
 		result.DiffBranch = diffBranch
@@ -47,16 +48,16 @@ func Push(options PushOptions) (*PushResult, error) {
 	return &result, nil
 }
 
-func pushGhostBranch(branchSpec types.GhostBranchSpec, workingEnvSpec types.WorkingEnvSpec) (types.GhostBranch, error) {
+func pushGhostBranch(branchSpec types.GhostBranchSpec, workingEnvSpec types.WorkingEnvSpec) (types.GhostBranch, errors.GitGhostError) {
 	workingEnv, err := workingEnvSpec.Initialize()
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
-	defer util.LogDeferredError(workingEnv.Clean)
+	defer util.LogDeferredGitGhostError(workingEnv.Clean)
 	dstDir := workingEnv.GhostDir
 	branch, err := branchSpec.CreateBranch(*workingEnv)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	if branch == nil {
 		return nil, nil
@@ -66,7 +67,7 @@ func pushGhostBranch(branchSpec types.GhostBranchSpec, workingEnvSpec types.Work
 		branch.BranchName(),
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	if existence {
 		log.WithFields(log.Fields{
@@ -82,7 +83,7 @@ func pushGhostBranch(branchSpec types.GhostBranchSpec, workingEnvSpec types.Work
 	}).Info("pushing branch")
 	err = git.Push(dstDir, branch.BranchName())
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	return branch, nil
 }

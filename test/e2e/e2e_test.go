@@ -52,14 +52,14 @@ func CreateTestTypeDefault(ghostDir *util.WorkDir) func(t *testing.T) {
 		}
 		baseCommit := strings.TrimRight(stdout, "\n")
 
-		stdout, _, err = srcDir.RunCommmand("git", "ghost", "push")
+		stdout, _, err = srcDir.RunGitGhostCommmand("push")
 		if err != nil {
 			t.Fatal(err)
 		}
 		diffHash := stdout
 		assert.NotEqual(t, "", diffHash)
 
-		stdout, _, err = srcDir.RunCommmand("git", "ghost", "show", diffHash)
+		stdout, _, err = srcDir.RunGitGhostCommmand("show", diffHash)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -70,7 +70,7 @@ func CreateTestTypeDefault(ghostDir *util.WorkDir) func(t *testing.T) {
 			t.Fatal(err)
 		}
 		assert.Equal(t, "b\n", stdout)
-		_, _, err = dstDir.RunCommmand("git", "ghost", "pull", diffHash)
+		_, _, err = dstDir.RunGitGhostCommmand("pull", diffHash)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -80,19 +80,19 @@ func CreateTestTypeDefault(ghostDir *util.WorkDir) func(t *testing.T) {
 		}
 		assert.Equal(t, "c\n", stdout)
 
-		stdout, _, err = dstDir.RunCommmand("git", "ghost", "list")
+		stdout, _, err = dstDir.RunGitGhostCommmand("list")
 		if err != nil {
 			t.Fatal(err)
 		}
 		assert.Contains(t, stdout, fmt.Sprintf("%s %s", baseCommit, diffHash))
 
-		stdout, _, err = dstDir.RunCommmand("git", "ghost", "delete", "--all")
+		stdout, _, err = dstDir.RunGitGhostCommmand("delete", "--all")
 		if err != nil {
 			t.Fatal(err)
 		}
 		assert.Contains(t, stdout, fmt.Sprintf("%s %s", baseCommit, diffHash))
 
-		stdout, _, err = dstDir.RunCommmand("git", "ghost", "list")
+		stdout, _, err = dstDir.RunGitGhostCommmand("list")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -109,7 +109,7 @@ func CreateTestTypeCommits(ghostDir *util.WorkDir) func(t *testing.T) {
 		defer srcDir.Remove()
 		defer dstDir.Remove()
 
-		stdout, _, err := srcDir.RunCommmand("git", "ghost", "push", "commits", "HEAD~1")
+		stdout, _, err := srcDir.RunGitGhostCommmand("push", "commits", "HEAD~1")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -120,7 +120,7 @@ func CreateTestTypeCommits(ghostDir *util.WorkDir) func(t *testing.T) {
 		assert.NotEqual(t, "", baseCommit)
 		assert.NotEqual(t, "", targetCommit)
 
-		stdout, _, err = srcDir.RunCommmand("git", "ghost", "show", "commits", baseCommit, targetCommit)
+		stdout, _, err = srcDir.RunGitGhostCommmand("show", "commits", baseCommit, targetCommit)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -135,7 +135,7 @@ func CreateTestTypeCommits(ghostDir *util.WorkDir) func(t *testing.T) {
 			t.Fatal(err)
 		}
 		assert.Equal(t, "a\n", stdout)
-		_, _, err = dstDir.RunCommmand("git", "ghost", "pull", "commits", baseCommit, targetCommit)
+		_, _, err = dstDir.RunGitGhostCommmand("pull", "commits", baseCommit, targetCommit)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -145,19 +145,19 @@ func CreateTestTypeCommits(ghostDir *util.WorkDir) func(t *testing.T) {
 		}
 		assert.Equal(t, "b\n", stdout)
 
-		stdout, _, err = dstDir.RunCommmand("git", "ghost", "list", "commits")
+		stdout, _, err = dstDir.RunGitGhostCommmand("list", "commits")
 		if err != nil {
 			t.Fatal(err)
 		}
 		assert.Contains(t, stdout, fmt.Sprintf("%s %s", baseCommit, targetCommit))
 
-		stdout, _, err = dstDir.RunCommmand("git", "ghost", "delete", "commits", "--all")
+		stdout, _, err = dstDir.RunGitGhostCommmand("delete", "commits", "--all")
 		if err != nil {
 			t.Fatal(err)
 		}
 		assert.Contains(t, stdout, fmt.Sprintf("%s %s", baseCommit, targetCommit))
 
-		stdout, _, err = dstDir.RunCommmand("git", "ghost", "list", "commits")
+		stdout, _, err = dstDir.RunGitGhostCommmand("list", "commits")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -186,20 +186,20 @@ func CreateTestTypeDiff(ghostDir *util.WorkDir) func(t *testing.T) {
 		}
 		baseCommit := strings.TrimRight(stdout, "\n")
 
-		stdout, _, err = srcDir.RunCommmand("git", "ghost", "push", "diff")
+		stdout, _, err = srcDir.RunGitGhostCommmand("push", "diff")
 		if err != nil {
 			t.Fatal(err)
 		}
 		diffHash := stdout
 		assert.NotEqual(t, "", diffHash)
 
-		stdout, _, err = srcDir.RunCommmand("git", "ghost", "show", "diff", diffHash)
+		stdout, _, err = srcDir.RunGitGhostCommmand("show", "diff", diffHash)
 		if err != nil {
 			t.Fatal(err)
 		}
 		assert.Contains(t, stdout, "-b\n+c\n")
 
-		_, _, err = dstDir.RunCommmand("git", "ghost", "pull", "diff", diffHash)
+		_, _, err = dstDir.RunGitGhostCommmand("pull", "diff", diffHash)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -209,19 +209,19 @@ func CreateTestTypeDiff(ghostDir *util.WorkDir) func(t *testing.T) {
 		}
 		assert.Equal(t, "c\n", stdout)
 
-		stdout, _, err = dstDir.RunCommmand("git", "ghost", "list", "diff")
+		stdout, _, err = dstDir.RunGitGhostCommmand("list", "diff")
 		if err != nil {
 			t.Fatal(err)
 		}
 		assert.Contains(t, stdout, fmt.Sprintf("%s %s", baseCommit, diffHash))
 
-		stdout, _, err = dstDir.RunCommmand("git", "ghost", "delete", "diff", "--all")
+		stdout, _, err = dstDir.RunGitGhostCommmand("delete", "diff", "--all")
 		if err != nil {
 			t.Fatal(err)
 		}
 		assert.Contains(t, stdout, fmt.Sprintf("%s %s", baseCommit, diffHash))
 
-		stdout, _, err = dstDir.RunCommmand("git", "ghost", "list", "diff")
+		stdout, _, err = dstDir.RunGitGhostCommmand("list", "diff")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -244,7 +244,7 @@ func CreateTestTypeAll(ghostDir *util.WorkDir) func(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		stdout, _, err := srcDir.RunCommmand("git", "ghost", "push", "all", "HEAD~1")
+		stdout, _, err := srcDir.RunGitGhostCommmand("push", "all", "HEAD~1")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -258,7 +258,7 @@ func CreateTestTypeAll(ghostDir *util.WorkDir) func(t *testing.T) {
 		diffHash := lines[1]
 		assert.NotEqual(t, "", diffHash)
 
-		stdout, _, err = srcDir.RunCommmand("git", "ghost", "show", "all", baseCommit, targetCommit, diffHash)
+		stdout, _, err = srcDir.RunGitGhostCommmand("show", "all", baseCommit, targetCommit, diffHash)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -274,7 +274,7 @@ func CreateTestTypeAll(ghostDir *util.WorkDir) func(t *testing.T) {
 			t.Fatal(err)
 		}
 		assert.Equal(t, "a\n", stdout)
-		_, _, err = dstDir.RunCommmand("git", "ghost", "pull", "all", baseCommit, targetCommit, diffHash)
+		_, _, err = dstDir.RunGitGhostCommmand("pull", "all", baseCommit, targetCommit, diffHash)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -284,21 +284,21 @@ func CreateTestTypeAll(ghostDir *util.WorkDir) func(t *testing.T) {
 		}
 		assert.Equal(t, "c\n", stdout)
 
-		stdout, _, err = dstDir.RunCommmand("git", "ghost", "list", "all")
+		stdout, _, err = dstDir.RunGitGhostCommmand("list", "all")
 		if err != nil {
 			t.Fatal(err)
 		}
 		assert.Contains(t, stdout, fmt.Sprintf("%s %s", baseCommit, targetCommit))
 		assert.Contains(t, stdout, fmt.Sprintf("%s %s", targetCommit, diffHash))
 
-		stdout, _, err = dstDir.RunCommmand("git", "ghost", "delete", "all", "-v", "--all")
+		stdout, _, err = dstDir.RunGitGhostCommmand("delete", "all", "-v", "--all")
 		if err != nil {
 			t.Fatal(err)
 		}
 		assert.Contains(t, stdout, fmt.Sprintf("%s %s", baseCommit, targetCommit))
 		assert.Contains(t, stdout, fmt.Sprintf("%s %s", targetCommit, diffHash))
 
-		stdout, _, err = dstDir.RunCommmand("git", "ghost", "list", "all")
+		stdout, _, err = dstDir.RunGitGhostCommmand("list", "all")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -328,14 +328,14 @@ func CreateTestIncludeFile(ghostDir *util.WorkDir) func(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		stdout, _, err := srcDir.RunCommmand("git", "ghost", "push", "--include", "included_file")
+		stdout, _, err := srcDir.RunGitGhostCommmand("push", "--include", "included_file")
 		if err != nil {
 			t.Fatal(err)
 		}
 		diffHash := strings.TrimRight(stdout, "\n")
 		assert.NotEqual(t, "", diffHash)
 
-		_, _, err = dstDir.RunCommmand("git", "ghost", "pull", diffHash)
+		_, _, err = dstDir.RunGitGhostCommmand("pull", diffHash)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -374,14 +374,14 @@ func CreateTestIncludeLinkFile(ghostDir *util.WorkDir) func(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		stdout, _, err := srcDir.RunCommmand("git", "ghost", "push", "--include", "included_link", "--follow-symlinks")
+		stdout, _, err := srcDir.RunGitGhostCommmand("push", "--include", "included_link", "--follow-symlinks")
 		if err != nil {
 			t.Fatal(err)
 		}
 		diffHash := strings.TrimRight(stdout, "\n")
 		assert.NotEqual(t, "", diffHash)
 
-		_, _, err = dstDir.RunCommmand("git", "ghost", "pull", diffHash)
+		_, _, err = dstDir.RunGitGhostCommmand("pull", diffHash)
 		if err != nil {
 			t.Fatal(err)
 		}

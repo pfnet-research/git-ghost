@@ -2,12 +2,13 @@ package git
 
 import (
 	"git-ghost/pkg/util"
+	"git-ghost/pkg/util/errors"
 	"os/exec"
 	"strings"
 )
 
 // ResolveComittish resolves comittish as full commit hash on dir
-func ResolveComittish(dir, comittish string) (string, error) {
+func ResolveComittish(dir, comittish string) (string, errors.GitGhostError) {
 	commit, err := util.JustOutputCmd(
 		exec.Command("git", "-C", dir, "rev-list", "-1", comittish),
 	)
