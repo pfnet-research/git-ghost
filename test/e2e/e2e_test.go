@@ -42,20 +42,20 @@ func CreateTestBasicScenario(ghostDir *util.WorkDir) func(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		stdout, _, err := srcDir.RunCommmand("git", "ghost", "push")
+		stdout, _, err := srcDir.RunGitGhostCommmand("push")
 		if err != nil {
 			t.Fatal(err)
 		}
 		diffHash := strings.TrimRight(stdout, "\n")
 		assert.NotEqual(t, "", diffHash)
 
-		_, _, err = srcDir.RunCommmand("git", "ghost", "show", diffHash)
+		_, _, err = srcDir.RunGitGhostCommmand("show", diffHash)
 		if err != nil {
 			t.Fatal(err)
 		}
 		// TODO: Do some assertion
 
-		_, _, err = dstDir.RunCommmand("git", "ghost", "pull", diffHash)
+		_, _, err = dstDir.RunGitGhostCommmand("pull", diffHash)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -65,7 +65,7 @@ func CreateTestBasicScenario(ghostDir *util.WorkDir) func(t *testing.T) {
 		}
 		assert.Equal(t, "c\n", stdout)
 
-		_, _, err = dstDir.RunCommmand("git", "ghost", "list")
+		_, _, err = dstDir.RunGitGhostCommmand("list")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -96,14 +96,14 @@ func CreateTestIncludeFile(ghostDir *util.WorkDir) func(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		stdout, _, err := srcDir.RunCommmand("git", "ghost", "-vvv", "push", "--include", "included_file")
+		stdout, _, err := srcDir.RunGitGhostCommmand("push", "--include", "included_file")
 		if err != nil {
 			t.Fatal(err)
 		}
 		diffHash := strings.TrimRight(stdout, "\n")
 		assert.NotEqual(t, "", diffHash)
 
-		_, _, err = dstDir.RunCommmand("git", "ghost", "pull", diffHash)
+		_, _, err = dstDir.RunGitGhostCommmand("pull", diffHash)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -142,14 +142,14 @@ func CreateTestIncludeLinkFile(ghostDir *util.WorkDir) func(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		stdout, _, err := srcDir.RunCommmand("git", "ghost", "push", "--include", "included_link", "--follow-symlinks")
+		stdout, _, err := srcDir.RunGitGhostCommmand("push", "--include", "included_link", "--follow-symlinks")
 		if err != nil {
 			t.Fatal(err)
 		}
 		diffHash := strings.TrimRight(stdout, "\n")
 		assert.NotEqual(t, "", diffHash)
 
-		_, _, err = dstDir.RunCommmand("git", "ghost", "pull", diffHash)
+		_, _, err = dstDir.RunGitGhostCommmand("pull", diffHash)
 		if err != nil {
 			t.Fatal(err)
 		}

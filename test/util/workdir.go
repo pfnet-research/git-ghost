@@ -71,6 +71,16 @@ func (wd *WorkDir) Remove() error {
 	return os.RemoveAll(wd.Dir)
 }
 
+func (wd *WorkDir) RunGitGhostCommmand(args ...string) (string, string, error) {
+	newArgs := []string{"ghost"}
+	debug := os.Getenv("DEBUG")
+	if debug != "" {
+		newArgs = append(newArgs, "-vvv")
+	}
+	newArgs = append(newArgs, args...)
+	return wd.RunCommmand("git", newArgs...)
+}
+
 func (wd *WorkDir) RunCommmand(command string, args ...string) (string, string, error) {
 	cmd := exec.Command(command, args...)
 	stdout := bytes.NewBufferString("")
