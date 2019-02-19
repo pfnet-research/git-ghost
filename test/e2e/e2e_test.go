@@ -1,6 +1,7 @@
 package e2e
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -22,12 +23,15 @@ func TestAll(t *testing.T) {
 	}
 	defer ghostDir.Remove()
 
-	t.Run("BasicScenario", CreateTestBasicScenario(ghostDir))
+	t.Run("TypeDefault", CreateTestTypeDefault(ghostDir))
+	t.Run("TypeCommits", CreateTestTypeCommits(ghostDir))
+	t.Run("TypeDiff", CreateTestTypeDiff(ghostDir))
+	t.Run("TypeAll", CreateTestTypeAll(ghostDir))
 	t.Run("IncludeFile", CreateTestIncludeFile(ghostDir))
 	t.Run("IncludeLinkFile", CreateTestIncludeLinkFile(ghostDir))
 }
 
-func CreateTestBasicScenario(ghostDir *util.WorkDir) func(t *testing.T) {
+func CreateTestTypeDefault(ghostDir *util.WorkDir) func(t *testing.T) {
 	return func(t *testing.T) {
 		srcDir, dstDir, err := setupBasicEnv(ghostDir)
 		if err != nil {
@@ -42,19 +46,30 @@ func CreateTestBasicScenario(ghostDir *util.WorkDir) func(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		stdout, _, err := srcDir.RunCommmand("git", "ghost", "push")
+		stdout, _, err := srcDir.RunCommmand("git", "rev-parse", "HEAD")
 		if err != nil {
 			t.Fatal(err)
 		}
-		diffHash := strings.TrimRight(stdout, "\n")
+		baseCommit := strings.TrimRight(stdout, "\n")
+
+		stdout, _, err = srcDir.RunCommmand("git", "ghost", "push")
+		if err != nil {
+			t.Fatal(err)
+		}
+		diffHash := stdout
 		assert.NotEqual(t, "", diffHash)
 
-		_, _, err = srcDir.RunCommmand("git", "ghost", "show", diffHash)
+		stdout, _, err = srcDir.RunCommmand("git", "ghost", "show", diffHash)
 		if err != nil {
 			t.Fatal(err)
 		}
-		// TODO: Do some assertion
+		assert.Contains(t, stdout, "-b\n+c\n")
 
+		stdout, _, err = dstDir.RunCommmand("cat", "sample.txt")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Equal(t, "b\n", stdout)
 		_, _, err = dstDir.RunCommmand("git", "ghost", "pull", diffHash)
 		if err != nil {
 			t.Fatal(err)
@@ -65,13 +80,230 @@ func CreateTestBasicScenario(ghostDir *util.WorkDir) func(t *testing.T) {
 		}
 		assert.Equal(t, "c\n", stdout)
 
-		_, _, err = dstDir.RunCommmand("git", "ghost", "list")
+		stdout, _, err = dstDir.RunCommmand("git", "ghost", "list")
 		if err != nil {
 			t.Fatal(err)
 		}
-		// TODO: Do some assertion
+		assert.Contains(t, stdout, fmt.Sprintf("%s %s", baseCommit, diffHash))
 
-		// TODO: delete the ghost branches and do some assertion
+		stdout, _, err = dstDir.RunCommmand("git", "ghost", "delete", "--all")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Contains(t, stdout, fmt.Sprintf("%s %s", baseCommit, diffHash))
+
+		stdout, _, err = dstDir.RunCommmand("git", "ghost", "list")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.NotContains(t, stdout, fmt.Sprintf("%s %s", baseCommit, diffHash))
+	}
+}
+
+func CreateTestTypeCommits(ghostDir *util.WorkDir) func(t *testing.T) {
+	return func(t *testing.T) {
+		srcDir, dstDir, err := setupBasicEnv(ghostDir)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer srcDir.Remove()
+		defer dstDir.Remove()
+
+		stdout, _, err := srcDir.RunCommmand("git", "ghost", "push", "commits", "HEAD~1")
+		if err != nil {
+			t.Fatal(err)
+		}
+		hashes := strings.Split(stdout, " ")
+		assert.Equal(t, 2, len(hashes))
+		baseCommit := hashes[0]
+		targetCommit := hashes[1]
+		assert.NotEqual(t, "", baseCommit)
+		assert.NotEqual(t, "", targetCommit)
+
+		stdout, _, err = srcDir.RunCommmand("git", "ghost", "show", "commits", baseCommit, targetCommit)
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Contains(t, stdout, "-a\n+b\n")
+
+		_, _, err = dstDir.RunCommmand("git", "checkout", baseCommit)
+		if err != nil {
+			t.Fatal(err)
+		}
+		stdout, _, err = dstDir.RunCommmand("cat", "sample.txt")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Equal(t, "a\n", stdout)
+		_, _, err = dstDir.RunCommmand("git", "ghost", "pull", "commits", baseCommit, targetCommit)
+		if err != nil {
+			t.Fatal(err)
+		}
+		stdout, _, err = dstDir.RunCommmand("cat", "sample.txt")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Equal(t, "b\n", stdout)
+
+		stdout, _, err = dstDir.RunCommmand("git", "ghost", "list", "commits")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Contains(t, stdout, fmt.Sprintf("%s %s", baseCommit, targetCommit))
+
+		stdout, _, err = dstDir.RunCommmand("git", "ghost", "delete", "commits", "--all")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Contains(t, stdout, fmt.Sprintf("%s %s", baseCommit, targetCommit))
+
+		stdout, _, err = dstDir.RunCommmand("git", "ghost", "list", "commits")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.NotContains(t, stdout, fmt.Sprintf("%s %s", baseCommit, targetCommit))
+	}
+}
+
+func CreateTestTypeDiff(ghostDir *util.WorkDir) func(t *testing.T) {
+	return func(t *testing.T) {
+		srcDir, dstDir, err := setupBasicEnv(ghostDir)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer srcDir.Remove()
+		defer dstDir.Remove()
+
+		// Make one modification
+		_, _, err = srcDir.RunCommmand("bash", "-c", "echo c > sample.txt")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		stdout, _, err := srcDir.RunCommmand("git", "rev-parse", "HEAD")
+		if err != nil {
+			t.Fatal(err)
+		}
+		baseCommit := strings.TrimRight(stdout, "\n")
+
+		stdout, _, err = srcDir.RunCommmand("git", "ghost", "push", "diff")
+		if err != nil {
+			t.Fatal(err)
+		}
+		diffHash := stdout
+		assert.NotEqual(t, "", diffHash)
+
+		stdout, _, err = srcDir.RunCommmand("git", "ghost", "show", "diff", diffHash)
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Contains(t, stdout, "-b\n+c\n")
+
+		_, _, err = dstDir.RunCommmand("git", "ghost", "pull", "diff", diffHash)
+		if err != nil {
+			t.Fatal(err)
+		}
+		stdout, _, err = dstDir.RunCommmand("cat", "sample.txt")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Equal(t, "c\n", stdout)
+
+		stdout, _, err = dstDir.RunCommmand("git", "ghost", "list", "diff")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Contains(t, stdout, fmt.Sprintf("%s %s", baseCommit, diffHash))
+
+		stdout, _, err = dstDir.RunCommmand("git", "ghost", "delete", "diff", "--all")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Contains(t, stdout, fmt.Sprintf("%s %s", baseCommit, diffHash))
+
+		stdout, _, err = dstDir.RunCommmand("git", "ghost", "list", "diff")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.NotContains(t, stdout, fmt.Sprintf("%s %s", baseCommit, diffHash))
+	}
+}
+
+func CreateTestTypeAll(ghostDir *util.WorkDir) func(t *testing.T) {
+	return func(t *testing.T) {
+		srcDir, dstDir, err := setupBasicEnv(ghostDir)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer srcDir.Remove()
+		defer dstDir.Remove()
+
+		// Make one modification
+		_, _, err = srcDir.RunCommmand("bash", "-c", "echo c > sample.txt")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		stdout, _, err := srcDir.RunCommmand("git", "ghost", "push", "all", "HEAD~1")
+		if err != nil {
+			t.Fatal(err)
+		}
+		lines := strings.Split(stdout, "\n")
+		hashes := strings.Split(lines[0], " ")
+		assert.Equal(t, 2, len(hashes))
+		baseCommit := hashes[0]
+		targetCommit := hashes[1]
+		assert.NotEqual(t, "", baseCommit)
+		assert.NotEqual(t, "", targetCommit)
+		diffHash := lines[1]
+		assert.NotEqual(t, "", diffHash)
+
+		stdout, _, err = srcDir.RunCommmand("git", "ghost", "show", "all", baseCommit, targetCommit, diffHash)
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Contains(t, stdout, "-a\n+b\n")
+		assert.Contains(t, stdout, "-b\n+c\n")
+
+		_, _, err = dstDir.RunCommmand("git", "checkout", baseCommit)
+		if err != nil {
+			t.Fatal(err)
+		}
+		stdout, _, err = dstDir.RunCommmand("cat", "sample.txt")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Equal(t, "a\n", stdout)
+		_, _, err = dstDir.RunCommmand("git", "ghost", "pull", "all", baseCommit, targetCommit, diffHash)
+		if err != nil {
+			t.Fatal(err)
+		}
+		stdout, _, err = dstDir.RunCommmand("cat", "sample.txt")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Equal(t, "c\n", stdout)
+
+		stdout, _, err = dstDir.RunCommmand("git", "ghost", "list", "all")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Contains(t, stdout, fmt.Sprintf("%s %s", baseCommit, targetCommit))
+		assert.Contains(t, stdout, fmt.Sprintf("%s %s", targetCommit, diffHash))
+
+		stdout, _, err = dstDir.RunCommmand("git", "ghost", "delete", "all", "-v", "--all")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Contains(t, stdout, fmt.Sprintf("%s %s", baseCommit, targetCommit))
+		assert.Contains(t, stdout, fmt.Sprintf("%s %s", targetCommit, diffHash))
+
+		stdout, _, err = dstDir.RunCommmand("git", "ghost", "list", "all")
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.NotContains(t, stdout, fmt.Sprintf("%s %s", baseCommit, targetCommit))
+		assert.NotContains(t, stdout, fmt.Sprintf("%s %s", targetCommit, diffHash))
 	}
 }
 

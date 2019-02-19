@@ -55,6 +55,9 @@ func Delete(options DeleteOptions) (*DeleteResult, error) {
 	defer util.LogDeferredError(workingEnv.Clean)
 
 	deleteBranches := func(branches []types.GhostBranch, dryrun bool) error {
+		if len(branches) == 0 {
+			return nil
+		}
 		var branchNames []string
 		for _, branch := range branches {
 			branchNames = append(branchNames, branch.BranchName())
