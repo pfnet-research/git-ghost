@@ -1,6 +1,8 @@
 package errors
 
 import (
+	"fmt"
+
 	"github.com/pkg/errors"
 
 	log "github.com/Sirupsen/logrus"
@@ -14,8 +16,11 @@ type GitGhostError interface {
 
 // LogErrorWithStack emits a log message with errors.GitGhostError level and stack trace with debug level
 func LogErrorWithStack(err GitGhostError) {
-	log.Error(err)
-	log.Tracef("%+v", err)
+	var fields log.Fields
+	if log.GetLevel() == log.TraceLevel {
+		fields = log.Fields{"stacktrace": fmt.Sprintf("%+v", err)}
+	}
+	log.WithFields(fields).Error(err)
 }
 
 func Errorf(s string, args ...interface{}) GitGhostError {
