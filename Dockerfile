@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y \
     make \
     wget \
     gcc \
-    zip && \
+    zip \
+    bzip2 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -24,6 +25,11 @@ ENV GOMETALINTER_VERSION=2.0.12
 RUN curl -sLo- https://github.com/alecthomas/gometalinter/releases/download/v${GOMETALINTER_VERSION}/gometalinter-${GOMETALINTER_VERSION}-linux-amd64.tar.gz | \
     tar -xzC "$GOPATH/bin" --exclude COPYING --exclude README.md --strip-components 1 -f- && \
     ln -s $GOPATH/bin/gometalinter $GOPATH/bin/gometalinter.v2
+
+# Install github-release
+ENV GITHUB_RELEASE_VERSION=0.7.2
+RUN curl -sLo- https://github.com/aktau/github-release/releases/download/v${GITHUB_RELEASE_VERSION}/linux-amd64-github-release.tar.bz2 | \
+    tar -xjC "$GOPATH/bin" --strip-components 3 -f-
 
 
 ####################################################################################################

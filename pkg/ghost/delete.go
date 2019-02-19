@@ -56,6 +56,9 @@ func Delete(options DeleteOptions) (*DeleteResult, errors.GitGhostError) {
 	defer util.LogDeferredGitGhostError(workingEnv.Clean)
 
 	deleteBranches := func(branches []types.GhostBranch, dryrun bool) errors.GitGhostError {
+		if len(branches) == 0 {
+			return nil
+		}
 		var branchNames []string
 		for _, branch := range branches {
 			branchNames = append(branchNames, branch.BranchName())

@@ -117,7 +117,7 @@ func runPushCommitsCommand(flags *pushFlags) func(cmd *cobra.Command, args []str
 
 		if result.CommitsBranch != nil {
 			fmt.Printf(
-				"%s %s\n",
+				"%s %s",
 				result.CommitsBranch.CommitHashFrom,
 				result.CommitsBranch.CommitHashTo,
 			)
@@ -215,10 +215,13 @@ func runPushAllCommand(flags *pushFlags) func(cmd *cobra.Command, args []string)
 
 		if result.CommitsBranch != nil {
 			fmt.Printf(
-				"%s %s\n",
+				"%s %s",
 				result.CommitsBranch.CommitHashFrom,
 				result.CommitsBranch.CommitHashTo,
 			)
+			if result.DiffBranch != nil {
+				fmt.Print("\n")
+			}
 		}
 
 		if result.DiffBranch != nil {
