@@ -24,11 +24,11 @@ func LogErrorWithStack(err GitGhostError) {
 }
 
 func Errorf(s string, args ...interface{}) GitGhostError {
-	return errors.Errorf(s, args...).(GitGhostError)
+	return errors.WithStack(fmt.Errorf(s, args...)).(GitGhostError)
 }
 
 func New(s string) GitGhostError {
-	return errors.New(s).(GitGhostError)
+	return errors.WithStack(fmt.Errorf(s)).(GitGhostError)
 }
 
 func WithStack(err error) GitGhostError {
