@@ -56,7 +56,11 @@ func CreateTestTypeDefault(ghostDir *util.WorkDir) func(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		diffHash := stdout
+		hashes := strings.Split(strings.TrimRight(stdout, "\n"), " ")
+		assert.Equal(t, 2, len(hashes))
+		diffBaseCommit := hashes[0]
+		diffHash := hashes[1]
+		assert.NotEqual(t, "", diffBaseCommit)
 		assert.NotEqual(t, "", diffHash)
 
 		stdout, _, err = srcDir.RunGitGhostCommmand("show", diffHash)
@@ -190,7 +194,11 @@ func CreateTestTypeDiff(ghostDir *util.WorkDir) func(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		diffHash := stdout
+		hashes := strings.Split(strings.TrimRight(stdout, "\n"), " ")
+		assert.Equal(t, 2, len(hashes))
+		diffBaseCommit := hashes[0]
+		diffHash := hashes[1]
+		assert.NotEqual(t, "", diffBaseCommit)
 		assert.NotEqual(t, "", diffHash)
 
 		stdout, _, err = srcDir.RunGitGhostCommmand("show", "diff", diffHash)
@@ -255,7 +263,12 @@ func CreateTestTypeAll(ghostDir *util.WorkDir) func(t *testing.T) {
 		targetCommit := hashes[1]
 		assert.NotEqual(t, "", baseCommit)
 		assert.NotEqual(t, "", targetCommit)
-		diffHash := lines[1]
+
+		hashes = strings.Split(lines[1], " ")
+		assert.Equal(t, 2, len(hashes))
+		diffBaseCommit := hashes[0]
+		diffHash := hashes[1]
+		assert.NotEqual(t, "", diffBaseCommit)
 		assert.NotEqual(t, "", diffHash)
 
 		stdout, _, err = srcDir.RunGitGhostCommmand("show", "all", baseCommit, targetCommit, diffHash)
@@ -332,7 +345,11 @@ func CreateTestIncludeFile(ghostDir *util.WorkDir) func(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		diffHash := strings.TrimRight(stdout, "\n")
+		hashes := strings.Split(strings.TrimRight(stdout, "\n"), " ")
+		assert.Equal(t, 2, len(hashes))
+		diffBaseCommit := hashes[0]
+		diffHash := hashes[1]
+		assert.NotEqual(t, "", diffBaseCommit)
 		assert.NotEqual(t, "", diffHash)
 
 		_, _, err = dstDir.RunGitGhostCommmand("pull", diffHash)
@@ -378,7 +395,11 @@ func CreateTestIncludeLinkFile(ghostDir *util.WorkDir) func(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		diffHash := strings.TrimRight(stdout, "\n")
+		hashes := strings.Split(strings.TrimRight(stdout, "\n"), " ")
+		assert.Equal(t, 2, len(hashes))
+		diffBaseCommit := hashes[0]
+		diffHash := hashes[1]
+		assert.NotEqual(t, "", diffBaseCommit)
 		assert.NotEqual(t, "", diffHash)
 
 		_, _, err = dstDir.RunGitGhostCommmand("pull", diffHash)
