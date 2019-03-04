@@ -173,7 +173,12 @@ func runPushDiffCommand(flags *pushFlags) func(cmd *cobra.Command, args []string
 		}
 
 		if result.DiffBranch != nil {
-			fmt.Printf(result.DiffBranch.DiffHash)
+			fmt.Printf(
+				"%s %s",
+				result.DiffBranch.CommitHashFrom,
+				result.DiffBranch.DiffHash,
+			)
+			fmt.Printf("\n")
 		}
 	}
 }
@@ -225,7 +230,12 @@ func runPushAllCommand(flags *pushFlags) func(cmd *cobra.Command, args []string)
 		}
 
 		if result.DiffBranch != nil {
-			fmt.Printf(result.DiffBranch.DiffHash)
+			fmt.Printf(
+				"%s %s",
+				result.DiffBranch.CommitHashFrom,
+				result.DiffBranch.DiffHash,
+			)
+			fmt.Print("\n")
 		}
 	}
 }
