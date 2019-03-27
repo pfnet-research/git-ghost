@@ -193,11 +193,7 @@ func (bs CommitsBranch) Show(we WorkingEnv, writer io.Writer) errors.GitGhostErr
 
 // Apply applies contents(diff or patch) of this ghost branch on passed working env
 func (bs CommitsBranch) Apply(we WorkingEnv) errors.GitGhostError {
-	err := apply(bs, we, bs.CommitHashFrom)
-	if err != nil {
-		return err
-	}
-	return nil
+	return apply(bs, we, bs.CommitHashFrom)
 }
 
 // Show writes contents of this ghost branch on passed working env to writer
@@ -207,9 +203,5 @@ func (bs DiffBranch) Show(we WorkingEnv, writer io.Writer) errors.GitGhostError 
 
 // Apply applies contents(diff or patch) of this ghost branch on passed working env
 func (bs DiffBranch) Apply(we WorkingEnv) errors.GitGhostError {
-	err := apply(bs, we, bs.CommitHashFrom)
-	if err != nil {
-		return err
-	}
-	return nil
+	return apply(bs, we, bs.CommitHashFrom)
 }
