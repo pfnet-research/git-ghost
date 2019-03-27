@@ -141,9 +141,10 @@ func (branches DiffBranches) AsGhostBranches() []GhostBranch {
 }
 
 func show(ghost GhostBranch, we WorkingEnv, writer io.Writer) errors.GitGhostError {
-	cmd := exec.Command("git", "-C", we.GhostDir, "--no-pager", "cat-file", "-p", fmt.Sprintf("HEAD:%s", ghost.FileName()))
-	cmd.Stdout = writer
-	return util.JustRunCmd(cmd)
+	return util.JustStreamOutputCmd(
+		exec.Command("git", "-C", we.GhostDir, "--no-pager", "cat-file", "-p", fmt.Sprintf("HEAD:%s", ghost.FileName())),
+		writer,
+	)
 }
 
 func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string) errors.GitGhostError {
