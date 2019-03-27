@@ -101,7 +101,7 @@ func (res *DeleteResult) PrettyString() string {
 		branches := *res.CommitsBranches
 		branches.Sort()
 		for _, branch := range branches {
-			buffer.WriteString(fmt.Sprintf("%s %s\n", branch.CommitHashFrom, branch.CommitHashTo))
+			buffer.WriteString(fmt.Sprintf("%-40s %-40s\n", branch.CommitHashFrom, branch.CommitHashTo))
 		}
 		buffer.WriteString("\n")
 	}
@@ -112,7 +112,7 @@ func (res *DeleteResult) PrettyString() string {
 		branches := *res.DiffBranches
 		branches.Sort()
 		for _, branch := range branches {
-			buffer.WriteString(fmt.Sprintf("%s %s\n", branch.CommitHashFrom, branch.DiffHash))
+			buffer.WriteString(fmt.Sprintf("%-40s %-40s\n", branch.CommitHashFrom, branch.DiffHash))
 		}
 		buffer.WriteString("\n")
 	}

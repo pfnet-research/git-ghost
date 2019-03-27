@@ -78,12 +78,12 @@ func (res *ListResult) PrettyString(headers bool, output string) string {
 			columns := []string{}
 			switch output {
 			case "only-from":
-				columns = append(columns, branch.CommitHashFrom)
+				columns = append(columns, fmt.Sprintf("%-40s", branch.CommitHashFrom))
 			case "only-to":
-				columns = append(columns, branch.CommitHashTo)
+				columns = append(columns, fmt.Sprintf("%-40s", branch.CommitHashTo))
 			default:
-				columns = append(columns, branch.CommitHashFrom)
-				columns = append(columns, branch.CommitHashTo)
+				columns = append(columns, fmt.Sprintf("%-40s", branch.CommitHashFrom))
+				columns = append(columns, fmt.Sprintf("%-40s", branch.CommitHashTo))
 			}
 			buffer.WriteString(fmt.Sprintf("%s\n", strings.Join(columns, " ")))
 		}
@@ -113,12 +113,12 @@ func (res *ListResult) PrettyString(headers bool, output string) string {
 			columns := []string{}
 			switch output {
 			case "only-from":
-				columns = append(columns, branch.CommitHashFrom)
+				columns = append(columns, fmt.Sprintf("%-40s", branch.CommitHashFrom))
 			case "only-to":
-				columns = append(columns, branch.DiffHash)
+				columns = append(columns, fmt.Sprintf("%-40s", branch.DiffHash))
 			default:
-				columns = append(columns, branch.CommitHashFrom)
-				columns = append(columns, branch.DiffHash)
+				columns = append(columns, fmt.Sprintf("%-40s", branch.CommitHashFrom))
+				columns = append(columns, fmt.Sprintf("%-40s", branch.DiffHash))
 			}
 			buffer.WriteString(fmt.Sprintf("%s\n", strings.Join(columns, " ")))
 		}
