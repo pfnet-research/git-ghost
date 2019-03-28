@@ -61,16 +61,17 @@ type PullableDiffBranchSpec struct {
 	DiffHash      string
 }
 
-// Resolve resolves comittish in DiffBranchSpec as full commit hash values
+// Resolve resolves comittish in DiffBranchSpec as full commit hash values.
+// The special character "_" is allowed to indicate full commmits.
 func (bs CommitsBranchSpec) Resolve(srcDir string) (*CommitsBranchSpec, errors.GitGhostError) {
-	err := git.ValidateComittish(srcDir, bs.CommitishFrom)
-	if err != nil {
-		return nil, err
-	}
-	commitHashFrom := resolveComittishOr(srcDir, bs.CommitishFrom)
-	err = git.ValidateComittish(srcDir, bs.CommitishTo)
-	if err != nil {
-		return nil, err
+	commitHashFrom := bs.CommitishFrom
+	if bs.CommitishFrom != util.CommitStartFromInit {
+		// CommitishFrom must be a valid existing commitish
+		err := git.ValidateComittish(srcDir, bs.CommitishFrom)
+		if err != nil {
+			return nil, err
+		}
+		commitHashFrom = resolveComittishOr(srcDir, bs.CommitishFrom)
 	}
 	commitHashTo := resolveComittishOr(srcDir, bs.CommitishTo)
 	branch := &CommitsBranchSpec{
@@ -134,9 +135,16 @@ func (bs CommitsBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.Git
 	}
 	util.LogDeferredError(tmpFile.Close)
 	defer util.LogDeferredError(func() error { return os.Remove(tmpFile.Name()) })
-	ggerr = git.CreateDiffBundleFile(srcDir, tmpFile.Name(), commitHashFrom, commitHashTo)
-	if ggerr != nil {
-		return nil, ggerr
+	if commitHashFrom == util.CommitStartFromInit {
+		ggerr = git.CreateFullBundleFile(srcDir, tmpFile.Name(), commitHashTo)
+		if ggerr != nil {
+			return nil, ggerr
+		}
+	} else {
+		ggerr = git.CreateDiffBundleFile(srcDir, tmpFile.Name(), commitHashFrom, commitHashTo)
+		if ggerr != nil {
+			return nil, ggerr
+		}
 	}
 	err = os.Rename(tmpFile.Name(), filepath.Join(dstDir, branch.FileName()))
 	if err != nil {
@@ -157,6 +165,7 @@ func (bs CommitsBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.Git
 
 // Resolve resolves comittish in DiffBranchSpec as full commit hash values
 func (bs DiffBranchSpec) Resolve(srcDir string) (*DiffBranchSpec, errors.GitGhostError) {
+	// CommitishFrom must be a valid existing commitish
 	err := git.ValidateComittish(srcDir, bs.ComittishFrom)
 	if err != nil {
 		return nil, err

@@ -8,7 +8,6 @@ import (
 	"io"
 	"os/exec"
 	"path"
-	"reflect"
 	"regexp"
 	"sort"
 
@@ -27,6 +26,13 @@ type GhostBranch interface {
 	Show(we WorkingEnv, writer io.Writer) errors.GitGhostError
 	// Apply applies contents(diff or patch) of this ghost branch on passed working env
 	Apply(we WorkingEnv) errors.GitGhostError
+}
+
+// GhostBranchImplementer implements concrete logics of GhostBranch.
+type GhostBranchImplementer interface {
+	ResolveHead(we WorkingEnv) (string, errors.GitGhostError)
+
+	ApplyFile(we WorkingEnv) errors.GitGhostError
 }
 
 // interface assetions
@@ -62,7 +68,7 @@ type CommitsBranches []CommitsBranch
 // DiffBranches is an alias for []DiffBranch
 type DiffBranches []DiffBranch
 
-var commitsBranchNamePattern = regexp.MustCompile(`^([a-z0-9]+)/([a-f0-9]+)-([a-f0-9]+)$`)
+var commitsBranchNamePattern = regexp.MustCompile(`^([a-z0-9]+)/([a-f0-9]+|_)-([a-f0-9]+)$`)
 var diffBranchNamePattern = regexp.MustCompile(`^([a-z0-9]+)/([a-f0-9]+)/([a-f0-9]+)$`)
 
 // BranchName returns its full branch name on git repository
@@ -147,7 +153,7 @@ func show(ghost GhostBranch, we WorkingEnv, writer io.Writer) errors.GitGhostErr
 	)
 }
 
-func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string) errors.GitGhostError {
+func apply(ghost GhostBranchImplementer, we WorkingEnv, expectedSrcHead string) errors.GitGhostError {
 	log.WithFields(util.MergeFields(
 		util.ToFields(ghost),
 		log.Fields{
@@ -157,7 +163,7 @@ func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string) errors.GitG
 		},
 	)).Info("applying ghost branch")
 
-	srcHead, err := git.ResolveComittish(we.SrcDir, "HEAD")
+	srcHead, err := ghost.ResolveHead(we)
 	if err != nil {
 		return err
 	}
@@ -175,16 +181,7 @@ func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string) errors.GitG
 		).Warnf("%s. Applying ghost branch might be failed.", message)
 	}
 
-	// TODO make this instance methods.
-	switch ghost.(type) {
-	case CommitsBranch:
-		return git.ApplyDiffBundleFile(we.SrcDir, path.Join(we.GhostDir, ghost.FileName()))
-	case DiffBranch:
-		return git.ApplyDiffPatchFile(we.SrcDir, path.Join(we.GhostDir, ghost.FileName()))
-
-	default:
-		return errors.Errorf("not supported on type = %+v", reflect.TypeOf(ghost))
-	}
+	return ghost.ApplyFile(we)
 }
 
 // Show writes contents of this ghost branch on passed working env to writer
@@ -192,9 +189,22 @@ func (bs CommitsBranch) Show(we WorkingEnv, writer io.Writer) errors.GitGhostErr
 	return show(bs, we, writer)
 }
 
-// Apply applies contents(diff or patch) of this ghost branch on passed working env
+// Apply is a proxy method to call the actual apply logic of this ghost branch.
 func (bs CommitsBranch) Apply(we WorkingEnv) errors.GitGhostError {
 	return apply(bs, we, bs.CommitHashFrom)
+}
+
+// ApplyFile applies the contents of this ghost branch on passed working env
+func (bs CommitsBranch) ApplyFile(we WorkingEnv) errors.GitGhostError {
+	return git.ApplyDiffBundleFile(we.SrcDir, path.Join(we.GhostDir, bs.FileName()))
+}
+
+// ResolveHead resolves the head of the source directory.
+func (bs CommitsBranch) ResolveHead(we WorkingEnv) (string, errors.GitGhostError) {
+	if bs.CommitHashFrom != util.CommitStartFromInit {
+		return git.ResolveComittish(we.SrcDir, "HEAD")
+	}
+	return util.CommitStartFromInit, nil
 }
 
 // Show writes contents of this ghost branch on passed working env to writer
@@ -202,7 +212,17 @@ func (bs DiffBranch) Show(we WorkingEnv, writer io.Writer) errors.GitGhostError 
 	return show(bs, we, writer)
 }
 
-// Apply applies contents(diff or patch) of this ghost branch on passed working env
+// Apply is a proxy method to call the actual apply logic of this ghost branch.
 func (bs DiffBranch) Apply(we WorkingEnv) errors.GitGhostError {
 	return apply(bs, we, bs.CommitHashFrom)
+}
+
+// ApplyFile applies the contents of this ghost branch on passed working env
+func (bs DiffBranch) ApplyFile(we WorkingEnv) errors.GitGhostError {
+	return git.ApplyDiffPatchFile(we.SrcDir, path.Join(we.GhostDir, bs.FileName()))
+}
+
+// ResolveHead resolves the head of the source directory.
+func (bs DiffBranch) ResolveHead(we WorkingEnv) (string, errors.GitGhostError) {
+	return git.ResolveComittish(we.SrcDir, "HEAD")
 }

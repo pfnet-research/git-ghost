@@ -329,6 +329,69 @@ func TestTypeAll(t *testing.T) {
 	assert.NotContains(t, stdout, fmt.Sprintf("%s %s", targetCommit, diffHash))
 }
 
+func TestFullCommits(t *testing.T) {
+	srcDir, err := setupBasicSrcEnv(ghostDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer srcDir.Remove()
+
+	dstDir, err := util.CreateGitWorkDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	dstDir.Env = map[string]string{
+		"GIT_GHOST_REPO": ghostDir.Dir,
+	}
+	defer dstDir.Remove()
+
+	stdout, _, err := srcDir.RunGitGhostCommmand("push", "commits", "_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	hashes := strings.Split(stdout, " ")
+	assert.Equal(t, 2, len(hashes))
+	baseCommit := hashes[0]
+	targetCommit := hashes[1]
+	assert.Equal(t, "_", baseCommit)
+	assert.NotEqual(t, "", targetCommit)
+
+	stdout, _, err = srcDir.RunGitGhostCommmand("show", "commits", baseCommit, targetCommit)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Contains(t, stdout, "+a\n")
+	assert.Contains(t, stdout, "-a\n+b\n")
+
+	_, _, err = dstDir.RunGitGhostCommmand("pull", "commits", baseCommit, targetCommit)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stdout, _, err = dstDir.RunCommmand("cat", "sample.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, "b\n", stdout)
+
+	stdout, _, err = dstDir.RunGitGhostCommmand("list", "commits")
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Contains(t, stdout, fmt.Sprintf("%-40s %-40s", baseCommit, targetCommit))
+
+	stdout, _, err = dstDir.RunGitGhostCommmand("delete", "commits", "--all")
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Contains(t, stdout, fmt.Sprintf("%-40s %-40s", baseCommit, targetCommit))
+
+	stdout, _, err = dstDir.RunGitGhostCommmand("list", "commits")
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.NotContains(t, stdout, fmt.Sprintf("%-40s %-40s", baseCommit, targetCommit))
+}
+
 func TestIncludeFile(t *testing.T) {
 	srcDir, dstDir, err := setupBasicEnv(ghostDir)
 	if err != nil {
@@ -448,6 +511,24 @@ func setupBasicEnv(workDir *util.WorkDir) (*util.WorkDir, *util.WorkDir, error) 
 		"GIT_GHOST_REPO": workDir.Dir,
 	}
 	return srcDir, dstDir, nil
+}
+
+func setupBasicSrcEnv(workDir *util.WorkDir) (*util.WorkDir, error) {
+	srcDir, err := util.CreateGitWorkDir()
+	if err != nil {
+		return nil, err
+	}
+
+	err = setupBasicGitRepo(srcDir)
+	if err != nil {
+		srcDir.Remove()
+		return nil, err
+	}
+	srcDir.Env = map[string]string{
+		"GIT_GHOST_REPO": workDir.Dir,
+	}
+
+	return srcDir, nil
 }
 
 func setupBasicGitRepo(wd *util.WorkDir) error {

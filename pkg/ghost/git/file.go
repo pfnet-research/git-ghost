@@ -28,6 +28,22 @@ func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) erro
 	)
 }
 
+// CreateFullBundleFile creates a bundle file with full commits to a given commitish and save it to filepath.
+func CreateFullBundleFile(dir, filepath, commitish string) errors.GitGhostError {
+	f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	defer util.LogDeferredError(f.Close)
+
+	return util.JustStreamOutputCmd(
+		exec.Command("git", "-C", dir,
+			"log", "-p", "--reverse", "--pretty=email", "--stat", "-m", "--first-parent", "--binary", commitish,
+		),
+		f,
+	)
+}
+
 // ApplyDiffBundleFile apply a patch file created in CreateDiffBundleFile
 func ApplyDiffBundleFile(dir, filepath string) errors.GitGhostError {
 	var errs error

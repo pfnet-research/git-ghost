@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"git-ghost/pkg/ghost"
 	"git-ghost/pkg/ghost/types"
+	"git-ghost/pkg/util"
 	"git-ghost/pkg/util/errors"
 	"os"
 
@@ -84,8 +85,10 @@ func (arg pushCommitsArg) validate() errors.GitGhostError {
 	if err := nonEmpty("commit-to", arg.commitsTo); err != nil {
 		return err
 	}
-	if err := isValidComittish("commit-from", arg.commitsFrom); err != nil {
-		return err
+	if arg.commitsFrom != util.CommitStartFromInit {
+		if err := isValidComittish("commit-from", arg.commitsFrom); err != nil {
+			return err
+		}
 	}
 	if err := isValidComittish("commit-to", arg.commitsTo); err != nil {
 		return err
