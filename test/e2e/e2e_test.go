@@ -336,7 +336,7 @@ func TestFullCommits(t *testing.T) {
 	}
 	defer srcDir.Remove()
 
-	dstDir, err := util.CreateGitWorkDir()
+	dstDir, err := util.CreateWorkDir()
 	if err != nil {
 		t.Fatal(err)
 	}

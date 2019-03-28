@@ -89,3 +89,10 @@ func ResetHardToBranch(dir, branch string) errors.GitGhostError {
 		exec.Command("git", "-C", dir, "reset", "--hard", branch),
 	)
 }
+
+// Init initializes a git repo
+func Init(dir string) errors.GitGhostError {
+	return util.JustRunCmd(
+		exec.Command("git", "-C", dir, "init"),
+	)
+}

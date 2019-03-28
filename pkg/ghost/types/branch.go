@@ -6,8 +6,10 @@ import (
 	"git-ghost/pkg/util"
 	"git-ghost/pkg/util/errors"
 	"io"
+	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"regexp"
 	"sort"
 
@@ -195,16 +197,32 @@ func (bs CommitsBranch) Apply(we WorkingEnv) errors.GitGhostError {
 }
 
 // ApplyFile applies the contents of this ghost branch on passed working env
+// If the ghost branch is full commits, it initializes a git repo.
 func (bs CommitsBranch) ApplyFile(we WorkingEnv) errors.GitGhostError {
+	if bs.CommitHashFrom == util.CommitStartFromInit {
+		err := git.Init(we.SrcDir)
+		if err != nil {
+			return err
+		}
+	}
 	return git.ApplyDiffBundleFile(we.SrcDir, path.Join(we.GhostDir, bs.FileName()))
 }
 
 // ResolveHead resolves the head of the source directory.
+// If the ghost branch is full commits, it requires no git.
 func (bs CommitsBranch) ResolveHead(we WorkingEnv) (string, errors.GitGhostError) {
-	if bs.CommitHashFrom != util.CommitStartFromInit {
+	if bs.CommitHashFrom == util.CommitStartFromInit {
+		_, err := os.Stat(filepath.Join(we.SrcDir, ".git"))
+		if err != nil {
+			if os.IsNotExist(err) {
+				return util.CommitStartFromInit, nil
+			}
+			return "", errors.WithStack(err)
+		}
+		return "", errors.New("directory must not be a git repo")
+	} else {
 		return git.ResolveComittish(we.SrcDir, "HEAD")
 	}
-	return util.CommitStartFromInit, nil
 }
 
 // Show writes contents of this ghost branch on passed working env to writer
