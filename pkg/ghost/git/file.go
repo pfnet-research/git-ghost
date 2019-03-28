@@ -80,7 +80,6 @@ func CreateDiffPatchFile(dir, filepath, comittish string) errors.GitGhostError {
 		exec.Command("git", "-C", dir, "diff", "--patience", "--binary", comittish),
 		f,
 	)
-	return nil
 }
 
 // AppendNonIndexedDiffFiles appends non-indexed diff files
