@@ -87,7 +87,7 @@ func runDeleteCommitsCommand(flags *deleteFlags) func(cmd *cobra.Command, args [
 			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
-		fmt.Printf(res.PrettyString())
+		fmt.Print(res.PrettyString())
 	}
 }
 
@@ -117,7 +117,7 @@ func runDeleteDiffCommand(flags *deleteFlags) func(cmd *cobra.Command, args []st
 			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
-		fmt.Printf(res.PrettyString())
+		fmt.Print(res.PrettyString())
 	}
 }
 
@@ -152,7 +152,7 @@ func runDeleteAllCommand(flags *deleteFlags) func(cmd *cobra.Command, args []str
 			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
-		fmt.Printf(res.PrettyString())
+		fmt.Print(res.PrettyString())
 	}
 }
 
