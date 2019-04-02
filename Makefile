@@ -85,7 +85,7 @@ release-image: guard-RELEASE_TAG
 
 .PHONY: lint
 lint: deps
-	gometalinter --config gometalinter.json ./...
+	golangci-lint run --config golangci.yml
 
 .PHONY: docker-lint
 docker-lint: build-image-dev
