@@ -181,7 +181,7 @@ func runPushDiffCommand(flags *pushFlags) func(cmd *cobra.Command, args []string
 				result.DiffBranch.CommitHashFrom,
 				result.DiffBranch.DiffHash,
 			)
-			fmt.Printf("\n")
+			fmt.Print("\n")
 		}
 	}
 }

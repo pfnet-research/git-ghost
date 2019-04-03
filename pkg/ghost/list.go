@@ -19,7 +19,6 @@ type ListOptions struct {
 }
 
 // ListResult contains results of List func
-
 type ListResult struct {
 	*types.CommitsBranches
 	*types.DiffBranches
