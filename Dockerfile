@@ -65,7 +65,7 @@ RUN apt-get update && apt-get install -y \
 
 COPY --from=git-ghost-dev /go/src/git-ghost/dist/git-ghost /usr/local/bin/
 
-COPY hack/create-test-repo.sh /work/create-test-repo.sh
+COPY scripts/create-test-repo.sh /work/create-test-repo.sh
 RUN mkdir -p /work/local /work/remote /work/ghost-repo
 RUN /work/create-test-repo.sh /work/local /work/remote /work/ghost-repo
 ENV GIT_GHOST_REPO=/work/ghost-repo
