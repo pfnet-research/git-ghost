@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright 2019 Preferred Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,37 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#!/bin/bash
+# Checks whether files have an appropriate license header.
 
-if [ "$#" -ne 3 ]; then
-  echo "Illegal number of arguments"
-  exit
-fi
+LICENSE_LINE='Licensed under the Apache License, Version 2.0 (the "License");'
 
-set -eux
+cd $(git rev-parse --show-toplevel)
 
-LOCAL=$(realpath $1)
-REMOTE=$(realpath $2)
-GHOST_REPO=$(realpath $3)
+files=$(git ls-files | grep -v vendor | grep -e ".go" -e ".sh" -e ".py")
 
-(
-cd $REMOTE
-git init
-git config --global user.email "you@example.com"
-git config --global user.name "Your Name"
-echo a > sample.txt
-git add sample.txt
-git commit sample.txt -m 'Initial commit'
-echo b > sample.txt
-git commit sample.txt -m 'Second commit'
-echo c > sample.txt
-)
+status=0
+for f in ${files[@]}; do
+    if ! grep "$LICENSE_LINE" $f --quiet; then
+        if [ $status -eq 0 ]; then
+            echo "The following files are missing license headers."
+        fi
+        echo "- $f"
+        status=1
+    fi
+done
 
-(
-git clone $REMOTE $LOCAL
-)
-
-(
-cd $GHOST_REPO
-git init
-)
+exit $status
