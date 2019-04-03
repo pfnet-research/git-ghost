@@ -115,7 +115,7 @@ build-image-cli:
 build-image-all: build-image-test build-image-e2e build-image-cli
 
 test: deps
-	@go test -v -race -short -tags no_e2e $(PROJECTROOT)/...
+	@go test -v -race -short -tags no_e2e ./...
 
 .PHONY: shell
 shell: build-image-cli

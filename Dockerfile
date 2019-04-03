@@ -46,7 +46,7 @@ RUN cd ${GOPATH}/src/dummy && \
     rmdir vendor
 
 # Perform the build
-WORKDIR /go/src/git-ghost
+WORKDIR $GOPATH/src/git-ghost
 COPY . .
 RUN make build
 
