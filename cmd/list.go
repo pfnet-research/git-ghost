@@ -91,7 +91,7 @@ func runListCommitsCommand(flags *listFlags) func(cmd *cobra.Command, args []str
 			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
-		fmt.Printf(res.PrettyString(!flags.noHeaders, flags.output))
+		fmt.Print(res.PrettyString(!flags.noHeaders, flags.output))
 	}
 }
 
@@ -120,7 +120,7 @@ func runListDiffCommand(flags *listFlags) func(cmd *cobra.Command, args []string
 			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
-		fmt.Printf(res.PrettyString(!flags.noHeaders, flags.output))
+		fmt.Print(res.PrettyString(!flags.noHeaders, flags.output))
 	}
 }
 
@@ -154,7 +154,7 @@ func runListAllCommand(flags *listFlags) func(cmd *cobra.Command, args []string)
 			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
-		fmt.Printf(res.PrettyString(!flags.noHeaders, flags.output))
+		fmt.Print(res.PrettyString(!flags.noHeaders, flags.output))
 	}
 }
 

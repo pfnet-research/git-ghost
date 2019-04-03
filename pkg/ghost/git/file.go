@@ -44,7 +44,7 @@ func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) erro
 	}
 
 	total := 0
-	buf := make([]byte, 1024, 1024)
+	buf := make([]byte, 1024)
 	for {
 		n, err := reader.Read(buf)
 		if n > 0 {
@@ -115,7 +115,7 @@ func CreateDiffPatchFile(dir, filepath, comittish string) errors.GitGhostError {
 	}
 
 	total := 0
-	buf := make([]byte, 1024, 1024)
+	buf := make([]byte, 1024)
 	for {
 		n, err := reader.Read(buf)
 		if n > 0 {
