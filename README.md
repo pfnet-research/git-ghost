@@ -86,3 +86,7 @@ $ godoc -http=:6060  # access http://localhost:6060 in browser
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new [Pull Request](../../pull/new/master)
+
+## Copyright
+
+Copyright (c) 2019 Preferred Networks. See [LICENSE](LICENSE) for details.
