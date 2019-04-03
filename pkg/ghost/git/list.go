@@ -29,7 +29,7 @@ func ListRemoteBranchNames(repo string, branchnames []string) ([]string, errors.
 	}
 
 	lines := strings.Split(string(output), "\n")
-	branchNames := make([]string, len(lines))
+	branchNames := make([]string, 0, len(lines))
 	for _, line := range lines {
 		if line == "" {
 			continue

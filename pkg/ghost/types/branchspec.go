@@ -164,7 +164,7 @@ func (bs DiffBranchSpec) Resolve(srcDir string) (*DiffBranchSpec, errors.GitGhos
 	commitHashFrom := resolveComittishOr(srcDir, bs.ComittishFrom)
 
 	var errs error
-	includedFilepaths := make([]string, len(bs.IncludedFilepaths))
+	includedFilepaths := make([]string, 0, len(bs.IncludedFilepaths))
 	for _, p := range bs.IncludedFilepaths {
 		resolved, err := resolveFilepath(srcDir, p)
 		if err != nil {
