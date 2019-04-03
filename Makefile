@@ -4,7 +4,7 @@ VERSION     := $(shell cat ${PROJECTROOT}/VERSION)
 REVISION    := $(shell git rev-parse --short HEAD)
 IMAGE_PREFIX ?=
 IMAGE_TAG   ?= $(VERSION)
-OUTDIR      ?= $(PROJECTROOT)/bin
+OUTDIR      ?= $(PROJECTROOT)/dist
 RELEASE_TAG ?=
 GITHUB_API  ?=
 GITHUB_USER ?=
@@ -56,7 +56,7 @@ build-all: build-linux build-darwin build-windows
 
 .PHONY: build-all-in-docker
 docker-build-all: build-image-dev
-	docker run --rm -v $(OUTDIR):/tmp/git-ghost/bin $(IMAGE_PREFIX)git-ghost-dev:$(RELEASE_TAG) make build-all OUTDIR=/tmp/git-ghost/bin
+	docker run --rm -v $(OUTDIR):/tmp/git-ghost/dist $(IMAGE_PREFIX)git-ghost-dev:$(RELEASE_TAG) make build-all OUTDIR=/tmp/git-ghost/dist
 
 .PHONY: release
 release: guard-RELEASE_TAG
@@ -135,5 +135,4 @@ docker-e2e: build-image-e2e
 
 .PHONY: clean
 clean:
-	rm -rf bin/*
-	rm -rf vendor/*
+	rm -rf dist/*
