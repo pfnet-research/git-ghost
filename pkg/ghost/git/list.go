@@ -42,8 +42,9 @@ func ListRemoteBranchNames(repo string, branchnames []string) ([]string, errors.
 		return []string{}, errors.WithStack(err)
 	}
 
-	var branchNames []string
-	for _, line := range strings.Split(string(output), "\n") {
+	lines := strings.Split(string(output), "\n")
+	branchNames := make([]string, 0, len(lines))
+	for _, line := range lines {
 		if line == "" {
 			continue
 		}

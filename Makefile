@@ -85,7 +85,7 @@ release-image: guard-RELEASE_TAG
 
 .PHONY: lint
 lint: deps
-	gometalinter --config gometalinter.json ./...
+	golangci-lint run --config golangci.yml
 
 .PHONY: docker-lint
 docker-lint: build-image-dev
@@ -115,7 +115,7 @@ build-image-cli:
 build-image-all: build-image-test build-image-e2e build-image-cli
 
 test: deps
-	@go test -v $(PROJECTROOT)/...
+	@go test -v -race -short -tags no_e2e ./...
 
 .PHONY: shell
 shell: build-image-cli
