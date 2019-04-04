@@ -49,7 +49,7 @@ build-windows:
 	make build \
 		GOARCH=amd64 \
 		GOOS=windows \
-		NAME=git-ghost-windows-amd64
+		NAME=git-ghost-windows-amd64.exe
 
 .PHONY: build-all
 build-all: build-linux build-darwin build-windows
@@ -71,7 +71,7 @@ release-assets: guard-RELEASE_TAG
 	docker run --rm $(DOCKER_GITHUB_ENV_FLAGS) $(IMAGE_PREFIX)git-ghost-dev:$(RELEASE_TAG) /bin/bash -c "\
 	  set -eux; \
 		make build-all OUTDIR=/tmp/git-ghost/dist; \
-		for target in linux-amd64 darwin-amd64 windows-amd64; do \
+		for target in linux-amd64 darwin-amd64 windows-amd64.exe; do \
 			github-release upload \
 				--tag $(RELEASE_TAG) \
 				--name git-ghost-\$$target \
