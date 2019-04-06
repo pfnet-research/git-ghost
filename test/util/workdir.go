@@ -47,6 +47,16 @@ func CloneWorkDir(base *WorkDir) (*WorkDir, error) {
 		_ = wd.Remove()
 		return nil, err
 	}
+	_, _, err = wd.RunCommmand("git", "config", "user.email", "you@example.com")
+	if err != nil {
+		_ = wd.Remove()
+		return nil, err
+	}
+	_, _, err = wd.RunCommmand("git", "config", "user.name", "\"Your Name\"")
+	if err != nil {
+		_ = wd.Remove()
+		return nil, err
+	}
 	return wd, nil
 }
 
@@ -65,7 +75,7 @@ func CreateGitWorkDir() (*WorkDir, error) {
 		_ = wd.Remove()
 		return nil, err
 	}
-	_, _, err = wd.RunCommmand("git", "config", "user.name", "Your Name")
+	_, _, err = wd.RunCommmand("git", "config", "user.name", "\"Your Name\"")
 	if err != nil {
 		_ = wd.Remove()
 		return nil, err

@@ -441,6 +441,10 @@ func TestIncludeLinkFile(t *testing.T) {
 }
 
 func setupBasicEnv(workDir *util.WorkDir) (*util.WorkDir, *util.WorkDir, error) {
+	env := map[string]string{
+		"GIT_GHOST_REPO": workDir.Dir,
+	}
+
 	srcDir, err := util.CreateGitWorkDir()
 	if err != nil {
 		return nil, nil, err
@@ -451,18 +455,15 @@ func setupBasicEnv(workDir *util.WorkDir) (*util.WorkDir, *util.WorkDir, error) 
 		srcDir.Remove()
 		return nil, nil, err
 	}
-	srcDir.Env = map[string]string{
-		"GIT_GHOST_REPO": workDir.Dir,
-	}
+	srcDir.Env = env
 
 	dstDir, err := util.CloneWorkDir(srcDir)
 	if err != nil {
 		srcDir.Remove()
 		return nil, nil, err
 	}
-	dstDir.Env = map[string]string{
-		"GIT_GHOST_REPO": workDir.Dir,
-	}
+	dstDir.Env = env
+
 	return srcDir, dstDir, nil
 }
 
