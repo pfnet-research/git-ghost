@@ -1,0 +1,49 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  generateName: git-ghost-example-
+  labels:
+    app: git-ghost-example
+spec:
+  initContainers:
+  - name: init
+    image: {{IMAGE_PREFIX}}git-ghost-cli:{{IMAGE_TAG}}
+    imagePullPolicy: IfNotPresent
+    command: ["bash"]
+    args:
+    - "-c"
+    - "git clone ${GIT_REPO} . && git checkout ${GIT_COMMIT_HASH} && git ghost pull -v ${GIT_COMMIT_HASH} ${DIFF_HASH}"
+    workingDir: /code
+    env:
+    - name: GIT_SSH_COMMAND
+      value: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i /etc/git-secret/sshkey"
+    - name: GIT_REPO
+      value: {{GIT_REPO}}
+    - name: GIT_GHOST_REPO
+      value: {{GIT_GHOST_REPO}}
+    - name: GIT_COMMIT_HASH
+      value: {{GIT_COMMIT_HASH}}
+    - name: DIFF_HASH
+      value: {{DIFF_HASH}}
+    volumeMounts:
+    - name: code
+      mountPath: /code
+    - name: git-secret
+      mountPath: /etc/git-secret
+  containers:
+  - name: main
+    image: {{IMAGE_PREFIX}}git-ghost-cli:{{IMAGE_TAG}}
+    imagePullPolicy: IfNotPresent
+    command: ["git", "diff", "HEAD"]
+    workingDir: /code
+    volumeMounts:
+    - name: code
+      mountPath: /code
+  volumes:
+  - name: code
+    emptyDir:
+  - name: git-secret
+    secret:
+      secretName: git-ghost-creds
+      defaultMode: 256
+  restartPolicy: Never
