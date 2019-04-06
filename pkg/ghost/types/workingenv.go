@@ -48,6 +48,10 @@ func (weSpec WorkingEnvSpec) Initialize() (*WorkingEnv, errors.GitGhostError) {
 	if ggerr != nil {
 		return nil, ggerr
 	}
+	ggerr = git.CopyUserConfig(weSpec.SrcDir, ghostDir)
+	if ggerr != nil {
+		return nil, ggerr
+	}
 
 	log.WithFields(log.Fields{
 		"dir": ghostDir,

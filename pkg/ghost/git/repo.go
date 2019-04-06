@@ -19,6 +19,7 @@ import (
 	"git-ghost/pkg/util"
 	"git-ghost/pkg/util/errors"
 	"os/exec"
+	"strings"
 )
 
 var (
@@ -35,6 +36,27 @@ func InitializeGitDir(dir, repo, branch string) errors.GitGhostError {
 	args = append(args, repo, dir)
 	cmd := exec.Command("git", args...)
 	return util.JustRunCmd(cmd)
+}
+
+// CopyUserConfig copies user config from source directory to destination directory.
+func CopyUserConfig(srcDir, dstDir string) errors.GitGhostError {
+	// Get user config from src
+	userNameBytes, err := util.JustOutputCmd(exec.Command("git", "-C", srcDir, "config", "user.name"))
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	userName := strings.TrimSuffix(string(userNameBytes), "\n")
+	userEmailBytes, err := util.JustOutputCmd(exec.Command("git", "-C", srcDir, "config", "user.email"))
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	userEmail := strings.TrimSuffix(string(userEmailBytes), "\n")
+	// Copy the user config to dst
+	err = util.JustRunCmd(exec.Command("git", "-C", dstDir, "config", "user.name", fmt.Sprintf("\"%s\"", userName)))
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	return errors.WithStack(util.JustRunCmd(exec.Command("git", "-C", dstDir, "config", "user.email", fmt.Sprintf("\"%s\"", userEmail))))
 }
 
 // CommitAndPush commits and push to its origin
