@@ -15,7 +15,6 @@
 package git
 
 import (
-	"bytes"
 	"fmt"
 	"git-ghost/pkg/util"
 	"git-ghost/pkg/util/errors"
@@ -39,19 +38,8 @@ func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) erro
 		"log", "-p", "--reverse", "--pretty=email", "--stat", "-m", "--first-parent", "--binary",
 		fmt.Sprintf("%s..%s", fromComittish, toComittish),
 	)
-	stderr := bytes.NewBufferString("")
 	cmd.Stdout = f
-	cmd.Stderr = stderr
-	err = cmd.Run()
-	if err != nil {
-		s := stderr.String()
-		if s != "" {
-			err := errors.New(s)
-			return errors.WithStack(err)
-		}
-		return errors.WithStack(err)
-	}
-	return nil
+	return util.JustRunCmd(cmd)
 }
 
 // ApplyDiffBundleFile apply a patch file created in CreateDiffBundleFile
@@ -87,18 +75,8 @@ func CreateDiffPatchFile(dir, filepath, comittish string) errors.GitGhostError {
 	defer util.LogDeferredError(f.Close)
 
 	cmd := exec.Command("git", "-C", dir, "diff", "--patience", "--binary", comittish)
-	stderr := bytes.NewBufferString("")
 	cmd.Stdout = f
-	cmd.Stderr = stderr
-	err = cmd.Run()
-	if err != nil {
-		s := stderr.String()
-		if s != "" {
-			return errors.New(s)
-		}
-		return errors.WithStack(err)
-	}
-	return nil
+	return util.JustRunCmd(cmd)
 }
 
 // AppendNonIndexedDiffFiles appends non-indexed diff files
