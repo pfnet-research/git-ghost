@@ -54,10 +54,6 @@ build-windows:
 .PHONY: build-all
 build-all: build-linux build-darwin build-windows
 
-.PHONY: build-all-in-docker
-docker-build-all: build-image-dev
-	docker run --rm -v $(OUTDIR):/tmp/git-ghost/dist $(IMAGE_PREFIX)git-ghost-dev:$(RELEASE_TAG) make build-all OUTDIR=/tmp/git-ghost/dist
-
 .PHONY: release
 release: guard-RELEASE_TAG
 	make build-image-dev IMAGE_TAG=$(RELEASE_TAG)
@@ -87,10 +83,6 @@ release-image: guard-RELEASE_TAG
 lint: deps
 	golangci-lint run --config golangci.yml
 
-.PHONY: docker-lint
-docker-lint: build-image-dev
-	@docker run $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) make lint
-
 .PHONY: deps
 deps:
 	dep ensure
@@ -99,20 +91,12 @@ deps:
 build-image-dev:
 	docker build -t $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) --target git-ghost-dev $(PROJECTROOT)
 
-.PHONY: build-image-test
-build-image-test:
-	docker build -t $(IMAGE_PREFIX)git-ghost-test:$(IMAGE_TAG) --target git-ghost-test $(PROJECTROOT)
-
-.PHONY: build-image-e2e
-build-image-e2e:
-	docker build -t $(IMAGE_PREFIX)git-ghost-e2e:$(IMAGE_TAG) --target git-ghost-e2e $(PROJECTROOT)
-
 .PHONY: build-image-cli
 build-image-cli:
 	docker build -t $(IMAGE_PREFIX)git-ghost-cli:$(IMAGE_TAG) --target git-ghost-cli $(PROJECTROOT)
 
 .PHONY: build-image-all
-build-image-all: build-image-test build-image-e2e build-image-cli
+build-image-all: build-image-dev build-image-cli
 
 test: deps
 	@go test -v -race -short -tags no_e2e ./...
@@ -121,17 +105,17 @@ test: deps
 shell: build-image-cli
 	docker run -it $(IMAGE_PREFIX)git-ghost-cli:$(IMAGE_TAG) bash
 
-.PHONY: test-shell
-test-shell: build-image-test
-	docker run -it $(IMAGE_PREFIX)git-ghost-test:$(IMAGE_TAG) bash
+.PHONY: dev-shell
+dev-shell: build-image-dev
+	docker run -it $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) bash
 
 .PHONY: e2e
-e2e: build
+e2e:
 	@go test -v $(PROJECTROOT)/test/e2e/e2e_test.go
 
 .PHONY: docker-e2e
-docker-e2e: build-image-e2e
-	@docker run $(IMAGE_PREFIX)git-ghost-e2e:$(IMAGE_TAG) make e2e
+docker-e2e: build-image-dev
+	@docker run $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) make install e2e DEBUG=$(DEBUG)
 
 .PHONY: clean
 clean:
