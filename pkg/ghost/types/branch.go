@@ -170,7 +170,7 @@ func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string) errors.GitG
 		},
 	)).Info("applying ghost branch")
 
-	srcHead, err := git.ResolveComittish(we.SrcDir, "HEAD")
+	srcHead, err := git.ResolveCommittish(we.SrcDir, "HEAD")
 	if err != nil {
 		return err
 	}
