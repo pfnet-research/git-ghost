@@ -60,12 +60,12 @@ func CopyUserConfig(srcDir, dstDir string) errors.GitGhostError {
 }
 
 // CommitAndPush commits and push to its origin
-func CommitAndPush(dir, filename, message, comittish string) errors.GitGhostError {
+func CommitAndPush(dir, filename, message, committish string) errors.GitGhostError {
 	err := CommitFile(dir, filename, message)
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	err = Push(dir, comittish)
+	err = Push(dir, committish)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -97,18 +97,18 @@ func DeleteRemoteBranches(dir string, branchNames ...string) errors.GitGhostErro
 }
 
 // Push pushes current HEAD to its origin
-func Push(dir string, comittishes ...string) errors.GitGhostError {
+func Push(dir string, committishes ...string) errors.GitGhostError {
 	args := []string{"-C", dir, "push", "origin"}
-	args = append(args, comittishes...)
+	args = append(args, committishes...)
 	return util.JustRunCmd(
 		exec.Command("git", args...),
 	)
 }
 
-// Pull pulls comittish from its origin
-func Pull(dir, comittish string) errors.GitGhostError {
+// Pull pulls committish from its origin
+func Pull(dir, committish string) errors.GitGhostError {
 	return util.JustRunCmd(
-		exec.Command("git", "-C", dir, "pull", "origin", comittish),
+		exec.Command("git", "-C", dir, "pull", "origin", committish),
 	)
 }
 

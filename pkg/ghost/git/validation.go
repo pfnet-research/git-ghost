@@ -27,9 +27,9 @@ func ValidateGit() errors.GitGhostError {
 	)
 }
 
-// ValidateComittish check comittish is valid on dir
-func ValidateComittish(dir, comittish string) errors.GitGhostError {
+// ValidateCommittish check committish is valid on dir
+func ValidateCommittish(dir, committish string) errors.GitGhostError {
 	return util.JustRunCmd(
-		exec.Command("git", "-C", dir, "cat-file", "-e", comittish),
+		exec.Command("git", "-C", dir, "cat-file", "-e", committish),
 	)
 }

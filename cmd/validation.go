@@ -26,8 +26,8 @@ func nonEmpty(name, value string) errors.GitGhostError {
 	return nil
 }
 
-func isValidComittish(name, comittish string) errors.GitGhostError {
-	err := git.ValidateComittish(globalOpts.srcDir, comittish)
+func isValidCommittish(name, committish string) errors.GitGhostError {
+	err := git.ValidateCommittish(globalOpts.srcDir, committish)
 	if err != nil {
 		return errors.Errorf("%s is not a valid object", name)
 	}

@@ -106,8 +106,8 @@ func runShowCommitsCommand(cmd *cobra.Command, args []string) {
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 		CommitsBranchSpec: &types.CommitsBranchSpec{
 			Prefix:        globalOpts.ghostPrefix,
-			CommitishFrom: arg.commitsFrom,
-			CommitishTo:   arg.commitsTo,
+			CommittishFrom: arg.commitsFrom,
+			CommittishTo:   arg.commitsTo,
 		},
 		Writer: os.Stdout,
 	}
@@ -165,7 +165,7 @@ func runShowDiffCommand(cmd *cobra.Command, args []string) {
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 		PullableDiffBranchSpec: &types.PullableDiffBranchSpec{
 			Prefix:        globalOpts.ghostPrefix,
-			ComittishFrom: arg.diffFrom,
+			CommittishFrom: arg.diffFrom,
 			DiffHash:      arg.diffHash,
 		},
 		Writer: os.Stdout,
@@ -207,12 +207,12 @@ func runShowAllCommand(cmd *cobra.Command, args []string) {
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 		CommitsBranchSpec: &types.CommitsBranchSpec{
 			Prefix:        globalOpts.ghostPrefix,
-			CommitishFrom: showCommitsArg.commitsFrom,
-			CommitishTo:   showCommitsArg.commitsTo,
+			CommittishFrom: showCommitsArg.commitsFrom,
+			CommittishTo:   showCommitsArg.commitsTo,
 		},
 		PullableDiffBranchSpec: &types.PullableDiffBranchSpec{
 			Prefix:        globalOpts.ghostPrefix,
-			ComittishFrom: showDiffArg.diffFrom,
+			CommittishFrom: showDiffArg.diffFrom,
 			DiffHash:      showDiffArg.diffHash,
 		},
 		Writer: os.Stdout,

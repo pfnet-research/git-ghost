@@ -21,10 +21,10 @@ import (
 	"strings"
 )
 
-// ResolveComittish resolves comittish as full commit hash on dir
-func ResolveComittish(dir, comittish string) (string, errors.GitGhostError) {
+// ResolveCommittish resolves committish as full commit hash on dir
+func ResolveCommittish(dir, committish string) (string, errors.GitGhostError) {
 	commit, err := util.JustOutputCmd(
-		exec.Command("git", "-C", dir, "rev-list", "-1", comittish),
+		exec.Command("git", "-C", dir, "rev-list", "-1", committish),
 	)
 	if err != nil {
 		return "", err

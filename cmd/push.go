@@ -98,10 +98,10 @@ func (arg pushCommitsArg) validate() errors.GitGhostError {
 	if err := nonEmpty("commit-to", arg.commitsTo); err != nil {
 		return err
 	}
-	if err := isValidComittish("commit-from", arg.commitsFrom); err != nil {
+	if err := isValidCommittish("commit-from", arg.commitsFrom); err != nil {
 		return err
 	}
-	if err := isValidComittish("commit-to", arg.commitsTo); err != nil {
+	if err := isValidCommittish("commit-to", arg.commitsTo); err != nil {
 		return err
 	}
 	return nil
@@ -118,8 +118,8 @@ func runPushCommitsCommand(flags *pushFlags) func(cmd *cobra.Command, args []str
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 			CommitsBranchSpec: &types.CommitsBranchSpec{
 				Prefix:        globalOpts.ghostPrefix,
-				CommitishFrom: pushArg.commitsFrom,
-				CommitishTo:   pushArg.commitsTo,
+				CommittishFrom: pushArg.commitsFrom,
+				CommittishTo:   pushArg.commitsTo,
 			},
 		}
 
@@ -157,7 +157,7 @@ func (arg pushDiffArg) validate() errors.GitGhostError {
 	if err := nonEmpty("diff-from", arg.diffFrom); err != nil {
 		return err
 	}
-	if err := isValidComittish("diff-from", arg.diffFrom); err != nil {
+	if err := isValidCommittish("diff-from", arg.diffFrom); err != nil {
 		return err
 	}
 	return nil
@@ -174,7 +174,7 @@ func runPushDiffCommand(flags *pushFlags) func(cmd *cobra.Command, args []string
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 			DiffBranchSpec: &types.DiffBranchSpec{
 				Prefix:            globalOpts.ghostPrefix,
-				ComittishFrom:     pushArg.diffFrom,
+				CommittishFrom:     pushArg.diffFrom,
 				IncludedFilepaths: flags.includedFilepaths,
 				FollowSymlinks:    flags.followSymlinks,
 			},
@@ -215,12 +215,12 @@ func runPushAllCommand(flags *pushFlags) func(cmd *cobra.Command, args []string)
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 			CommitsBranchSpec: &types.CommitsBranchSpec{
 				Prefix:        globalOpts.ghostPrefix,
-				CommitishFrom: pushCommitsArg.commitsFrom,
-				CommitishTo:   pushCommitsArg.commitsTo,
+				CommittishFrom: pushCommitsArg.commitsFrom,
+				CommittishTo:   pushCommitsArg.commitsTo,
 			},
 			DiffBranchSpec: &types.DiffBranchSpec{
 				Prefix:            globalOpts.ghostPrefix,
-				ComittishFrom:     pushDiffArg.diffFrom,
+				CommittishFrom:     pushDiffArg.diffFrom,
 				IncludedFilepaths: flags.includedFilepaths,
 				FollowSymlinks:    flags.followSymlinks,
 			},

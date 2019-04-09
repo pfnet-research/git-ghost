@@ -24,29 +24,29 @@ import (
 type ListCommitsBranchSpec struct {
 	// Prefix is a prefix of branch name
 	Prefix string
-	// HashFrom is comittish value to list HashFrom..HashTo
+	// HashFrom is committish value to list HashFrom..HashTo
 	HashFrom string
-	// HashTo is a comittish value to list HashFrom..HashTo
+	// HashTo is a committish value to list HashFrom..HashTo
 	HashTo string
 }
 
 // ListCommitsBranchSpec is spec for list diff branch
 type ListDiffBranchSpec struct {
 	Prefix string
-	// HashFrom is comittish value to list HashFrom..HashTo
+	// HashFrom is committish value to list HashFrom..HashTo
 	HashFrom string
-	// HashTo is a comittish value to list HashFrom..HashTo
+	// HashTo is a committish value to list HashFrom..HashTo
 	HashTo string
 }
 
-// Resolve resolves commitish values in ListCommitsBranchSpec as full commit hash
+// Resolve resolves committish values in ListCommitsBranchSpec as full commit hash
 func (ls *ListCommitsBranchSpec) Resolve(srcDir string) *ListCommitsBranchSpec {
 	newSpec := *ls
 	if ls.HashFrom != "" {
-		newSpec.HashFrom = resolveComittishOr(srcDir, ls.HashFrom)
+		newSpec.HashFrom = resolveCommittishOr(srcDir, ls.HashFrom)
 	}
 	if ls.HashTo != "" {
-		newSpec.HashTo = resolveComittishOr(srcDir, ls.HashTo)
+		newSpec.HashTo = resolveCommittishOr(srcDir, ls.HashTo)
 	}
 	return &newSpec
 }
@@ -67,11 +67,11 @@ func (ls *ListCommitsBranchSpec) GetBranches(repo string) (CommitsBranches, erro
 	return branches, nil
 }
 
-// Resolve resolves commitish values in ListDiffBranchSpec as full commit hash
+// Resolve resolves committish values in ListDiffBranchSpec as full commit hash
 func (ls *ListDiffBranchSpec) Resolve(srcDir string) *ListDiffBranchSpec {
 	newSpec := *ls
 	if ls.HashFrom != "" {
-		newSpec.HashFrom = resolveComittishOr(srcDir, ls.HashFrom)
+		newSpec.HashFrom = resolveCommittishOr(srcDir, ls.HashFrom)
 	}
 	return &newSpec
 }
@@ -92,14 +92,14 @@ func (ls *ListDiffBranchSpec) GetBranches(repo string) (DiffBranches, errors.Git
 	return branches, nil
 }
 
-func listGhostBranchNames(repo, prefix, fromComittish, toComittish string) ([]string, error) {
+func listGhostBranchNames(repo, prefix, fromCommittish, toCommittish string) ([]string, error) {
 	fromPattern := "*"
 	toPattern := "*"
-	if fromComittish != "" {
-		fromPattern = fromComittish
+	if fromCommittish != "" {
+		fromPattern = fromCommittish
 	}
-	if toComittish != "" {
-		toPattern = toComittish
+	if toCommittish != "" {
+		toPattern = toCommittish
 	}
 
 	branchNames, err := git.ListRemoteBranchNames(repo, []string{

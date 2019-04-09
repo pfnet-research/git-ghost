@@ -26,8 +26,8 @@ import (
 	multierror "github.com/hashicorp/go-multierror"
 )
 
-// CreateDiffBundleFile creates patches for fromComittish..toComittish and save it to filepath
-func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) errors.GitGhostError {
+// CreateDiffBundleFile creates patches for fromCommittish..toCommittish and save it to filepath
+func CreateDiffBundleFile(dir, filepath, fromCommittish, toCommittish string) errors.GitGhostError {
 	f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return errors.WithStack(err)
@@ -36,7 +36,7 @@ func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) erro
 
 	cmd := exec.Command("git", "-C", dir,
 		"log", "-p", "--reverse", "--pretty=email", "--stat", "-m", "--first-parent", "--binary",
-		fmt.Sprintf("%s..%s", fromComittish, toComittish),
+		fmt.Sprintf("%s..%s", fromCommittish, toCommittish),
 	)
 	cmd.Stdout = f
 	return util.JustRunCmd(cmd)
@@ -66,15 +66,15 @@ func ApplyDiffBundleFile(dir, filepath string) errors.GitGhostError {
 	return errors.WithStack(errs)
 }
 
-// CreateDiffPatchFile creates a diff from comittish to current working state of `dir` and save it to filepath
-func CreateDiffPatchFile(dir, filepath, comittish string) errors.GitGhostError {
+// CreateDiffPatchFile creates a diff from committish to current working state of `dir` and save it to filepath
+func CreateDiffPatchFile(dir, filepath, committish string) errors.GitGhostError {
 	f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return errors.WithStack(err)
 	}
 	defer util.LogDeferredError(f.Close)
 
-	cmd := exec.Command("git", "-C", dir, "diff", "--patience", "--binary", comittish)
+	cmd := exec.Command("git", "-C", dir, "diff", "--patience", "--binary", committish)
 	cmd.Stdout = f
 	return util.JustRunCmd(cmd)
 }
