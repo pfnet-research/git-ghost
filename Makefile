@@ -113,6 +113,14 @@ e2e:
 docker-e2e: build-image-dev
 	@docker run $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) make install e2e DEBUG=$(DEBUG)
 
+.PHONY: update-license
+update-license:
+	@python3 ./scripts/license/add.py -v
+
+.PHONY: check-license
+check-license:
+	@python3 ./scripts/license/check.py -v
+
 .PHONY: clean
 clean:
 	rm -rf dist/*
