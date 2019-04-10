@@ -121,6 +121,11 @@ update-license:
 check-license:
 	@python3 ./scripts/license/check.py -v
 
+.PHONY: coverage
+coverage:
+	@go test -tags no_e2e -covermode=count -coverprofile=profile.cov -coverpkg ./pkg/...,./cmd/... $(shell go list ./... | grep -v /vendor/)
+	@go tool cover -func=profile.cov
+
 .PHONY: clean
 clean:
 	rm -rf dist/*

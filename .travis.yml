@@ -1,0 +1,29 @@
+language: go
+go:
+- "1.11.x"
+- "1.12.x"
+
+before_install:
+- export PATH=$GOPATH/bin:$PATH
+
+install:
+- go get -u github.com/golang/dep/...
+- go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+- go get -u github.com/mattn/goveralls
+- dep ensure
+
+before_script: make lint
+
+script:
+- make test coverage && goveralls -coverprofile=profile.cov -service=travis-ci
+- make install e2e
+
+deploy:
+- provider: script
+  script: make release RELEASE_TAG=$TRAVIS_TAG
+  on:
+    tags: true
+- provider: script
+  script: make release RELEASE_TAG=latest
+  on:
+    branch: master

@@ -1,5 +1,9 @@
 # git-ghost
 
+[![GoDoc][godoc-image]][godoc-link]
+[![Build Status][build-image]][build-link]
+[![Coverage Status][cov-image]][cov-link]
+
 Git Ghost is a command line tool for synchronizing your working directory efficiently to a remote place without commiting changes.
 
 ## Concept
@@ -90,3 +94,10 @@ $ godoc -http=:6060  # access http://localhost:6060 in browser
 ## Copyright
 
 Copyright (c) 2019 Preferred Networks. See [LICENSE](LICENSE) for details.
+
+[build-image]: https://secure.travis-ci.org/pfnet-research/git-ghost.svg
+[build-link]:  http://travis-ci.org/pfnet-research/git-ghost
+[cov-image]:   https://coveralls.io/repos/github/pfnet-research/git-ghost/badge.svg?branch=master
+[cov-link]:    https://coveralls.io/github/pfnet-research/git-ghost?branch=master
+[godoc-image]: https://godoc.org/github.com/pfnet-research/git-ghost?status.svg
+[godoc-link]:  https://godoc.org/github.com/pfnet-research/git-ghost
