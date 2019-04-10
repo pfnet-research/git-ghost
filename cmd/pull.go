@@ -15,9 +15,9 @@
 package cmd
 
 import (
-	"git-ghost/pkg/ghost"
-	"git-ghost/pkg/ghost/types"
-	"git-ghost/pkg/util/errors"
+	"github.com/pfnet-research/git-ghost/pkg/ghost"
+	"github.com/pfnet-research/git-ghost/pkg/ghost/types"
+	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 	"os"
 
 	log "github.com/Sirupsen/logrus"

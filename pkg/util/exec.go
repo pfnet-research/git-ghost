@@ -16,7 +16,7 @@ package util
 
 import (
 	"bytes"
-	"git-ghost/pkg/util/errors"
+	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 	"os"
 	"os/exec"
 	"strings"

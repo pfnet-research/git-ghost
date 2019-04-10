@@ -16,8 +16,8 @@ package types
 
 import (
 	"fmt"
-	"git-ghost/pkg/ghost/git"
-	"git-ghost/pkg/util/errors"
+	"github.com/pfnet-research/git-ghost/pkg/ghost/git"
+	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 )
 
 // ListCommitsBranchSpec is spec for list commits branch

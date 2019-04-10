@@ -17,10 +17,10 @@ package ghost
 import (
 	"bytes"
 	"fmt"
-	"git-ghost/pkg/ghost/git"
-	"git-ghost/pkg/ghost/types"
-	"git-ghost/pkg/util"
-	"git-ghost/pkg/util/errors"
+	"github.com/pfnet-research/git-ghost/pkg/ghost/git"
+	"github.com/pfnet-research/git-ghost/pkg/ghost/types"
+	"github.com/pfnet-research/git-ghost/pkg/util"
+	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 
 	log "github.com/Sirupsen/logrus"
 )

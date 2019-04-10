@@ -16,8 +16,8 @@ package git
 
 import (
 	"fmt"
-	"git-ghost/pkg/util"
-	"git-ghost/pkg/util/errors"
+	"github.com/pfnet-research/git-ghost/pkg/util"
+	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 	"os/exec"
 	"strings"
 )

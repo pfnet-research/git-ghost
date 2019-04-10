@@ -15,7 +15,7 @@
 package main
 
 import (
-	"git-ghost/cmd"
+	"github.com/pfnet-research/git-ghost/cmd"
 	"os"
 
 	log "github.com/Sirupsen/logrus"

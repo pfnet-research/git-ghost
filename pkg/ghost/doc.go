@@ -13,4 +13,4 @@
 // limitations under the License.
 
 // Package ghost package is a top package for git-ghost
-package ghost // import "git-ghost/pkg/ghost"
+package ghost // import "github.com/pfnet-research/git-ghost/pkg/ghost"
