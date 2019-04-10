@@ -24,6 +24,6 @@ deploy:
   on:
     tags: true
 - provider: script
-  script: make release RELEASE_TAG=latest
+  script: make release-image RELEASE_TAG=latest
   on:
     branch: master
