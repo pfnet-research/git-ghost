@@ -123,7 +123,7 @@ check-license:
 
 .PHONY: coverage
 coverage:
-	@go test -covermode=count -coverprofile=profile.cov $(shell go list ./... | grep -v /vendor/)
+	@go test -tags no_e2e -covermode=count -coverprofile=profile.cov $(shell go list ./... | grep -v /vendor/)
 	@go tool cover -func=profile.cov
 
 .PHONY: clean
