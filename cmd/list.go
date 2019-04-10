@@ -16,12 +16,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/pfnet-research/git-ghost/pkg/ghost"
-	"github.com/pfnet-research/git-ghost/pkg/ghost/types"
-	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/pfnet-research/git-ghost/pkg/ghost"
+	"github.com/pfnet-research/git-ghost/pkg/ghost/types"
+	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 
 	"github.com/spf13/cobra"
 )

@@ -16,10 +16,11 @@ package util
 
 import (
 	"bytes"
-	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 
 	log "github.com/Sirupsen/logrus"
 )

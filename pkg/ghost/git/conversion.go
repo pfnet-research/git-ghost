@@ -15,10 +15,11 @@
 package git
 
 import (
-	"github.com/pfnet-research/git-ghost/pkg/util"
-	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 	"os/exec"
 	"strings"
+
+	"github.com/pfnet-research/git-ghost/pkg/util"
+	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 )
 
 // ResolveCommittish resolves committish as full commit hash on dir

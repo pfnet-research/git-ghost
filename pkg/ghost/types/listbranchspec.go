@@ -16,6 +16,7 @@ package types
 
 import (
 	"fmt"
+
 	"github.com/pfnet-research/git-ghost/pkg/ghost/git"
 	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 )

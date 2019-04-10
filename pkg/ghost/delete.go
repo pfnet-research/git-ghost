@@ -17,6 +17,7 @@ package ghost
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/pfnet-research/git-ghost/pkg/ghost/git"
 	"github.com/pfnet-research/git-ghost/pkg/ghost/types"
 	"github.com/pfnet-research/git-ghost/pkg/util"

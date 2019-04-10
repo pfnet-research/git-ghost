@@ -16,10 +16,11 @@ package git
 
 import (
 	"fmt"
-	"github.com/pfnet-research/git-ghost/pkg/util"
-	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 	"os/exec"
 	"strings"
+
+	"github.com/pfnet-research/git-ghost/pkg/util"
+	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 )
 
 var (

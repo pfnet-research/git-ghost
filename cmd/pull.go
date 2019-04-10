@@ -15,10 +15,11 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/pfnet-research/git-ghost/pkg/ghost"
 	"github.com/pfnet-research/git-ghost/pkg/ghost/types"
 	"github.com/pfnet-research/git-ghost/pkg/util/errors"
-	"os"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -115,7 +116,7 @@ func runPullCommitsCommand(flags *pullFlags) func(cmd *cobra.Command, args []str
 		options := ghost.PullOptions{
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 			CommitsBranchSpec: &types.CommitsBranchSpec{
-				Prefix:        globalOpts.ghostPrefix,
+				Prefix:         globalOpts.ghostPrefix,
 				CommittishFrom: arg.commitsFrom,
 				CommittishTo:   arg.commitsTo,
 			},
@@ -176,9 +177,9 @@ func runPullDiffCommand(flags *pullFlags) func(cmd *cobra.Command, args []string
 		options := ghost.PullOptions{
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 			PullableDiffBranchSpec: &types.PullableDiffBranchSpec{
-				Prefix:        globalOpts.ghostPrefix,
+				Prefix:         globalOpts.ghostPrefix,
 				CommittishFrom: arg.diffFrom,
-				DiffHash:      arg.diffHash,
+				DiffHash:       arg.diffHash,
 			},
 			// ForceApply: flags.forceApply,
 		}
@@ -220,14 +221,14 @@ func runPullAllCommand(flags *pullFlags) func(cmd *cobra.Command, args []string)
 		options := ghost.PullOptions{
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 			CommitsBranchSpec: &types.CommitsBranchSpec{
-				Prefix:        globalOpts.ghostPrefix,
+				Prefix:         globalOpts.ghostPrefix,
 				CommittishFrom: pullCommitsArg.commitsFrom,
 				CommittishTo:   pullCommitsArg.commitsTo,
 			},
 			PullableDiffBranchSpec: &types.PullableDiffBranchSpec{
-				Prefix:        globalOpts.ghostPrefix,
+				Prefix:         globalOpts.ghostPrefix,
 				CommittishFrom: pullDiffArg.diffFrom,
-				DiffHash:      pullDiffArg.diffHash,
+				DiffHash:       pullDiffArg.diffHash,
 			},
 			// ForceApply: flags.forceApply,
 		}

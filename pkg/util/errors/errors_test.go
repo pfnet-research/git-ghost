@@ -16,8 +16,9 @@ package errors_test
 
 import (
 	"fmt"
-	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 	"testing"
+
+	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 
 	"github.com/stretchr/testify/assert"
 )
