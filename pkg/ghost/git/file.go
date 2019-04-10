@@ -16,11 +16,12 @@ package git
 
 import (
 	"fmt"
-	"git-ghost/pkg/util"
-	"git-ghost/pkg/util/errors"
 	"os"
 	"os/exec"
 	"syscall"
+
+	"github.com/pfnet-research/git-ghost/pkg/util"
+	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 
 	log "github.com/Sirupsen/logrus"
 	multierror "github.com/hashicorp/go-multierror"

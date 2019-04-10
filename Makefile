@@ -12,7 +12,7 @@ GITHUB_REPO ?=
 GITHUB_TOKEN ?=
 DOCKER_GITHUB_ENV_FLAGS := -e GITHUB_API=$(GITHUB_API) -e GITHUB_USER=$(GITHUB_USER) -e GITHUB_REPO=$(GITHUB_REPO) -e GITHUB_TOKEN=$(GITHUB_TOKEN)
 
-LDFLAGS := -ldflags="-s -w -X \"git-ghost/cmd.Version=$(VERSION)\" -X \"git-ghost/cmd.Revision=$(REVISION)\" -extldflags \"-static\""
+LDFLAGS := -ldflags="-s -w -X \"github.com/pfnet-research/git-ghost/cmd.Version=$(VERSION)\" -X \"github.com/pfnet-research/git-ghost/cmd.Revision=$(REVISION)\" -extldflags \"-static\""
 
 guard-%:
 	@ if [ "${${*}}" = "" ]; then \

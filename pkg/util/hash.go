@@ -15,9 +15,10 @@
 package util
 
 import (
-	"git-ghost/pkg/util/errors"
 	"os/exec"
 	"strings"
+
+	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 )
 
 func GenerateFileContentHash(filepath string) (string, errors.GitGhostError) {

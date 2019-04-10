@@ -13,4 +13,4 @@
 // limitations under the License.
 
 // Package git package contains functions to operate git repositories used by git-ghost
-package git // import "git-ghost/pkg/ghost/git"
+package git // import "github.com/pfnet-research/git-ghost/pkg/ghost/git"

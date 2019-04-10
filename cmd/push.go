@@ -16,10 +16,11 @@ package cmd
 
 import (
 	"fmt"
-	"git-ghost/pkg/ghost"
-	"git-ghost/pkg/ghost/types"
-	"git-ghost/pkg/util/errors"
 	"os"
+
+	"github.com/pfnet-research/git-ghost/pkg/ghost"
+	"github.com/pfnet-research/git-ghost/pkg/ghost/types"
+	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 
 	"github.com/spf13/cobra"
 )
@@ -117,7 +118,7 @@ func runPushCommitsCommand(flags *pushFlags) func(cmd *cobra.Command, args []str
 		options := ghost.PushOptions{
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 			CommitsBranchSpec: &types.CommitsBranchSpec{
-				Prefix:        globalOpts.ghostPrefix,
+				Prefix:         globalOpts.ghostPrefix,
 				CommittishFrom: pushArg.commitsFrom,
 				CommittishTo:   pushArg.commitsTo,
 			},
@@ -174,7 +175,7 @@ func runPushDiffCommand(flags *pushFlags) func(cmd *cobra.Command, args []string
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 			DiffBranchSpec: &types.DiffBranchSpec{
 				Prefix:            globalOpts.ghostPrefix,
-				CommittishFrom:     pushArg.diffFrom,
+				CommittishFrom:    pushArg.diffFrom,
 				IncludedFilepaths: flags.includedFilepaths,
 				FollowSymlinks:    flags.followSymlinks,
 			},
@@ -214,13 +215,13 @@ func runPushAllCommand(flags *pushFlags) func(cmd *cobra.Command, args []string)
 		options := ghost.PushOptions{
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 			CommitsBranchSpec: &types.CommitsBranchSpec{
-				Prefix:        globalOpts.ghostPrefix,
+				Prefix:         globalOpts.ghostPrefix,
 				CommittishFrom: pushCommitsArg.commitsFrom,
 				CommittishTo:   pushCommitsArg.commitsTo,
 			},
 			DiffBranchSpec: &types.DiffBranchSpec{
 				Prefix:            globalOpts.ghostPrefix,
-				CommittishFrom:     pushDiffArg.diffFrom,
+				CommittishFrom:    pushDiffArg.diffFrom,
 				IncludedFilepaths: flags.includedFilepaths,
 				FollowSymlinks:    flags.followSymlinks,
 			},

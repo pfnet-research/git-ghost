@@ -16,15 +16,16 @@ package types
 
 import (
 	"fmt"
-	"git-ghost/pkg/ghost/git"
-	"git-ghost/pkg/util"
-	"git-ghost/pkg/util/errors"
 	"io"
 	"os/exec"
 	"path"
 	"reflect"
 	"regexp"
 	"sort"
+
+	"github.com/pfnet-research/git-ghost/pkg/ghost/git"
+	"github.com/pfnet-research/git-ghost/pkg/util"
+	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 
 	log "github.com/Sirupsen/logrus"
 )

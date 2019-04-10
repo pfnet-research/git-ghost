@@ -15,9 +15,10 @@
 package util
 
 import (
-	"git-ghost/pkg/util/errors"
 	"os"
 	"path/filepath"
+
+	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 )
 
 // FileSize returns file size of a given file

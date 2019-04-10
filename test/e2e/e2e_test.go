@@ -22,7 +22,7 @@ import (
 	"strings"
 	"testing"
 
-	"git-ghost/test/util"
+	"github.com/pfnet-research/git-ghost/test/util"
 
 	"github.com/stretchr/testify/assert"
 )

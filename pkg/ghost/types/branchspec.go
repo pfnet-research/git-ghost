@@ -16,13 +16,14 @@ package types
 
 import (
 	"fmt"
-	"git-ghost/pkg/ghost/git"
-	"git-ghost/pkg/util"
-	"git-ghost/pkg/util/errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/pfnet-research/git-ghost/pkg/ghost/git"
+	"github.com/pfnet-research/git-ghost/pkg/util"
+	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 
 	log "github.com/Sirupsen/logrus"
 	multierror "github.com/hashicorp/go-multierror"
@@ -55,7 +56,7 @@ const maxSymlinkDepth = 3
 
 // CommitsBranchSpec is a spec for creating local base branch
 type CommitsBranchSpec struct {
-	Prefix        string
+	Prefix         string
 	CommittishFrom string
 	CommittishTo   string
 }
@@ -63,16 +64,16 @@ type CommitsBranchSpec struct {
 // DiffBranchSpec is a spec for creating local mod branch
 type DiffBranchSpec struct {
 	Prefix            string
-	CommittishFrom     string
+	CommittishFrom    string
 	IncludedFilepaths []string
 	FollowSymlinks    bool
 }
 
 // PullableDiffBranchSpec is a spec for pulling local base branch
 type PullableDiffBranchSpec struct {
-	Prefix        string
+	Prefix         string
 	CommittishFrom string
-	DiffHash      string
+	DiffHash       string
 }
 
 // Resolve resolves committish in DiffBranchSpec as full commit hash values
@@ -88,7 +89,7 @@ func (bs CommitsBranchSpec) Resolve(srcDir string) (*CommitsBranchSpec, errors.G
 	}
 	commitHashTo := resolveCommittishOr(srcDir, bs.CommittishTo)
 	branch := &CommitsBranchSpec{
-		Prefix:        bs.Prefix,
+		Prefix:         bs.Prefix,
 		CommittishFrom: commitHashFrom,
 		CommittishTo:   commitHashTo,
 	}
@@ -224,7 +225,7 @@ func (bs DiffBranchSpec) Resolve(srcDir string) (*DiffBranchSpec, errors.GitGhos
 
 	return &DiffBranchSpec{
 		Prefix:            bs.Prefix,
-		CommittishFrom:     commitHashFrom,
+		CommittishFrom:    commitHashFrom,
 		IncludedFilepaths: includedFilepaths,
 	}, nil
 }
@@ -300,9 +301,9 @@ func (bs PullableDiffBranchSpec) Resolve(srcDir string) (*PullableDiffBranchSpec
 	commitHashFrom := resolveCommittishOr(srcDir, bs.CommittishFrom)
 
 	return &PullableDiffBranchSpec{
-		Prefix:        bs.Prefix,
+		Prefix:         bs.Prefix,
 		CommittishFrom: commitHashFrom,
-		DiffHash:      bs.DiffHash,
+		DiffHash:       bs.DiffHash,
 	}, nil
 }
 

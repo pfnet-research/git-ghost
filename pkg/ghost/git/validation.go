@@ -15,9 +15,10 @@
 package git
 
 import (
-	"git-ghost/pkg/util"
-	"git-ghost/pkg/util/errors"
 	"os/exec"
+
+	"github.com/pfnet-research/git-ghost/pkg/util"
+	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 )
 
 // ValidateGit check the environment has 'git' command or not.
