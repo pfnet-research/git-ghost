@@ -1,3 +1,17 @@
+// Copyright 2019 Preferred Networks, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package cmd
 
 import (
@@ -12,8 +26,8 @@ func nonEmpty(name, value string) errors.GitGhostError {
 	return nil
 }
 
-func isValidComittish(name, comittish string) errors.GitGhostError {
-	err := git.ValidateComittish(globalOpts.srcDir, comittish)
+func isValidCommittish(name, committish string) errors.GitGhostError {
+	err := git.ValidateCommittish(globalOpts.srcDir, committish)
 	if err != nil {
 		return errors.Errorf("%s is not a valid object", name)
 	}

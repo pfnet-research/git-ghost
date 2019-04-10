@@ -1,3 +1,17 @@
+// Copyright 2019 Preferred Networks, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package cmd
 
 import (
@@ -92,8 +106,8 @@ func runShowCommitsCommand(cmd *cobra.Command, args []string) {
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 		CommitsBranchSpec: &types.CommitsBranchSpec{
 			Prefix:        globalOpts.ghostPrefix,
-			CommitishFrom: arg.commitsFrom,
-			CommitishTo:   arg.commitsTo,
+			CommittishFrom: arg.commitsFrom,
+			CommittishTo:   arg.commitsTo,
 		},
 		Writer: os.Stdout,
 	}
@@ -151,7 +165,7 @@ func runShowDiffCommand(cmd *cobra.Command, args []string) {
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 		PullableDiffBranchSpec: &types.PullableDiffBranchSpec{
 			Prefix:        globalOpts.ghostPrefix,
-			ComittishFrom: arg.diffFrom,
+			CommittishFrom: arg.diffFrom,
 			DiffHash:      arg.diffHash,
 		},
 		Writer: os.Stdout,
@@ -193,12 +207,12 @@ func runShowAllCommand(cmd *cobra.Command, args []string) {
 		WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 		CommitsBranchSpec: &types.CommitsBranchSpec{
 			Prefix:        globalOpts.ghostPrefix,
-			CommitishFrom: showCommitsArg.commitsFrom,
-			CommitishTo:   showCommitsArg.commitsTo,
+			CommittishFrom: showCommitsArg.commitsFrom,
+			CommittishTo:   showCommitsArg.commitsTo,
 		},
 		PullableDiffBranchSpec: &types.PullableDiffBranchSpec{
 			Prefix:        globalOpts.ghostPrefix,
-			ComittishFrom: showDiffArg.diffFrom,
+			CommittishFrom: showDiffArg.diffFrom,
 			DiffHash:      showDiffArg.diffHash,
 		},
 		Writer: os.Stdout,

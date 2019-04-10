@@ -1,3 +1,17 @@
+// Copyright 2019 Preferred Networks, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package cmd
 
 import (
@@ -102,8 +116,8 @@ func runPullCommitsCommand(flags *pullFlags) func(cmd *cobra.Command, args []str
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 			CommitsBranchSpec: &types.CommitsBranchSpec{
 				Prefix:        globalOpts.ghostPrefix,
-				CommitishFrom: arg.commitsFrom,
-				CommitishTo:   arg.commitsTo,
+				CommittishFrom: arg.commitsFrom,
+				CommittishTo:   arg.commitsTo,
 			},
 			// ForceApply: flags.forceApply,
 		}
@@ -163,7 +177,7 @@ func runPullDiffCommand(flags *pullFlags) func(cmd *cobra.Command, args []string
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 			PullableDiffBranchSpec: &types.PullableDiffBranchSpec{
 				Prefix:        globalOpts.ghostPrefix,
-				ComittishFrom: arg.diffFrom,
+				CommittishFrom: arg.diffFrom,
 				DiffHash:      arg.diffHash,
 			},
 			// ForceApply: flags.forceApply,
@@ -207,12 +221,12 @@ func runPullAllCommand(flags *pullFlags) func(cmd *cobra.Command, args []string)
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 			CommitsBranchSpec: &types.CommitsBranchSpec{
 				Prefix:        globalOpts.ghostPrefix,
-				CommitishFrom: pullCommitsArg.commitsFrom,
-				CommitishTo:   pullCommitsArg.commitsTo,
+				CommittishFrom: pullCommitsArg.commitsFrom,
+				CommittishTo:   pullCommitsArg.commitsTo,
 			},
 			PullableDiffBranchSpec: &types.PullableDiffBranchSpec{
 				Prefix:        globalOpts.ghostPrefix,
-				ComittishFrom: pullDiffArg.diffFrom,
+				CommittishFrom: pullDiffArg.diffFrom,
 				DiffHash:      pullDiffArg.diffHash,
 			},
 			// ForceApply: flags.forceApply,

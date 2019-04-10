@@ -1,3 +1,17 @@
+// Copyright 2019 Preferred Networks, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package cmd
 
 import (
@@ -86,11 +100,11 @@ func (arg pushCommitsArg) validate() errors.GitGhostError {
 		return err
 	}
 	if arg.commitsFrom != util.CommitStartFromInit {
-		if err := isValidComittish("commit-from", arg.commitsFrom); err != nil {
+		if err := isValidCommittish("commit-from", arg.commitsFrom); err != nil {
 			return err
 		}
 	}
-	if err := isValidComittish("commit-to", arg.commitsTo); err != nil {
+	if err := isValidCommittish("commit-to", arg.commitsTo); err != nil {
 		return err
 	}
 	return nil
@@ -106,9 +120,9 @@ func runPushCommitsCommand(flags *pushFlags) func(cmd *cobra.Command, args []str
 		options := ghost.PushOptions{
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 			CommitsBranchSpec: &types.CommitsBranchSpec{
-				Prefix:        globalOpts.ghostPrefix,
-				CommitishFrom: pushArg.commitsFrom,
-				CommitishTo:   pushArg.commitsTo,
+				Prefix:         globalOpts.ghostPrefix,
+				CommittishFrom: pushArg.commitsFrom,
+				CommittishTo:   pushArg.commitsTo,
 			},
 		}
 
@@ -146,7 +160,7 @@ func (arg pushDiffArg) validate() errors.GitGhostError {
 	if err := nonEmpty("diff-from", arg.diffFrom); err != nil {
 		return err
 	}
-	if err := isValidComittish("diff-from", arg.diffFrom); err != nil {
+	if err := isValidCommittish("diff-from", arg.diffFrom); err != nil {
 		return err
 	}
 	return nil
@@ -163,7 +177,7 @@ func runPushDiffCommand(flags *pushFlags) func(cmd *cobra.Command, args []string
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 			DiffBranchSpec: &types.DiffBranchSpec{
 				Prefix:            globalOpts.ghostPrefix,
-				ComittishFrom:     pushArg.diffFrom,
+				CommittishFrom:    pushArg.diffFrom,
 				IncludedFilepaths: flags.includedFilepaths,
 				FollowSymlinks:    flags.followSymlinks,
 			},
@@ -203,13 +217,13 @@ func runPushAllCommand(flags *pushFlags) func(cmd *cobra.Command, args []string)
 		options := ghost.PushOptions{
 			WorkingEnvSpec: globalOpts.WorkingEnvSpec(),
 			CommitsBranchSpec: &types.CommitsBranchSpec{
-				Prefix:        globalOpts.ghostPrefix,
-				CommitishFrom: pushCommitsArg.commitsFrom,
-				CommitishTo:   pushCommitsArg.commitsTo,
+				Prefix:         globalOpts.ghostPrefix,
+				CommittishFrom: pushCommitsArg.commitsFrom,
+				CommittishTo:   pushCommitsArg.commitsTo,
 			},
 			DiffBranchSpec: &types.DiffBranchSpec{
 				Prefix:            globalOpts.ghostPrefix,
-				ComittishFrom:     pushDiffArg.diffFrom,
+				CommittishFrom:    pushDiffArg.diffFrom,
 				IncludedFilepaths: flags.includedFilepaths,
 				FollowSymlinks:    flags.followSymlinks,
 			},

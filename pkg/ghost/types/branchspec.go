@@ -1,3 +1,17 @@
+// Copyright 2019 Preferred Networks, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package types
 
 import (
@@ -41,43 +55,47 @@ const maxSymlinkDepth = 3
 
 // CommitsBranchSpec is a spec for creating local base branch
 type CommitsBranchSpec struct {
-	Prefix        string
-	CommitishFrom string
-	CommitishTo   string
+	Prefix         string
+	CommittishFrom string
+	CommittishTo   string
 }
 
 // DiffBranchSpec is a spec for creating local mod branch
 type DiffBranchSpec struct {
 	Prefix            string
-	ComittishFrom     string
+	CommittishFrom    string
 	IncludedFilepaths []string
 	FollowSymlinks    bool
 }
 
 // PullableDiffBranchSpec is a spec for pulling local base branch
 type PullableDiffBranchSpec struct {
-	Prefix        string
-	ComittishFrom string
-	DiffHash      string
+	Prefix         string
+	CommittishFrom string
+	DiffHash       string
 }
 
-// Resolve resolves comittish in DiffBranchSpec as full commit hash values.
+// Resolve resolves committish in DiffBranchSpec as full commit hash values.
 // The special character "_" is allowed to indicate full commmits.
 func (bs CommitsBranchSpec) Resolve(srcDir string) (*CommitsBranchSpec, errors.GitGhostError) {
-	commitHashFrom := bs.CommitishFrom
-	if bs.CommitishFrom != util.CommitStartFromInit {
-		// CommitishFrom must be a valid existing commitish
-		err := git.ValidateComittish(srcDir, bs.CommitishFrom)
+	commitHashFrom := bs.CommittishFrom
+	if bs.CommittishFrom != util.CommitStartFromInit {
+		// CommittishFrom must be a valid existing committish
+		err := git.ValidateCommittish(srcDir, bs.CommittishFrom)
 		if err != nil {
 			return nil, err
 		}
-		commitHashFrom = resolveComittishOr(srcDir, bs.CommitishFrom)
+		commitHashFrom = resolveCommittishOr(srcDir, bs.CommittishFrom)
+		err = git.ValidateCommittish(srcDir, bs.CommittishTo)
+		if err != nil {
+			return nil, err
+		}
 	}
-	commitHashTo := resolveComittishOr(srcDir, bs.CommitishTo)
+	commitHashTo := resolveCommittishOr(srcDir, bs.CommittishTo)
 	branch := &CommitsBranchSpec{
-		Prefix:        bs.Prefix,
-		CommitishFrom: commitHashFrom,
-		CommitishTo:   commitHashTo,
+		Prefix:         bs.Prefix,
+		CommittishFrom: commitHashFrom,
+		CommittishTo:   commitHashTo,
 	}
 	return branch, nil
 }
@@ -91,8 +109,8 @@ func (bs CommitsBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, errors.GitGh
 
 	branch := &CommitsBranch{
 		Prefix:         resolved.Prefix,
-		CommitHashFrom: resolved.CommitishFrom,
-		CommitHashTo:   resolved.CommitishTo,
+		CommitHashFrom: resolved.CommittishFrom,
+		CommitHashTo:   resolved.CommittishTo,
 	}
 	if branch.CommitHashFrom == branch.CommitHashTo {
 		log.WithFields(log.Fields{
@@ -118,8 +136,8 @@ func (bs CommitsBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.Git
 		return nil, ggerr
 	}
 
-	commitHashFrom := resolved.CommitishFrom
-	commitHashTo := resolved.CommitishTo
+	commitHashFrom := resolved.CommittishFrom
+	commitHashTo := resolved.CommittishTo
 	if commitHashFrom == commitHashTo {
 		return nil, nil
 	}
@@ -163,14 +181,14 @@ func (bs CommitsBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.Git
 	return &branch, nil
 }
 
-// Resolve resolves comittish in DiffBranchSpec as full commit hash values
+// Resolve resolves committish in DiffBranchSpec as full commit hash values
 func (bs DiffBranchSpec) Resolve(srcDir string) (*DiffBranchSpec, errors.GitGhostError) {
-	// CommitishFrom must be a valid existing commitish
-	err := git.ValidateComittish(srcDir, bs.ComittishFrom)
+	// CommittishFrom must be a valid existing committish
+	err := git.ValidateCommittish(srcDir, bs.CommittishFrom)
 	if err != nil {
 		return nil, err
 	}
-	commitHashFrom := resolveComittishOr(srcDir, bs.ComittishFrom)
+	commitHashFrom := resolveCommittishOr(srcDir, bs.CommittishFrom)
 
 	var errs error
 	includedFilepaths := make([]string, 0, len(bs.IncludedFilepaths))
@@ -219,7 +237,7 @@ func (bs DiffBranchSpec) Resolve(srcDir string) (*DiffBranchSpec, errors.GitGhos
 
 	return &DiffBranchSpec{
 		Prefix:            bs.Prefix,
-		ComittishFrom:     commitHashFrom,
+		CommittishFrom:    commitHashFrom,
 		IncludedFilepaths: includedFilepaths,
 	}, nil
 }
@@ -232,7 +250,7 @@ func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.GitGho
 	if ggerr != nil {
 		return nil, ggerr
 	}
-	commitHashFrom := resolved.ComittishFrom
+	commitHashFrom := resolved.CommittishFrom
 	tmpFile, err := ioutil.TempFile("", "git-ghost-local-mod")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -286,18 +304,18 @@ func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.GitGho
 	return &branch, nil
 }
 
-// Resolve resolves comittish in PullableDiffBranchSpec as full commit hash values
+// Resolve resolves committish in PullableDiffBranchSpec as full commit hash values
 func (bs PullableDiffBranchSpec) Resolve(srcDir string) (*PullableDiffBranchSpec, errors.GitGhostError) {
-	err := git.ValidateComittish(srcDir, bs.ComittishFrom)
+	err := git.ValidateCommittish(srcDir, bs.CommittishFrom)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	commitHashFrom := resolveComittishOr(srcDir, bs.ComittishFrom)
+	commitHashFrom := resolveCommittishOr(srcDir, bs.CommittishFrom)
 
 	return &PullableDiffBranchSpec{
-		Prefix:        bs.Prefix,
-		ComittishFrom: commitHashFrom,
-		DiffHash:      bs.DiffHash,
+		Prefix:         bs.Prefix,
+		CommittishFrom: commitHashFrom,
+		DiffHash:       bs.DiffHash,
 	}, nil
 }
 
@@ -309,7 +327,7 @@ func (bs PullableDiffBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, errors.
 	}
 	branch := &DiffBranch{
 		Prefix:         resolved.Prefix,
-		CommitHashFrom: resolved.ComittishFrom,
+		CommitHashFrom: resolved.CommittishFrom,
 		DiffHash:       bs.DiffHash,
 	}
 	err = pull(branch, we)
@@ -323,14 +341,14 @@ func pull(ghost GhostBranch, we WorkingEnv) errors.GitGhostError {
 	return git.ResetHardToBranch(we.GhostDir, git.ORIGIN+"/"+ghost.BranchName())
 }
 
-func resolveComittishOr(srcDir string, commitishToResolve string) string {
-	resolved, err := git.ResolveComittish(srcDir, commitishToResolve)
+func resolveCommittishOr(srcDir string, committishToResolve string) string {
+	resolved, err := git.ResolveCommittish(srcDir, committishToResolve)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"repository": srcDir,
-			"specified":  commitishToResolve,
+			"specified":  committishToResolve,
 		}).Warn("can't resolve commit-ish value on local git repository.  specified commit-ish value will be used.")
-		return commitishToResolve
+		return committishToResolve
 	}
 	return resolved
 }

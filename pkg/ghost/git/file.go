@@ -1,3 +1,17 @@
+// Copyright 2019 Preferred Networks, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package git
 
 import (
@@ -12,8 +26,8 @@ import (
 	multierror "github.com/hashicorp/go-multierror"
 )
 
-// CreateDiffBundleFile creates patches for fromComittish..toComittish and save it to filepath
-func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) errors.GitGhostError {
+// CreateDiffBundleFile creates patches for fromCommittish..toCommittish and save it to filepath
+func CreateDiffBundleFile(dir, filepath, fromCommittish, toCommittish string) errors.GitGhostError {
 	f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return errors.WithStack(err)
@@ -22,14 +36,14 @@ func CreateDiffBundleFile(dir, filepath, fromComittish, toComittish string) erro
 
 	return util.JustStreamOutputCmd(
 		exec.Command("git", "-C", dir,
-			"log", "-p", "--reverse", "--pretty=email", "--stat", "-m", "--first-parent", "--binary", fmt.Sprintf("%s..%s", fromComittish, toComittish),
+			"log", "-p", "--reverse", "--pretty=email", "--stat", "-m", "--first-parent", "--binary", fmt.Sprintf("%s..%s", fromCommittish, toCommittish),
 		),
 		f,
 	)
 }
 
-// CreateFullBundleFile creates a bundle file with full commits to a given commitish and save it to filepath.
-func CreateFullBundleFile(dir, filepath, commitish string) errors.GitGhostError {
+// CreateFullBundleFile creates a bundle file with full commits to a given committish and save it to filepath.
+func CreateFullBundleFile(dir, filepath, committish string) errors.GitGhostError {
 	f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return errors.WithStack(err)
@@ -38,7 +52,7 @@ func CreateFullBundleFile(dir, filepath, commitish string) errors.GitGhostError 
 
 	return util.JustStreamOutputCmd(
 		exec.Command("git", "-C", dir,
-			"log", "-p", "--reverse", "--pretty=email", "--stat", "-m", "--first-parent", "--binary", commitish,
+			"log", "-p", "--reverse", "--pretty=email", "--stat", "-m", "--first-parent", "--binary", committish,
 		),
 		f,
 	)
@@ -68,8 +82,8 @@ func ApplyDiffBundleFile(dir, filepath string) errors.GitGhostError {
 	return errors.WithStack(errs)
 }
 
-// CreateDiffPatchFile creates a diff from comittish to current working state of `dir` and save it to filepath
-func CreateDiffPatchFile(dir, filepath, comittish string) errors.GitGhostError {
+// CreateDiffPatchFile creates a diff from committish to current working state of `dir` and save it to filepath
+func CreateDiffPatchFile(dir, filepath, committish string) errors.GitGhostError {
 	f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return errors.WithStack(err)
@@ -77,7 +91,7 @@ func CreateDiffPatchFile(dir, filepath, comittish string) errors.GitGhostError {
 	defer util.LogDeferredError(f.Close)
 
 	return util.JustStreamOutputCmd(
-		exec.Command("git", "-C", dir, "diff", "--patience", "--binary", comittish),
+		exec.Command("git", "-C", dir, "diff", "--patience", "--binary", committish),
 		f,
 	)
 }

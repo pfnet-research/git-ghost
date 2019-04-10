@@ -1,19 +1,31 @@
 ####################################################################################################
-# builder image
+# git-ghost-dev
 ####################################################################################################
-FROM golang:1.11.4 as builder
+FROM golang:1.11.4 as git-ghost-dev
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update -q && apt-get install -yq --no-install-recommends \
     git \
     make \
     wget \
     gcc \
     zip \
-    bzip2 && \
+    bzip2 \
+    lsb-release \
+    software-properties-common \
+    apt-transport-https \
+    ca-certificates \
+    && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 WORKDIR /tmp
+
+# Install docker client
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+RUN apt-get update -q && apt-get install -yq --no-install-recommends docker-ce-cli && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install dep
 ENV DEP_VERSION=0.5.0
@@ -29,12 +41,6 @@ ENV GITHUB_RELEASE_VERSION=0.7.2
 RUN curl -sLo- https://github.com/aktau/github-release/releases/download/v${GITHUB_RELEASE_VERSION}/linux-amd64-github-release.tar.bz2 | \
     tar -xjC "$GOPATH/bin" --strip-components 3 -f-
 
-
-####################################################################################################
-# git-ghost-dev
-####################################################################################################
-FROM builder as git-ghost-dev
-
 # A dummy directory is created under $GOPATH/src/dummy so we are able to use dep
 # to install all the packages of our dep lock file
 COPY Gopkg.toml ${GOPATH}/src/dummy/Gopkg.toml
@@ -45,49 +51,25 @@ RUN cd ${GOPATH}/src/dummy && \
     mv vendor/* ${GOPATH}/src/ && \
     rmdir vendor
 
-# Perform the build
-WORKDIR /go/src/git-ghost
+WORKDIR $GOPATH/src/git-ghost
 COPY . .
+
+####################################################################################################
+# builder
+####################################################################################################
+FROM git-ghost-dev as builder
+
+# Perform the build
 RUN make build
-
-####################################################################################################
-# git-ghost-test
-####################################################################################################
-FROM ubuntu:16.04 as git-ghost-test
-
-RUN apt-get update && apt-get install -y \
-    vim \
-    git && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-COPY --from=git-ghost-dev /go/src/git-ghost/bin/git-ghost /usr/local/bin/
-
-COPY hack/create-test-repo.sh /work/create-test-repo.sh
-RUN mkdir -p /work/local /work/remote /work/ghost-repo
-RUN /work/create-test-repo.sh /work/local /work/remote /work/ghost-repo
-ENV GIT_GHOST_REPO=/work/ghost-repo
-
-WORKDIR /work/local
-
-####################################################################################################
-# git-ghost-e2e
-####################################################################################################
-FROM git-ghost-dev as git-ghost-e2e
-
-COPY --from=git-ghost-dev /go/src/git-ghost/bin/git-ghost /usr/local/bin/
-WORKDIR /go/src/git-ghost
-RUN git config --global user.email you@example.com \
-    && git config --global user.name "Your Name"
 
 ####################################################################################################
 # git-ghost-cli
 ####################################################################################################
 FROM ubuntu:16.04 as git-ghost-cli
 
-RUN apt-get update && apt-get install -y \
-    git && \
+COPY --from=builder /go/src/git-ghost/dist/git-ghost /usr/local/bin/
+
+RUN apt-get update -q && apt-get install -yq --no-install-recommends git && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --from=git-ghost-dev /go/src/git-ghost/bin/git-ghost /usr/local/bin/
