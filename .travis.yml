@@ -16,7 +16,7 @@ before_script: make lint
 
 script:
 - make test coverage && goveralls -coverprofile=profile.cov -service=travis-ci
-- make e2e
+- make install e2e
 
 deploy:
 - provider: script
