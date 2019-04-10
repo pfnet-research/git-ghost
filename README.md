@@ -23,7 +23,7 @@ This type of branch contains modifications from a specific commit in your workin
 Install the binary from source: execute,
 
 ```bash
-$ git clone <REPO_URL> git-ghost
+$ git clone https://github.com/pfnet-research/git-ghost
 $ cd git-ghost
 $ make install
 ```
@@ -72,7 +72,7 @@ $ git-ghost pull all <HASH_2> <HASH_3>
 ```
 # checkout this repo to $GOPATH/src/git-ghost
 $ cd $GOPATH/src
-$ git clone git@github.pfidev.jp:Cluster/git-ghost.git
+$ git clone git@github.com:pfnet-research/git-ghost.git
 $ cd git-ghost
 
 # build
