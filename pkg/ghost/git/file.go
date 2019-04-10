@@ -34,12 +34,28 @@ func CreateDiffBundleFile(dir, filepath, fromCommittish, toCommittish string) er
 	}
 	defer util.LogDeferredError(f.Close)
 
-	cmd := exec.Command("git", "-C", dir,
-		"log", "-p", "--reverse", "--pretty=email", "--stat", "-m", "--first-parent", "--binary",
-		fmt.Sprintf("%s..%s", fromCommittish, toCommittish),
+	return util.JustStreamOutputCmd(
+		exec.Command("git", "-C", dir,
+			"log", "-p", "--reverse", "--pretty=email", "--stat", "-m", "--first-parent", "--binary", fmt.Sprintf("%s..%s", fromCommittish, toCommittish),
+		),
+		f,
 	)
-	cmd.Stdout = f
-	return util.JustRunCmd(cmd)
+}
+
+// CreateFullBundleFile creates a bundle file with full commits to a given committish and save it to filepath.
+func CreateFullBundleFile(dir, filepath, committish string) errors.GitGhostError {
+	f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	defer util.LogDeferredError(f.Close)
+
+	return util.JustStreamOutputCmd(
+		exec.Command("git", "-C", dir,
+			"log", "-p", "--reverse", "--pretty=email", "--stat", "-m", "--first-parent", "--binary", committish,
+		),
+		f,
+	)
 }
 
 // ApplyDiffBundleFile apply a patch file created in CreateDiffBundleFile
@@ -74,9 +90,10 @@ func CreateDiffPatchFile(dir, filepath, committish string) errors.GitGhostError 
 	}
 	defer util.LogDeferredError(f.Close)
 
-	cmd := exec.Command("git", "-C", dir, "diff", "--patience", "--binary", committish)
-	cmd.Stdout = f
-	return util.JustRunCmd(cmd)
+	return util.JustStreamOutputCmd(
+		exec.Command("git", "-C", dir, "diff", "--patience", "--binary", committish),
+		f,
+	)
 }
 
 // AppendNonIndexedDiffFiles appends non-indexed diff files

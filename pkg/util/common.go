@@ -20,6 +20,10 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+const (
+	CommitStartFromInit = "_"
+)
+
 // LogDeferredError calls a given function and log an error according to the result
 func LogDeferredError(f func() error) {
 	err := f()
