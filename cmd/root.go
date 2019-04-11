@@ -35,11 +35,17 @@ type globalFlags struct {
 }
 
 func (gf globalFlags) WorkingEnvSpec() types.WorkingEnvSpec {
-	return types.WorkingEnvSpec{
+	workingEnvSpec := types.WorkingEnvSpec{
 		SrcDir:          gf.srcDir,
 		GhostWorkingDir: gf.ghostWorkDir,
 		GhostRepo:       gf.ghostRepo,
 	}
+	userName, userEmail, err := git.GetUserConfig(globalOpts.srcDir)
+	if err == nil {
+		workingEnvSpec.GhostUserName = userName
+		workingEnvSpec.GhostUserEmail = userEmail
+	}
+	return workingEnvSpec
 }
 
 var (

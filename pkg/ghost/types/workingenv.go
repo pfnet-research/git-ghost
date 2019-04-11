@@ -24,6 +24,11 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+const (
+	defaultGhostUserName  = "Git Ghost"
+	defaultGhostUserEmail = "git-ghost@example.com"
+)
+
 // WorkingEnvSpec abstract an environment git-ghost works with
 type WorkingEnvSpec struct {
 	// SrcDir is local git directory
@@ -32,6 +37,10 @@ type WorkingEnvSpec struct {
 	GhostWorkingDir string
 	// GhostRepo is a repository url git-ghost works with
 	GhostRepo string
+	// GhostUserName is a user name which is used in ghost working directories.
+	GhostUserName string
+	// GhostUserEmail is a user email which is used in ghost working directories.
+	GhostUserEmail string
 }
 
 // WorkingEnv is initialized environment containing temporary local ghost repository
@@ -49,7 +58,15 @@ func (weSpec WorkingEnvSpec) Initialize() (*WorkingEnv, errors.GitGhostError) {
 	if ggerr != nil {
 		return nil, ggerr
 	}
-	ggerr = git.CopyUserConfig(weSpec.SrcDir, ghostDir)
+	ghostUserName := defaultGhostUserName
+	if weSpec.GhostUserName != "" {
+		ghostUserName = weSpec.GhostUserName
+	}
+	ghostUserEmail := defaultGhostUserEmail
+	if weSpec.GhostUserEmail != "" {
+		ghostUserEmail = weSpec.GhostUserEmail
+	}
+	ggerr = git.SetUserConfig(ghostDir, ghostUserName, ghostUserEmail)
 	if ggerr != nil {
 		return nil, ggerr
 	}
