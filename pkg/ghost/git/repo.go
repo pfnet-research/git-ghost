@@ -21,6 +21,8 @@ import (
 
 	"github.com/pfnet-research/git-ghost/pkg/util"
 	"github.com/pfnet-research/git-ghost/pkg/util/errors"
+
+	gherrors "github.com/pkg/errors"
 )
 
 var (
@@ -44,20 +46,24 @@ func CopyUserConfig(srcDir, dstDir string) errors.GitGhostError {
 	// Get user config from src
 	userNameBytes, err := util.JustOutputCmd(exec.Command("git", "-C", srcDir, "config", "user.name"))
 	if err != nil {
-		return errors.WithStack(err)
+		return errors.WithStack(gherrors.WithMessage(err, "failed to get git user name"))
 	}
 	userName := strings.TrimSuffix(string(userNameBytes), "\n")
 	userEmailBytes, err := util.JustOutputCmd(exec.Command("git", "-C", srcDir, "config", "user.email"))
 	if err != nil {
-		return errors.WithStack(err)
+		return errors.WithStack(gherrors.WithMessage(err, "failed to get git user email"))
 	}
 	userEmail := strings.TrimSuffix(string(userEmailBytes), "\n")
 	// Copy the user config to dst
 	err = util.JustRunCmd(exec.Command("git", "-C", dstDir, "config", "user.name", fmt.Sprintf("\"%s\"", userName)))
 	if err != nil {
-		return errors.WithStack(err)
+		return errors.WithStack(gherrors.WithMessage(err, "failed to set git user name"))
 	}
-	return errors.WithStack(util.JustRunCmd(exec.Command("git", "-C", dstDir, "config", "user.email", fmt.Sprintf("\"%s\"", userEmail))))
+	err = util.JustRunCmd(exec.Command("git", "-C", dstDir, "config", "user.email", fmt.Sprintf("\"%s\"", userEmail)))
+	if err != nil {
+		return errors.WithStack(gherrors.WithMessage(err, "failed to set git user email"))
+	}
+	return nil
 }
 
 // CommitAndPush commits and push to its origin
