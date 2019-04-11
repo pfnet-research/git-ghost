@@ -70,7 +70,7 @@ FROM ubuntu:16.04 as git-ghost-cli
 
 COPY --from=builder /go/src/git-ghost/dist/git-ghost /usr/local/bin/
 
-RUN apt-get update -q && apt-get install -yq --no-install-recommends git && \
+RUN apt-get update -q && apt-get install -yq --no-install-recommends git ca-certificates coreutils openssh-client && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
