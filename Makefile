@@ -25,7 +25,7 @@ build: deps
 	go build -tags netgo -installsuffix netgo $(LDFLAGS) -o $(OUTDIR)/$(NAME)
 
 .PHONY: install
-install:
+install: deps
 	go install -tags netgo -installsuffix netgo $(LDFLAGS)
 
 .PHONY: build-linux-amd64
