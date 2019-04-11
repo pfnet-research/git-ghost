@@ -43,23 +43,37 @@ func InitializeGitDir(dir, repo, branch string) errors.GitGhostError {
 
 // CopyUserConfig copies user config from source directory to destination directory.
 func CopyUserConfig(srcDir, dstDir string) errors.GitGhostError {
+	name, email, err := GetUserConfig(srcDir)
+	if err != nil {
+		return err
+	}
+	return SetUserConfig(dstDir, name, email)
+}
+
+// GetUserConfig returns a user config (name and email) from destination directory.
+func GetUserConfig(dir string) (string, string, errors.GitGhostError) {
 	// Get user config from src
-	userNameBytes, err := util.JustOutputCmd(exec.Command("git", "-C", srcDir, "config", "user.name"))
+	nameBytes, err := util.JustOutputCmd(exec.Command("git", "-C", dir, "config", "user.name"))
 	if err != nil {
-		return errors.WithStack(gherrors.WithMessage(err, "failed to get git user name"))
+		return "", "", errors.WithStack(gherrors.WithMessage(err, "failed to get git user name"))
 	}
-	userName := strings.TrimSuffix(string(userNameBytes), "\n")
-	userEmailBytes, err := util.JustOutputCmd(exec.Command("git", "-C", srcDir, "config", "user.email"))
+	name := strings.TrimSuffix(string(nameBytes), "\n")
+	emailBytes, err := util.JustOutputCmd(exec.Command("git", "-C", dir, "config", "user.email"))
 	if err != nil {
-		return errors.WithStack(gherrors.WithMessage(err, "failed to get git user email"))
+		return "", "", errors.WithStack(gherrors.WithMessage(err, "failed to get git user email"))
 	}
-	userEmail := strings.TrimSuffix(string(userEmailBytes), "\n")
-	// Copy the user config to dst
-	err = util.JustRunCmd(exec.Command("git", "-C", dstDir, "config", "user.name", fmt.Sprintf("\"%s\"", userName)))
+	email := strings.TrimSuffix(string(emailBytes), "\n")
+	return name, email, nil
+}
+
+// SetUserConfig sets a user config (name and email) to destination directory.
+func SetUserConfig(dir, name, email string) errors.GitGhostError {
+	// Set the user config to dst
+	err := util.JustRunCmd(exec.Command("git", "-C", dir, "config", "user.name", fmt.Sprintf("\"%s\"", name)))
 	if err != nil {
 		return errors.WithStack(gherrors.WithMessage(err, "failed to set git user name"))
 	}
-	err = util.JustRunCmd(exec.Command("git", "-C", dstDir, "config", "user.email", fmt.Sprintf("\"%s\"", userEmail)))
+	err = util.JustRunCmd(exec.Command("git", "-C", dir, "config", "user.email", fmt.Sprintf("\"%s\"", email)))
 	if err != nil {
 		return errors.WithStack(gherrors.WithMessage(err, "failed to set git user email"))
 	}
