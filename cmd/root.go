@@ -41,10 +41,11 @@ func (gf globalFlags) WorkingEnvSpec() types.WorkingEnvSpec {
 		GhostRepo:       gf.ghostRepo,
 	}
 	userName, userEmail, err := git.GetUserConfig(globalOpts.srcDir)
-	if err == nil {
-		workingEnvSpec.GhostUserName = userName
-		workingEnvSpec.GhostUserEmail = userEmail
+	if err != nil {
+		log.Debug("failed to get user name and email of the source directory")
 	}
+	workingEnvSpec.GhostUserName = userName
+	workingEnvSpec.GhostUserEmail = userEmail
 	return workingEnvSpec
 }
 
