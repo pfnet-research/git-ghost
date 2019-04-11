@@ -14,6 +14,7 @@ RUN apt-get update -q && apt-get install -yq --no-install-recommends \
     software-properties-common \
     apt-transport-https \
     ca-certificates \
+    vim \
     && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
