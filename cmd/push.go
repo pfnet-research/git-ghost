@@ -35,30 +35,30 @@ func NewPushCommand() *cobra.Command {
 		flags pushFlags
 	)
 	command := &cobra.Command{
-		Use:   fmt.Sprintf("push [from-hash(default=%s)]", ghostDefaultPushFromHash),
+		Use:   fmt.Sprintf("push [diff-from-hash(default=%s)]", ghostDefaultPushFromHash),
 		Short: "push commits(hash1...hash2), diff(hash...current state) to your ghost repo",
-		Long:  "push commits or diff or all to your ghost repo.  If you didn't specify any subcommand, this commands works as an alias for 'push diff' command.",
+		Long:  "push commits or diff or all to your ghost repo. If you didn't specify any subcommand, this commands works as an alias for 'push diff' command. The default diff-from-hash can be changed by GIT_GHOST_DEFAULT_PUSH_FROM_HASH env.",
 		Args:  cobra.RangeArgs(0, 1),
 		Run:   runPushDiffCommand(&flags),
 	}
 	command.AddCommand(&cobra.Command{
 		Use:   fmt.Sprintf("commits [from-hash(default=%s)] [to-hash(default=HEAD)]", ghostDefaultPushFromHash),
 		Short: "push commits between two commits to your ghost repo",
-		Long:  "push all the commits between [from-hash]...[to-hash] to your ghost repo.",
+		Long:  "push all the commits between [from-hash]...[to-hash] to your ghost repo. The default from-hash can be changed by GIT_GHOST_DEFAULT_PUSH_FROM_HASH env.",
 		Args:  cobra.RangeArgs(0, 2),
 		Run:   runPushCommitsCommand(&flags),
 	})
 	command.AddCommand(&cobra.Command{
-		Use:   fmt.Sprintf("diff [from-hash(default=%s)]", ghostDefaultPushFromHash),
+		Use:   fmt.Sprintf("diff [diff-from-hash(default=%s)]", ghostDefaultPushFromHash),
 		Short: "push diff from a commit to current state of your working dir to your ghost repo",
-		Long:  "push diff from [from-hash] to current state of your working dir to your ghost repo.  please be noted that this pushes only diff, which means that it doesn't save any commits information.",
+		Long:  "push diff from [from-hash] to current state of your working dir to your ghost repo. please be noted that this pushes only diff, which means that it doesn't save any commits information. The default diff-from-hash can be changed by GIT_GHOST_DEFAULT_PUSH_FROM_HASH env.",
 		Args:  cobra.RangeArgs(0, 1),
 		Run:   runPushDiffCommand(&flags),
 	})
 	command.AddCommand(&cobra.Command{
 		Use:   fmt.Sprintf("all [commits-from-hash(default=%s)] [diff-from-hash(default=HEAD)]", ghostDefaultPushFromHash),
 		Short: "push both commits and diff to your ghost repo",
-		Long:  "push both commits([commits-from-hash]...[diff-from-hash]) and diff([diff-from-hash]...current state) to your ghost repo",
+		Long:  "push both commits([commits-from-hash]...[diff-from-hash]) and diff([diff-from-hash]...current state) to your ghost repo. The default commits-from-hash can be changed by GIT_GHOST_DEFAULT_PUSH_FROM_HASH env.",
 		Args:  cobra.RangeArgs(0, 2),
 		Run:   runPushAllCommand(&flags),
 	})

@@ -28,30 +28,30 @@ import (
 
 func NewShowCommand() *cobra.Command {
 	command := &cobra.Command{
-		Use:   fmt.Sprintf("show [from-hash(default=%s)] [diff-hash]", ghostDefaultPushFromHash),
+		Use:   fmt.Sprintf("show [diff-from-hash(default=%s)] [diff-hash]", ghostDefaultPushFromHash),
 		Short: "show commits(hash1...hash2), diff(hash...current state) in ghost repo",
-		Long:  "show commits or diff or all from ghost repo.  If you didn't specify any subcommand, this commands works as an alias for 'show diff' command.",
+		Long:  "show commits or diff or all from ghost repo.  If you didn't specify any subcommand, this commands works as an alias for 'show diff' command. The default diff-from-hash can be changed by GIT_GHOST_DEFAULT_PUSH_FROM_HASH.",
 		Args:  cobra.RangeArgs(1, 2),
 		Run:   runShowDiffCommand,
 	}
 	command.AddCommand(&cobra.Command{
 		Use:   fmt.Sprintf("diff [diff-from-hash(default=%s)] [diff-hash]", ghostDefaultPushFromHash),
 		Short: "show diff in ghost repo ",
-		Long:  "show diff from [diff-from-hash] to [diff-hash] in ghost repo",
+		Long:  "show diff from [diff-from-hash] to [diff-hash] in ghost repo. The default diff-from-hash can be changed by GIT_GHOST_DEFAULT_PUSH_FROM_HASH.",
 		Args:  cobra.RangeArgs(1, 2),
 		Run:   runShowDiffCommand,
 	})
 	command.AddCommand(&cobra.Command{
 		Use:   fmt.Sprintf("commits [from-hash(default=%s)] [to-hash]", ghostDefaultPushFromHash),
 		Short: "show commits in ghost repo",
-		Long:  "show commits from [from-hash] to [to-hash] in ghost repo",
+		Long:  "show commits from [from-hash] to [to-hash] in ghost repo. The default from-hash can be changed by GIT_GHOST_DEFAULT_PUSH_FROM_HASH.",
 		Args:  cobra.RangeArgs(1, 2),
 		Run:   runShowCommitsCommand,
 	})
 	command.AddCommand(&cobra.Command{
 		Use:   fmt.Sprintf("all [from-hash(default=%s)] [to-hash] [diff-hash]", ghostDefaultPushFromHash),
 		Short: "show both commits and diff in ghost repo",
-		Long:  "show commits([from-hash]...[to-hash]) and diff([to-hash]...[diff-hash]) in ghost repo",
+		Long:  "show commits([from-hash]...[to-hash]) and diff([to-hash]...[diff-hash]) in ghost repo. The default from-hash can be changed by GIT_GHOST_DEFAULT_PUSH_FROM_HASH.",
 		Args:  cobra.RangeArgs(2, 3),
 		Run:   runShowAllCommand,
 	})
