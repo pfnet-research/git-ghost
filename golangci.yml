@@ -1,7 +1,5 @@
 run:
   tests: false
-  skip-files:
-    - "pkg/.*_k8s.go$"
 output:
   format: colored-line-number
   print-issued-lines: true
