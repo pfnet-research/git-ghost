@@ -67,8 +67,10 @@ release-code: guard-RELEASE_TAG guard-RELEASE_COMMIT guard-GITHUB_USER guard-GIT
 		--tag $(RELEASE_TAG)
 
 .PHONY: release-assets
-release-assets: guard-RELEASE_TAG guard-GITHUB_REPO guard-GITHUB_USER guard-GITHUB_TOKEN clean build-all
+release-assets: guard-RELEASE_TAG guard-RELEASE_COMMIT guard-GITHUB_USER guard-GITHUB_REPO guard-GITHUB_REPO_URL guard-GITHUB_TOKEN
 	@GITHUB_TOKEN=$(GITHUB_TOKEN)
+	git diff --quiet HEAD || (echo "your current branch is dirty" && exit 1)
+	git checkout $(RELEASE_COMMIT)
 	for target in linux-amd64 darwin-amd64 windows-amd64.exe; do \
 		github-release upload \
 		  --user $(GITHUB_USER) \
@@ -77,11 +79,16 @@ release-assets: guard-RELEASE_TAG guard-GITHUB_REPO guard-GITHUB_USER guard-GITH
 			--name git-ghost-$$target \
 			--file $(OUTDIR)/git-ghost-$$target; \
 	done
+	git checkout -
 
 .PHONY: release-image
 release-image: IMAGE_TAG=$(RELEASE_TAG)
-release-image: guard-RELEASE_TAG build-image-cli
+release-image: guard-RELEASE_TAG
+	git diff --quiet HEAD || (echo "your current branch is dirty" && exit 1)
+	git checkout $(RELEASE_COMMIT)
+	make build-image-cli
 	docker push $(IMAGE_PREFIX)git-ghost-cli:$(RELEASE_TAG)
+	git checkout -
 
 .PHONY: lint
 lint: deps
@@ -136,4 +143,4 @@ coverage:
 
 .PHONY: clean
 clean:
-	rm -rf dist/*
+	rm -rf $(OUTDIR)/*
