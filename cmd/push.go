@@ -30,40 +30,36 @@ type pushFlags struct {
 	followSymlinks    bool
 }
 
-func init() {
-	RootCmd.AddCommand(NewPushCommand())
-}
-
 func NewPushCommand() *cobra.Command {
 	var (
 		flags pushFlags
 	)
 	command := &cobra.Command{
-		Use:   "push [from-hash(default=HEAD)]",
+		Use:   fmt.Sprintf("push [from-hash(default=%s)]", globalOpts.ghostDefaultPushFromHash),
 		Short: "push commits(hash1...hash2), diff(hash...current state) to your ghost repo",
 		Long:  "push commits or diff or all to your ghost repo.  If you didn't specify any subcommand, this commands works as an alias for 'push diff' command.",
 		Args:  cobra.RangeArgs(0, 1),
 		Run:   runPushDiffCommand(&flags),
 	}
 	command.AddCommand(&cobra.Command{
-		Use:   "commits [from-hash] [to-hash(default=HEAD)]",
+		Use:   fmt.Sprintf("commits [from-hash(default=%s)] [to-hash(default=HEAD)]", globalOpts.ghostDefaultPushFromHash),
 		Short: "push commits between two commits to your ghost repo",
 		Long:  "push all the commits between [from-hash]...[to-hash] to your ghost repo.",
-		Args:  cobra.RangeArgs(1, 2),
+		Args:  cobra.RangeArgs(0, 2),
 		Run:   runPushCommitsCommand(&flags),
 	})
 	command.AddCommand(&cobra.Command{
-		Use:   "diff [from-hash(default=HEAD)]",
+		Use:   fmt.Sprintf("diff [from-hash(default=%s)]", globalOpts.ghostDefaultPushFromHash),
 		Short: "push diff from a commit to current state of your working dir to your ghost repo",
 		Long:  "push diff from [from-hash] to current state of your working dir to your ghost repo.  please be noted that this pushes only diff, which means that it doesn't save any commits information.",
 		Args:  cobra.RangeArgs(0, 1),
 		Run:   runPushDiffCommand(&flags),
 	})
 	command.AddCommand(&cobra.Command{
-		Use:   "all [commits-from-hash] [diff-from-hash(default=HEAD)]",
+		Use:   fmt.Sprintf("all [commits-from-hash(default=%s)] [diff-from-hash(default=HEAD)]", globalOpts.ghostDefaultPushFromHash),
 		Short: "push both commits and diff to your ghost repo",
 		Long:  "push both commits([commits-from-hash]...[diff-from-hash]) and diff([diff-from-hash]...current state) to your ghost repo",
-		Args:  cobra.RangeArgs(1, 2),
+		Args:  cobra.RangeArgs(0, 2),
 		Run:   runPushAllCommand(&flags),
 	})
 
@@ -80,7 +76,7 @@ type pushCommitsArg struct {
 
 func newPushCommitsArg(args []string) pushCommitsArg {
 	pushCommitsArg := pushCommitsArg{
-		commitsFrom: "",
+		commitsFrom: globalOpts.ghostDefaultPushFromHash,
 		commitsTo:   "HEAD",
 	}
 	if len(args) >= 1 {
@@ -146,7 +142,7 @@ type pushDiffArg struct {
 
 func newPushDiffArg(args []string) pushDiffArg {
 	pushDiffArg := pushDiffArg{
-		diffFrom: "HEAD",
+		diffFrom: globalOpts.ghostDefaultPushFromHash,
 	}
 	if len(args) >= 1 {
 		pushDiffArg.diffFrom = args[0]
@@ -200,13 +196,18 @@ func runPushDiffCommand(flags *pushFlags) func(cmd *cobra.Command, args []string
 
 func runPushAllCommand(flags *pushFlags) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
-		pushCommitsArg := newPushCommitsArg(args[0:1])
+		pushCommitsArg := newPushCommitsArg(args)
 		if err := pushCommitsArg.validate(); err != nil {
 			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
 
-		pushDiffArg := newPushDiffArg(args[1:])
+		if len(args) > 0 {
+			args = args[1:]
+		} else {
+			args = []string{}
+		}
+		pushDiffArg := newPushDiffArg(args)
 		if err := pushDiffArg.validate(); err != nil {
 			errors.LogErrorWithStack(err)
 			os.Exit(1)

@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/pfnet-research/git-ghost/pkg/ghost"
@@ -27,28 +28,28 @@ import (
 
 func NewShowCommand() *cobra.Command {
 	command := &cobra.Command{
-		Use:   "show [from-hash(default=HEAD)] [diff-hash]",
+		Use:   fmt.Sprintf("show [from-hash(default=%s)] [diff-hash]", globalOpts.ghostDefaultPushFromHash),
 		Short: "show commits(hash1...hash2), diff(hash...current state) in ghost repo",
 		Long:  "show commits or diff or all from ghost repo.  If you didn't specify any subcommand, this commands works as an alias for 'show diff' command.",
 		Args:  cobra.RangeArgs(1, 2),
 		Run:   runShowDiffCommand,
 	}
 	command.AddCommand(&cobra.Command{
-		Use:   "diff [diff-from-hash(default=HEAD)] [diff-hash]",
+		Use:   fmt.Sprintf("diff [diff-from-hash(default=%s)] [diff-hash]", globalOpts.ghostDefaultPushFromHash),
 		Short: "show diff in ghost repo ",
 		Long:  "show diff from [diff-from-hash] to [diff-hash] in ghost repo",
 		Args:  cobra.RangeArgs(1, 2),
 		Run:   runShowDiffCommand,
 	})
 	command.AddCommand(&cobra.Command{
-		Use:   "commits [from-hash(default=HEAD)] [to-hash]",
+		Use:   fmt.Sprintf("commits [from-hash(default=%s)] [to-hash]", globalOpts.ghostDefaultPushFromHash),
 		Short: "show commits in ghost repo",
 		Long:  "show commits from [from-hash] to [to-hash] in ghost repo",
 		Args:  cobra.RangeArgs(1, 2),
 		Run:   runShowCommitsCommand,
 	})
 	command.AddCommand(&cobra.Command{
-		Use:   "all [from-hash(default=HEAD)] [to-hash] [diff-hash]",
+		Use:   fmt.Sprintf("all [from-hash(default=%s)] [to-hash] [diff-hash]", globalOpts.ghostDefaultPushFromHash),
 		Short: "show both commits and diff in ghost repo",
 		Long:  "show commits([from-hash]...[to-hash]) and diff([to-hash]...[diff-hash]) in ghost repo",
 		Args:  cobra.RangeArgs(2, 3),
@@ -64,7 +65,7 @@ type showCommitsArg struct {
 
 func newShowCommitsArg(args []string) showCommitsArg {
 	arg := showCommitsArg{
-		commitsFrom: "HEAD",
+		commitsFrom: globalOpts.ghostDefaultPushFromHash,
 		commitsTo:   "",
 	}
 
@@ -123,7 +124,7 @@ type showDiffArg struct {
 
 func newShowDiffArg(args []string) showDiffArg {
 	arg := showDiffArg{
-		diffFrom: "HEAD",
+		diffFrom: globalOpts.ghostDefaultPushFromHash,
 		diffHash: "",
 	}
 

@@ -27,11 +27,12 @@ import (
 )
 
 type globalFlags struct {
-	srcDir       string
-	ghostWorkDir string
-	ghostPrefix  string
-	ghostRepo    string
-	verbose      int
+	srcDir                   string
+	ghostWorkDir             string
+	ghostPrefix              string
+	ghostRepo                string
+	ghostDefaultPushFromHash string
+	verbose                  int
 }
 
 func (gf globalFlags) WorkingEnvSpec() types.WorkingEnvSpec {
@@ -142,6 +143,11 @@ func (flags *globalFlags) SetDefaults() errors.GitGhostError {
 	if globalOpts.ghostRepo == "" {
 		globalOpts.ghostRepo = os.Getenv("GIT_GHOST_REPO")
 	}
+	fromHash := os.Getenv("GIT_GHOST_DEFAULT_PUSH_FROM_HASH")
+	if fromHash == "" {
+		fromHash = "HEAD"
+	}
+	globalOpts.ghostDefaultPushFromHash = fromHash
 	return nil
 }
 
@@ -158,6 +164,9 @@ func (flags *globalFlags) Validate() errors.GitGhostError {
 	}
 	if flags.ghostRepo == "" {
 		return errors.New("ghost-repo must be specified")
+	}
+	if flags.ghostDefaultPushFromHash == "" {
+		return errors.New("ghost-default-from-hash must be specified")
 	}
 	return nil
 }
