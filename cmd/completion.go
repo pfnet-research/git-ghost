@@ -58,14 +58,11 @@ __git-ghost_custom_func() {
 	`
 )
 
-func init() {
-	RootCmd.AddCommand(completionCmd)
-}
-
-var completionCmd = &cobra.Command{
-	Use:   "completion SHELL",
-	Short: "output shell completion code for the specified shell (bash or zsh)",
-	Long: `Write bash or zsh shell completion code to standard output.
+func NewCompletionCmd(cmd *cobra.Command) *cobra.Command {
+	return &cobra.Command{
+		Use:   "completion SHELL",
+		Short: "output shell completion code for the specified shell (bash or zsh)",
+		Long: `Write bash or zsh shell completion code to standard output.
 
 	For bash, ensure you have bash completions installed and enabled.
 	To access completions in your current shell, run
@@ -75,21 +72,22 @@ var completionCmd = &cobra.Command{
 	For zsh, output to a file in a directory referenced by the $fpath shell
 	variable.
 `,
-	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		shell := args[0]
-		RootCmd.BashCompletionFunction = bashCompletionFunc
-		availableCompletions := map[string]func(io.Writer) error{
-			"bash": RootCmd.GenBashCompletion,
-			"zsh":  RootCmd.GenZshCompletion,
-		}
-		completion, ok := availableCompletions[shell]
-		if !ok {
-			fmt.Printf("Invalid shell '%s'. The supported shells are bash and zsh.\n", shell)
-			os.Exit(1)
-		}
-		if err := completion(os.Stdout); err != nil {
-			log.Fatal(err)
-		}
-	},
+		Args: cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			shell := args[0]
+			cmd.BashCompletionFunction = bashCompletionFunc
+			availableCompletions := map[string]func(io.Writer) error{
+				"bash": cmd.GenBashCompletion,
+				"zsh":  cmd.GenZshCompletion,
+			}
+			completion, ok := availableCompletions[shell]
+			if !ok {
+				fmt.Printf("Invalid shell '%s'. The supported shells are bash and zsh.\n", shell)
+				os.Exit(1)
+			}
+			if err := completion(os.Stdout); err != nil {
+				log.Fatal(err)
+			}
+		},
+	}
 }

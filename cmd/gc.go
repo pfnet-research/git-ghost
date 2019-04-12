@@ -20,10 +20,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
-	RootCmd.AddCommand(gcCmd)
-}
-
 var gcCmd = &cobra.Command{
 	Use:   "gc",
 	Short: "gc ghost commits from remote repository.",

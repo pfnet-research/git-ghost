@@ -27,10 +27,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
-	RootCmd.AddCommand(NewListCommand())
-}
-
 var outputTypes = []string{"only-from", "only-to"}
 var regexpOutputPattern = regexp.MustCompile("^(|" + strings.Join(outputTypes, "|") + ")$")
 
