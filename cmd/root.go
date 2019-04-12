@@ -31,7 +31,6 @@ type globalFlags struct {
 	ghostWorkDir             string
 	ghostPrefix              string
 	ghostRepo                string
-	ghostDefaultPushFromHash string
 	verbose                  int
 }
 
@@ -56,9 +55,14 @@ var (
 	Revision string
 )
 
+var (
+	ghostDefaultPushFromHash string = "HEAD"
+)
+
 var globalOpts globalFlags
 
 func NewRootCmd() *cobra.Command {
+	setDefaultGlobalVars()
 	cobra.OnInitialize()
 	rootCmd := &cobra.Command{
 		Use:           "git-ghost",
@@ -143,11 +147,6 @@ func (flags *globalFlags) SetDefaults() errors.GitGhostError {
 	if globalOpts.ghostRepo == "" {
 		globalOpts.ghostRepo = os.Getenv("GIT_GHOST_REPO")
 	}
-	fromHash := os.Getenv("GIT_GHOST_DEFAULT_PUSH_FROM_HASH")
-	if fromHash == "" {
-		fromHash = "HEAD"
-	}
-	globalOpts.ghostDefaultPushFromHash = fromHash
 	return nil
 }
 
@@ -165,8 +164,12 @@ func (flags *globalFlags) Validate() errors.GitGhostError {
 	if flags.ghostRepo == "" {
 		return errors.New("ghost-repo must be specified")
 	}
-	if flags.ghostDefaultPushFromHash == "" {
-		return errors.New("ghost-default-from-hash must be specified")
-	}
 	return nil
+}
+
+func setDefaultGlobalVars() {
+	fromHash := os.Getenv("GIT_GHOST_DEFAULT_PUSH_FROM_HASH")
+	if fromHash != "" {
+		ghostDefaultPushFromHash = fromHash
+	}
 }
