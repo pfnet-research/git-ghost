@@ -27,11 +27,11 @@ import (
 )
 
 type globalFlags struct {
-	srcDir                   string
-	ghostWorkDir             string
-	ghostPrefix              string
-	ghostRepo                string
-	verbose                  int
+	srcDir       string
+	ghostWorkDir string
+	ghostPrefix  string
+	ghostRepo    string
+	verbose      int
 }
 
 func (gf globalFlags) WorkingEnvSpec() types.WorkingEnvSpec {
