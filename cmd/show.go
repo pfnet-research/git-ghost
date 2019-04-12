@@ -122,9 +122,9 @@ type showDiffArg struct {
 	diffHash string
 }
 
-func newShowDiffArg(args []string) showDiffArg {
+func newShowDiffArg(defaultFromHash string, args []string) showDiffArg {
 	arg := showDiffArg{
-		diffFrom: globalOpts.ghostDefaultPushFromHash,
+		diffFrom: defaultFromHash,
 		diffHash: "",
 	}
 
@@ -153,7 +153,7 @@ func (arg showDiffArg) validate() errors.GitGhostError {
 }
 
 func runShowDiffCommand(cmd *cobra.Command, args []string) {
-	arg := newShowDiffArg(args)
+	arg := newShowDiffArg(globalOpts.ghostDefaultPushFromHash, args)
 	if err := arg.validate(); err != nil {
 		errors.LogErrorWithStack(err)
 		os.Exit(1)
@@ -183,10 +183,10 @@ func runShowAllCommand(cmd *cobra.Command, args []string) {
 	switch len(args) {
 	case 3:
 		showCommitsArg = newShowCommitsArg(args[0:2])
-		showDiffArg = newShowDiffArg(args[1:])
+		showDiffArg = newShowDiffArg("HEAD", args[1:])
 	case 2:
 		showCommitsArg = newShowCommitsArg(args[0:1])
-		showDiffArg = newShowDiffArg(args)
+		showDiffArg = newShowDiffArg("HEAD", args)
 	default:
 		log.Error(cmd.Args(cmd, args))
 		os.Exit(1)

@@ -140,9 +140,9 @@ type pushDiffArg struct {
 	diffFrom string
 }
 
-func newPushDiffArg(args []string) pushDiffArg {
+func newPushDiffArg(defaultFromHash string, args []string) pushDiffArg {
 	pushDiffArg := pushDiffArg{
-		diffFrom: globalOpts.ghostDefaultPushFromHash,
+		diffFrom: defaultFromHash,
 	}
 	if len(args) >= 1 {
 		pushDiffArg.diffFrom = args[0]
@@ -162,7 +162,7 @@ func (arg pushDiffArg) validate() errors.GitGhostError {
 
 func runPushDiffCommand(flags *pushFlags) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
-		pushArg := newPushDiffArg(args)
+		pushArg := newPushDiffArg(globalOpts.ghostDefaultPushFromHash, args)
 		if err := pushArg.validate(); err != nil {
 			errors.LogErrorWithStack(err)
 			os.Exit(1)
@@ -196,18 +196,25 @@ func runPushDiffCommand(flags *pushFlags) func(cmd *cobra.Command, args []string
 
 func runPushAllCommand(flags *pushFlags) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
-		pushCommitsArg := newPushCommitsArg(args)
+		var pushCommitsArg pushCommitsArg
+		var pushDiffArg pushDiffArg
+
+		switch len(args) {
+		case 2:
+			pushCommitsArg = newPushCommitsArg(args[0:1])
+			pushDiffArg = newPushDiffArg("HEAD", args[1:])
+		case 1:
+			pushCommitsArg = newPushCommitsArg(args[0:1])
+			pushDiffArg = newPushDiffArg("HEAD", []string{})
+		default:
+			pushCommitsArg = newPushCommitsArg([]string{})
+			pushDiffArg = newPushDiffArg("HEAD", []string{})
+		}
+
 		if err := pushCommitsArg.validate(); err != nil {
 			errors.LogErrorWithStack(err)
 			os.Exit(1)
 		}
-
-		if len(args) > 0 {
-			args = args[1:]
-		} else {
-			args = []string{}
-		}
-		pushDiffArg := newPushDiffArg(args)
 		if err := pushDiffArg.validate(); err != nil {
 			errors.LogErrorWithStack(err)
 			os.Exit(1)
