@@ -1,6 +1,6 @@
 NAME        := git-ghost
 PROJECTROOT := $(shell pwd)
-VERSION     := $(shell cat ${PROJECTROOT}/VERSION)
+VERSION     ?= $(shell cat ${PROJECTROOT}/VERSION)-dev
 REVISION    := $(shell git rev-parse --short HEAD)
 IMAGE_PREFIX ?= dtaniwaki/
 IMAGE_TAG   ?= $(VERSION)
@@ -71,6 +71,7 @@ release-assets: guard-RELEASE_TAG guard-RELEASE_COMMIT guard-GITHUB_USER guard-G
 	@GITHUB_TOKEN=$(GITHUB_TOKEN)
 	git diff --quiet HEAD || (echo "your current branch is dirty" && exit 1)
 	git checkout $(RELEASE_COMMIT)
+	make clean build-all VERSION=$(shell cat ${PROJECTROOT}/VERSION)
 	for target in linux-amd64 darwin-amd64 windows-amd64.exe; do \
 		github-release upload \
 		  --user $(GITHUB_USER) \
