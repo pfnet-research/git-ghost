@@ -30,10 +30,6 @@ type pushFlags struct {
 	followSymlinks    bool
 }
 
-func init() {
-	RootCmd.AddCommand(NewPushCommand())
-}
-
 func NewPushCommand() *cobra.Command {
 	var (
 		flags pushFlags

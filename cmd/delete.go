@@ -25,10 +25,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
-	RootCmd.AddCommand(NewDeleteCommand())
-}
-
 type deleteFlags struct {
 	hashFrom string
 	hashTo   string

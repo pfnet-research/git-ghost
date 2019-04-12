@@ -55,59 +55,68 @@ var (
 	Revision string
 )
 
-var RootCmd = &cobra.Command{
-	Use:           "git-ghost",
-	Short:         "git-ghost",
-	SilenceErrors: false,
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		if cmd.Use == "version" {
-			return nil
-		}
-		err := validateEnvironment()
-		if err != nil {
-			return err
-		}
-		err = globalOpts.SetDefaults()
-		if err != nil {
-			return err
-		}
-		err = globalOpts.Validate()
-		if err != nil {
-			return err
-		}
-		switch globalOpts.verbose {
-		case 0:
-			log.SetLevel(log.ErrorLevel)
-		case 1:
-			log.SetLevel(log.InfoLevel)
-		case 2:
-			log.SetLevel(log.DebugLevel)
-		case 3:
-			log.SetLevel(log.TraceLevel)
-		}
-		return nil
-	},
-}
-
 var globalOpts globalFlags
 
-func init() {
+func NewRootCmd() *cobra.Command {
 	cobra.OnInitialize()
-	RootCmd.PersistentFlags().StringVar(&globalOpts.srcDir, "src-dir", "", "source directory which you create ghost from (default to PWD env)")
-	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostWorkDir, "ghost-working-dir", "", "local root directory for git-ghost interacting with ghost repository (default to a temporary directory)")
-	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostPrefix, "ghost-prefix", "", "prefix of ghost branch name (default to GIT_GHOST_PREFIX env, or ghost)")
-	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostRepo, "ghost-repo", "", "git remote url for ghosts repository (default to GIT_GHOST_REPO env)")
-	RootCmd.PersistentFlags().CountVarP(&globalOpts.verbose, "verbose", "v", "verbose mode")
-	RootCmd.AddCommand(versionCmd)
+	rootCmd := &cobra.Command{
+		Use:           "git-ghost",
+		Short:         "git-ghost",
+		SilenceErrors: false,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			if cmd.Use == "version" {
+				return nil
+			}
+			err := validateEnvironment()
+			if err != nil {
+				return err
+			}
+			err = globalOpts.SetDefaults()
+			if err != nil {
+				return err
+			}
+			err = globalOpts.Validate()
+			if err != nil {
+				return err
+			}
+			switch globalOpts.verbose {
+			case 0:
+				log.SetLevel(log.ErrorLevel)
+			case 1:
+				log.SetLevel(log.InfoLevel)
+			case 2:
+				log.SetLevel(log.DebugLevel)
+			case 3:
+				log.SetLevel(log.TraceLevel)
+			}
+			return nil
+		},
+	}
+	rootCmd.PersistentFlags().StringVar(&globalOpts.srcDir, "src-dir", "", "source directory which you create ghost from (default to PWD env)")
+	rootCmd.PersistentFlags().StringVar(&globalOpts.ghostWorkDir, "ghost-working-dir", "", "local root directory for git-ghost interacting with ghost repository (default to a temporary directory)")
+	rootCmd.PersistentFlags().StringVar(&globalOpts.ghostPrefix, "ghost-prefix", "", "prefix of ghost branch name (default to GIT_GHOST_PREFIX env, or ghost)")
+	rootCmd.PersistentFlags().StringVar(&globalOpts.ghostRepo, "ghost-repo", "", "git remote url for ghosts repository (default to GIT_GHOST_REPO env)")
+	rootCmd.PersistentFlags().CountVarP(&globalOpts.verbose, "verbose", "v", "verbose mode")
+	rootCmd.AddCommand(NewPushCommand())
+	rootCmd.AddCommand(NewPullCommand())
+	rootCmd.AddCommand(NewShowCommand())
+	rootCmd.AddCommand(NewListCommand())
+	rootCmd.AddCommand(NewDeleteCommand())
+	rootCmd.AddCommand(NewGCCommand())
+	rootCmd.AddCommand(NewVersionCommand())
+	rootCmd.AddCommand(NewCompletionCommand(rootCmd))
+	return rootCmd
 }
 
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Print the version number of git-ghost",
-	Long:  `Print the version number of git-ghost`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("git-ghost %s (revision: %s)", Version, Revision)
-	},
+func NewVersionCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:   "version",
+		Short: "Print the version number of git-ghost",
+		Long:  `Print the version number of git-ghost`,
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Printf("git-ghost %s (revision: %s)", Version, Revision)
+		},
+	}
 }
 
 func validateEnvironment() errors.GitGhostError {
