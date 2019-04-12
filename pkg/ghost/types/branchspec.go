@@ -134,10 +134,6 @@ func (bs CommitsBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.Git
 
 	commitHashFrom := resolved.CommittishFrom
 	commitHashTo := resolved.CommittishTo
-	if commitHashFrom == commitHashTo {
-		return nil, nil
-	}
-
 	branch := CommitsBranch{
 		Prefix:         resolved.Prefix,
 		CommitHashFrom: commitHashFrom,
