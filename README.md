@@ -20,6 +20,8 @@ This type of branch contains modifications from a specific commit in your workin
 
 ## Installing
 
+### From Source
+
 Install the binary from source: execute,
 
 ```bash
@@ -28,7 +30,16 @@ $ cd git-ghost
 $ make install
 ```
 
-The binaries of each versions are available in [Releases](/releases).
+### Using Homebrew
+
+```bash
+$ brew tap pfnet-research/git-ghost
+$ brew install git-ghost
+```
+
+### Releases
+
+The binaries of each releases are available in [Releases](/releases).
 
 ## Getting Started
 
