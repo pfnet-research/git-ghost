@@ -253,15 +253,6 @@ func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.GitGho
 		}
 	}
 
-	size, err := util.FileSize(tmpFile.Name())
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	if size == 0 {
-		return nil, nil
-	}
-
 	hash, err := util.GenerateFileContentHash(tmpFile.Name())
 	if err != nil {
 		return nil, errors.WithStack(err)
