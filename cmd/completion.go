@@ -58,7 +58,7 @@ __git-ghost_custom_func() {
 	`
 )
 
-func NewCompletionCmd(cmd *cobra.Command) *cobra.Command {
+func NewCompletionCmd(rootCmd *cobra.Command) *cobra.Command {
 	return &cobra.Command{
 		Use:   "completion SHELL",
 		Short: "output shell completion code for the specified shell (bash or zsh)",
@@ -75,10 +75,10 @@ func NewCompletionCmd(cmd *cobra.Command) *cobra.Command {
 		Args: cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			shell := args[0]
-			cmd.BashCompletionFunction = bashCompletionFunc
+			rootCmd.BashCompletionFunction = bashCompletionFunc
 			availableCompletions := map[string]func(io.Writer) error{
-				"bash": cmd.GenBashCompletion,
-				"zsh":  cmd.GenZshCompletion,
+				"bash": rootCmd.GenBashCompletion,
+				"zsh":  rootCmd.GenZshCompletion,
 			}
 			completion, ok := availableCompletions[shell]
 			if !ok {
