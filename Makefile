@@ -6,11 +6,10 @@ IMAGE_PREFIX ?= dtaniwaki/
 IMAGE_TAG   ?= $(VERSION)
 OUTDIR      ?= $(PROJECTROOT)/dist
 RELEASE_TAG ?=
-GITHUB_API  ?=
-GITHUB_USER ?=
-GITHUB_REPO ?=
+GITHUB_USER := pfnet-research
+GITHUB_REPO := git-ghost
+GITHUB_REPO_URL := git@github.com:pfnet-research/git-ghost.git
 GITHUB_TOKEN ?=
-DOCKER_GITHUB_ENV_FLAGS := -e GITHUB_API=$(GITHUB_API) -e GITHUB_USER=$(GITHUB_USER) -e GITHUB_REPO=$(GITHUB_REPO) -e GITHUB_TOKEN=$(GITHUB_TOKEN)
 
 LDFLAGS := -ldflags="-s -w -X \"github.com/pfnet-research/git-ghost/cmd.Version=$(VERSION)\" -X \"github.com/pfnet-research/git-ghost/cmd.Revision=$(REVISION)\" -extldflags \"-static\""
 
@@ -58,16 +57,25 @@ build-all: build-linux build-darwin build-windows
 release: release-code release-assets release-image
 
 .PHONY: release-code
-release-code: guard-RELEASE_TAG guard-GITHUB_USER guard-GITHUB_REPO guard-GITHUB_TOKEN
-	github-release release --tag $(RELEASE_TAG)
+release-code: guard-RELEASE_TAG guard-RELEASE_COMMIT guard-GITHUB_USER guard-GITHUB_REPO guard-GITHUB_REPO_URL guard-GITHUB_TOKEN
+	@GITHUB_TOKEN=$(GITHUB_TOKEN)
+	git tag $(RELEASE_TAG) $(RELEASE_COMMIT)
+	git push $(GITHUB_REPO_URL) $(RELEASE_TAG)
+	github-release release \
+	  --user $(GITHUB_USER) \
+		--repo $(GITHUB_REPO) \
+		--tag $(RELEASE_TAG)
 
 .PHONY: release-assets
-release-assets: guard-RELEASE_TAG guard-GITHUB_USER guard-GITHUB_REPO guard-GITHUB_TOKEN clean build-all
+release-assets: guard-RELEASE_TAG guard-GITHUB_REPO guard-GITHUB_USER guard-GITHUB_TOKEN clean build-all
+	@GITHUB_TOKEN=$(GITHUB_TOKEN)
 	for target in linux-amd64 darwin-amd64 windows-amd64.exe; do \
 		github-release upload \
+		  --user $(GITHUB_USER) \
+			--repo $(GITHUB_REPO) \
 			--tag $(RELEASE_TAG) \
 			--name git-ghost-$$target \
-			--file $(OUTDIR)/git-ghost-\$$target; \
+			--file $(OUTDIR)/git-ghost-$$target; \
 	done
 
 .PHONY: release-image
