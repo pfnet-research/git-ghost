@@ -29,9 +29,9 @@ target_dirs = [os.path.join(PROJECT_ROOT, d) for d in os.listdir(PROJECT_ROOT) i
 
 def main(verbose=False):
     for d in target_dirs:
-        add(Path(d).glob("./**/*.go"), license_header("//"), verbose)
-        add(Path(d).glob("./**/*.py"), license_header("#"), verbose)
-        add(Path(d).glob("./**/*.sh"), license_header("#"), verbose)
+        add(Path(d).glob("**/*.go"), license_header("//"), verbose)
+        add(Path(d).glob("**/*.py"), license_header("#"), verbose)
+        add(Path(d).glob("**/*.sh"), license_header("#"), verbose)
 
 
 def add(paths, license_header, verbose):

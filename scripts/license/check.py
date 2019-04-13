@@ -32,11 +32,11 @@ def main(verbose=False):
 
     for d in target_dirs:
         ok &= check(
-            Path(d).glob("./**/*.go"), license_header("//"), verbose)
+            Path(d).glob("**/*.go"), license_header("//"), verbose)
         ok &= check(
-            Path(d).glob("./**/*.py"), license_header("#"), verbose)
+            Path(d).glob("**/*.py"), license_header("#"), verbose)
         ok &= check(
-            Path(d).glob("./**/*.sh"), license_header("#"), verbose)
+            Path(d).glob("**/*.sh"), license_header("#"), verbose)
 
     return 0 if ok else 1
 
