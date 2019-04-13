@@ -14,7 +14,7 @@ install:
 - go get -u github.com/mattn/goveralls
 - dep ensure
 
-before_script: make lint
+before_script: make check-license lint
 
 script:
 - make test coverage
