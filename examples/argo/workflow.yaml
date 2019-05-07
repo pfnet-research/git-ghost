@@ -25,11 +25,11 @@ spec:
   templates:
   - name: steps
     steps:
-    - - name: init
-        template: init
+    - - name: build-image
+        template: build-image
     - - name: job
         template: job
-  - name: init
+  - name: build-image
     initContainers:
     - name: init
       image: "{{workflow.parameters.image-prefix}}git-ghost-cli:{{workflow.parameters.image-tag}}"
