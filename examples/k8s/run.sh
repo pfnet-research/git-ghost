@@ -32,7 +32,7 @@ exit 1)
 
 IMAGE_PREFIX=
 if [[ -z "$IMAGE_PREFIX" ]]; then
-  IMAGE_PREFIX=dtaniwaki
+  IMAGE_PREFIX=dtaniwaki/
 fi
 
 IMAGE_TAG=
