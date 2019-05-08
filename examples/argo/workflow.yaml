@@ -53,7 +53,6 @@ spec:
       - --context=/workspace
       - --dockerfile=/workspace/examples/argo/Dockerfile
       - --destination={{workflow.parameters.git-ghost-registry}}:{{workflow.parameters.git-commit-hash}}-{{workflow.parameters.diff-hash}}
-      - --verbosity=debug
       volumeMounts:
       - name: code
         mountPath: /workspace
