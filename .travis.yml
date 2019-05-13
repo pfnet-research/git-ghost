@@ -9,10 +9,8 @@ before_install:
 - export PATH=$GOPATH/bin:$PATH
 
 install:
-- go get -u github.com/golang/dep/...
 - go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
 - go get -u github.com/mattn/goveralls
-- dep ensure
 
 before_script: make lint
 
