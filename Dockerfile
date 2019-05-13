@@ -3,6 +3,7 @@
 ####################################################################################################
 FROM golang:1.11.4 as git-ghost-dev
 
+
 RUN apt-get update -q && apt-get install -yq --no-install-recommends \
     git \
     make \

@@ -1,0 +1,90 @@
+kind: Workflow
+apiVersion: v1
+metadata:
+  generateName: git-ghost-argo-example-
+  labels:
+    app: git-ghost-argo-example
+spec:
+  arguments:
+    parameters:
+    - name: image-prefix
+      globalName: image-prefix
+    - name: image-tag
+      globalName: image-tag
+    - name: git-repo
+      globalName: git-repo
+    - name: git-ghost-repo
+      globalName: git-ghost-repo
+    - name: git-ghost-registry
+      globalName: git-ghost-registry
+    - name: git-commit-hash
+      globalName: git-commit-hash
+    - name: diff-hash
+      globalName: diff-hash
+  entrypoint: steps
+  templates:
+  - name: steps
+    steps:
+    - - name: build-image
+        template: build-image
+    - - name: job
+        template: job
+  - name: build-image
+    initContainers:
+    - name: init
+      image: "{{workflow.parameters.image-prefix}}git-ghost-cli:{{workflow.parameters.image-tag}}"
+      imagePullPolicy: IfNotPresent
+      command: ["bash"]
+      args:
+      - "-c"
+      - "git clone {{workflow.parameters.git-repo}} . && git checkout {{workflow.parameters.git-commit-hash}} && git ghost pull -v {{workflow.parameters.git-commit-hash}} {{workflow.parameters.diff-hash}}"
+      workingDir: /workspace
+      env:
+      - name: GIT_SSH_COMMAND
+        value: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i /etc/git-secret/sshkey"
+      - name: GIT_GHOST_REPO
+        value: "{{workflow.parameters.git-ghost-repo}}"
+      mirrorVolumeMounts: true
+    container:
+      name: kaniko
+      image: gcr.io/kaniko-project/executor:v0.9.0
+      imagePullPolicy: IfNotPresent
+      args:
+      - --context=/workspace
+      - --dockerfile=/workspace/examples/argo/Dockerfile
+      - --destination={{workflow.parameters.git-ghost-registry}}:{{workflow.parameters.git-commit-hash}}-{{workflow.parameters.diff-hash}}
+      volumeMounts:
+      - name: code
+        mountPath: /workspace
+      - name: git-secret
+        mountPath: /etc/git-secret
+      - name: docker-cred
+        mountPath: /root
+    volumes:
+    - name: code
+      emptyDir:
+    - name: git-secret
+      secret:
+        secretName: git-ghost-git-cred
+        defaultMode: 256
+    - name: docker-cred
+      projected:
+        sources:
+        - secret:
+            name: git-ghost-docker-cred
+            items:
+              - key: .dockerconfigjson
+                path: .docker/config.json
+  - name: job
+    metadata:
+      labels:
+        git-commit-hash: "{{workflow.parameters.git-commit-hash}}"
+        diff-hash: "{{workflow.parameters.diff-hash}}"
+    container:
+      image: "{{workflow.parameters.git-ghost-registry}}:{{workflow.parameters.git-commit-hash}}-{{workflow.parameters.diff-hash}}"
+      command: ["git"]
+      args:
+      - diff
+      - HEAD
+  imagePullSecrets:
+  - name: git-ghost-docker-cred
