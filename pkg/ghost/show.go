@@ -21,7 +21,7 @@ import (
 	"github.com/pfnet-research/git-ghost/pkg/util"
 	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // ShowOptions represents arg for Pull func

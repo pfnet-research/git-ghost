@@ -22,7 +22,7 @@ import (
 	"github.com/pfnet-research/git-ghost/pkg/ghost/types"
 	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 

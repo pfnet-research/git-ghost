@@ -17,7 +17,7 @@ package util
 import (
 	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // LogDeferredError calls a given function and log an error according to the result

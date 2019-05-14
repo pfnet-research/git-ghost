@@ -27,7 +27,7 @@ import (
 	"github.com/pfnet-research/git-ghost/pkg/util"
 	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // GhostBranch is an interface representing a ghost branch.

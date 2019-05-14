@@ -25,8 +25,8 @@ import (
 	"github.com/pfnet-research/git-ghost/pkg/util"
 	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 
-	log "github.com/Sirupsen/logrus"
 	multierror "github.com/hashicorp/go-multierror"
+	log "github.com/sirupsen/logrus"
 )
 
 // GhostBranchSpec is an interface
@@ -134,10 +134,6 @@ func (bs CommitsBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.Git
 
 	commitHashFrom := resolved.CommittishFrom
 	commitHashTo := resolved.CommittishTo
-	if commitHashFrom == commitHashTo {
-		return nil, nil
-	}
-
 	branch := CommitsBranch{
 		Prefix:         resolved.Prefix,
 		CommitHashFrom: commitHashFrom,
@@ -255,15 +251,6 @@ func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.GitGho
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
-	}
-
-	size, err := util.FileSize(tmpFile.Name())
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	if size == 0 {
-		return nil, nil
 	}
 
 	hash, err := util.GenerateFileContentHash(tmpFile.Name())

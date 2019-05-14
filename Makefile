@@ -20,11 +20,11 @@ guard-%:
 	fi
 
 .PHONY: build
-build: deps
+build:
 	go build -tags netgo -installsuffix netgo $(LDFLAGS) -o $(OUTDIR)/$(NAME)
 
 .PHONY: install
-install: deps
+install:
 	go install -tags netgo -installsuffix netgo $(LDFLAGS)
 
 .PHONY: build-linux-amd64
@@ -92,12 +92,8 @@ release-image: guard-RELEASE_TAG
 	git checkout -
 
 .PHONY: lint
-lint: deps
+lint:
 	golangci-lint run --config golangci.yml
-
-.PHONY: deps
-deps:
-	dep ensure
 
 .PHONY: build-image-dev
 build-image-dev:
@@ -110,7 +106,7 @@ build-image-cli:
 .PHONY: build-image-all
 build-image-all: build-image-dev build-image-cli
 
-test: deps
+test:
 	@go test -v -race -short -tags no_e2e ./...
 
 .PHONY: shell

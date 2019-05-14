@@ -17,7 +17,7 @@ package util
 import (
 	"reflect"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 func ToFields(structObj interface{}) (fields log.Fields) {
