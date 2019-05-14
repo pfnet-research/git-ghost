@@ -22,7 +22,7 @@ import (
 
 	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 func JustOutputCmd(cmd *exec.Cmd) ([]byte, errors.GitGhostError) {

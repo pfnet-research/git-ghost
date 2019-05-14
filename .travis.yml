@@ -5,14 +5,12 @@ go:
 
 go_import_path: github.com/pfnet-research/git-ghost
 
-before_install:
-- export PATH=$GOPATH/bin:$PATH
+env:
+- GO111MODULE=on
 
 install:
-- go get -u github.com/golang/dep/...
-- go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
-- go get -u github.com/mattn/goveralls
-- dep ensure
+- go install github.com/golangci/golangci-lint/cmd/golangci-lint
+- go install github.com/mattn/goveralls
 
 before_script: make lint
 

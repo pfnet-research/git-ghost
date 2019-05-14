@@ -25,8 +25,8 @@ import (
 	"github.com/pfnet-research/git-ghost/pkg/util"
 	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 
-	log "github.com/Sirupsen/logrus"
 	multierror "github.com/hashicorp/go-multierror"
+	log "github.com/sirupsen/logrus"
 )
 
 // GhostBranchSpec is an interface
