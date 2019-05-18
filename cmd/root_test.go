@@ -15,18 +15,12 @@
 package cmd
 
 import (
-	"fmt"
+	"testing"
 
-	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
 )
 
-func NewGCCommand() *cobra.Command {
-	return &cobra.Command{
-		Use:   "gc",
-		Short: "gc ghost commits from remote repository.",
-		Long:  "gc ghost commits from remote repository.",
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("gc command")
-		},
-	}
+func TestRootCmd(t *testing.T) {
+	cmd := NewRootCmd()
+	assert.NotNil(t, cmd)
 }

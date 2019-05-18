@@ -27,8 +27,9 @@ func init() {
 }
 
 func main() {
-	// RootCmd prints errors if exists
-	if err := cmd.RootCmd.Execute(); err != nil {
+	// rootCmd prints errors if exists
+	rootCmd := cmd.NewRootCmd()
+	if err := rootCmd.Execute(); err != nil {
 		os.Exit(-1)
 	}
 }

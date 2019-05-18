@@ -25,10 +25,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
-	RootCmd.AddCommand(NewShowCommand())
-}
-
 func NewShowCommand() *cobra.Command {
 	command := &cobra.Command{
 		Use:   "show [from-hash(default=HEAD)] [diff-hash]",
