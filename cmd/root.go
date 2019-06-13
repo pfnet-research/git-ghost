@@ -84,6 +84,8 @@ var RootCmd = &cobra.Command{
 			log.SetLevel(log.DebugLevel)
 		case 3:
 			log.SetLevel(log.TraceLevel)
+		default:
+			log.SetLevel(log.TraceLevel)
 		}
 		return nil
 	},
@@ -97,7 +99,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostWorkDir, "ghost-working-dir", "", "local root directory for git-ghost interacting with ghost repository (default to a temporary directory)")
 	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostPrefix, "ghost-prefix", "", "prefix of ghost branch name (default to GIT_GHOST_PREFIX env, or ghost)")
 	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostRepo, "ghost-repo", "", "git remote url for ghosts repository (default to GIT_GHOST_REPO env)")
-	RootCmd.PersistentFlags().CountVarP(&globalOpts.verbose, "verbose", "v", "verbose mode")
+	RootCmd.PersistentFlags().CountVarP(&globalOpts.verbose, "verbose", "v", "verbose mode. (1: info, 2: debug, 3: trace)")
 	RootCmd.AddCommand(versionCmd)
 }
 
