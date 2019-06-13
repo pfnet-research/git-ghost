@@ -110,6 +110,19 @@ func AppendNonIndexedDiffFiles(dir, filepath string, nonIndexedFilepaths []strin
 
 // ApplyDiffPatchFile apply a diff file created by CreateDiffPatchFile
 func ApplyDiffPatchFile(dir, filepath string) errors.GitGhostError {
+	// Handle empty patch
+	fi, err := os.Stat(filepath)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	if fi.Size() == 0 {
+		log.WithFields(util.MergeFields(
+			log.Fields{
+				"srcDir":   dir,
+				"filepath": filepath,
+			})).Info("ignore empty patch")
+		return nil
+	}
 	return util.JustRunCmd(
 		exec.Command("git", "-C", dir, "apply", filepath),
 	)
