@@ -30,7 +30,12 @@ func ValidateGit() errors.GitGhostError {
 
 // ValidateCommittish check committish is valid on dir
 func ValidateCommittish(dir, committish string) errors.GitGhostError {
-	return util.JustRunCmd(
+	output, err := util.JustOutputCmd(
 		exec.Command("git", "-C", dir, "cat-file", "-e", committish),
 	)
+	if err != nil && util.GetExitCode(err.Cause()) == 1 && len(output) == 0 {
+		// exit 1 is for unexisting committish.
+		return errors.Errorf("%s does not exist", committish)
+	}
+	return err
 }

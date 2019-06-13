@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"syscall"
 
 	"github.com/pfnet-research/git-ghost/pkg/util"
 	"github.com/pfnet-research/git-ghost/pkg/util/errors"
@@ -94,13 +93,9 @@ func AppendNonIndexedDiffFiles(dir, filepath string, nonIndexedFilepaths []strin
 		cmd.Stdout = f
 		ggerr := util.JustRunCmd(cmd)
 		if ggerr != nil {
-			if exiterr, ok := ggerr.Cause().(*exec.ExitError); ok {
-				if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
-					// exit 1 is valid for git diff
-					if status.ExitStatus() == 1 {
-						continue
-					}
-				}
+			if util.GetExitCode(ggerr.Cause()) == 1 {
+				// exit 1 is valid for git diff
+				continue
 			}
 			errs = multierror.Append(errs, ggerr)
 		}
