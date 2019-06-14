@@ -108,14 +108,6 @@ func (bs CommitsBranchSpec) PullBranch(we WorkingEnv) (GhostBranch, errors.GitGh
 		CommitHashFrom: resolved.CommittishFrom,
 		CommitHashTo:   resolved.CommittishTo,
 	}
-	if branch.CommitHashFrom == branch.CommitHashTo {
-		log.WithFields(log.Fields{
-			"from": branch.CommitHashFrom,
-			"to":   branch.CommitHashTo,
-		}).Warn("skipping pull and apply ghost commits branch because from-hash and to-hash is the same.")
-		return nil, nil
-	}
-
 	err = pull(branch, we)
 	if err != nil {
 		return nil, err

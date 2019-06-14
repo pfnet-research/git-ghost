@@ -195,7 +195,6 @@ func apply(ghost GhostBranch, we WorkingEnv, expectedSrcHead string) errors.GitG
 		return git.ApplyDiffBundleFile(we.SrcDir, path.Join(we.GhostDir, ghost.FileName()))
 	case DiffBranch:
 		return git.ApplyDiffPatchFile(we.SrcDir, path.Join(we.GhostDir, ghost.FileName()))
-
 	default:
 		return errors.Errorf("not supported on type = %+v", reflect.TypeOf(ghost))
 	}
@@ -208,6 +207,13 @@ func (bs CommitsBranch) Show(we WorkingEnv, writer io.Writer) errors.GitGhostErr
 
 // Apply applies contents(diff or patch) of this ghost branch on passed working env
 func (bs CommitsBranch) Apply(we WorkingEnv) errors.GitGhostError {
+	if bs.CommitHashFrom == bs.CommitHashTo {
+		log.WithFields(log.Fields{
+			"from": bs.CommitHashFrom,
+			"to":   bs.CommitHashTo,
+		}).Warn("skipping apply ghost commits branch because from-hash and to-hash is the same.")
+		return nil
+	}
 	err := apply(bs, we, bs.CommitHashFrom)
 	if err != nil {
 		return err

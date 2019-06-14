@@ -44,11 +44,7 @@ func pullAndshow(branchSpec types.PullableGhostBranchSpec, we types.WorkingEnv, 
 	if err != nil {
 		return err
 	}
-	if branch != nil {
-		err := branch.Show(we, writer)
-		return err
-	}
-	return nil
+	return branch.Show(we, writer)
 }
 
 // Show writes ghost branches contents to option.Writer

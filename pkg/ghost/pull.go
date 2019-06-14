@@ -32,7 +32,7 @@ type PullOptions struct {
 func pullAndApply(spec types.PullableGhostBranchSpec, we types.WorkingEnv) errors.GitGhostError {
 	pulledBranch, err := spec.PullBranch(we)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	return pulledBranch.Apply(we)
 }
