@@ -19,6 +19,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 
 	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 
@@ -61,4 +62,13 @@ func JustRunCmd(cmd *exec.Cmd) errors.GitGhostError {
 		return errors.WithStack(err)
 	}
 	return nil
+}
+
+func GetExitCode(err error) int {
+	if exiterr, ok := err.(*exec.ExitError); ok {
+		if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
+			return status.ExitStatus()
+		}
+	}
+	return -1
 }
