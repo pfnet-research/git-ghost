@@ -122,7 +122,11 @@ func validateEnvironment() errors.GitGhostError {
 
 func (flags *globalFlags) SetDefaults() errors.GitGhostError {
 	if globalOpts.srcDir == "" {
-		globalOpts.srcDir = os.Getenv("PWD")
+		srcDir, err := os.Getwd()
+		if err != nil {
+			return errors.New("failed to get the working directory")
+		}
+		globalOpts.srcDir = srcDir
 	}
 	if globalOpts.ghostWorkDir == "" {
 		globalOpts.ghostWorkDir = os.TempDir()
