@@ -1,6 +1,6 @@
 NAME        := git-ghost
 PROJECTROOT := $(shell pwd)
-VERSION     ?= $(shell cat ${PROJECTROOT}/VERSION)-dev
+VERSION     := $(if $(VERSION),$(VERSION),$(shell cat ${PROJECTROOT}/VERSION)-dev)
 REVISION    := $(shell git rev-parse --short HEAD)
 IMAGE_PREFIX ?= dtaniwaki/
 IMAGE_TAG   ?= $(VERSION)
@@ -83,11 +83,10 @@ release-assets: guard-RELEASE_TAG guard-RELEASE_COMMIT guard-GITHUB_USER guard-G
 	git checkout -
 
 .PHONY: release-image
-release-image: IMAGE_TAG=$(RELEASE_TAG)
 release-image: guard-RELEASE_TAG
 	git diff --quiet HEAD || (echo "your current branch is dirty" && exit 1)
 	git checkout $(RELEASE_COMMIT)
-	make build-image-cli
+	make build-image-cli VERSION=$(shell cat ${PROJECTROOT}/VERSION)
 	docker push $(IMAGE_PREFIX)git-ghost-cli:$(RELEASE_TAG)
 	git checkout -
 
@@ -101,7 +100,7 @@ build-image-dev:
 
 .PHONY: build-image-cli
 build-image-cli:
-	docker build -t $(IMAGE_PREFIX)git-ghost-cli:$(IMAGE_TAG) --target git-ghost-cli $(PROJECTROOT)
+	docker build -t $(IMAGE_PREFIX)git-ghost-cli:$(IMAGE_TAG) --build-arg VERSION=$(VERSION) --target git-ghost-cli $(PROJECTROOT)
 
 .PHONY: build-image-all
 build-image-all: build-image-dev build-image-cli
