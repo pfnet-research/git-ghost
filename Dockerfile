@@ -1,7 +1,7 @@
 ####################################################################################################
 # git-ghost-dev
 ####################################################################################################
-FROM golang:1.11.4 as git-ghost-dev
+FROM golang:1.12.6 as git-ghost-dev
 
 
 RUN apt-get update -q && apt-get install -yq --no-install-recommends \
@@ -43,23 +43,22 @@ ENV GITHUB_RELEASE_VERSION=0.7.2
 RUN curl -sLo- https://github.com/aktau/github-release/releases/download/v${GITHUB_RELEASE_VERSION}/linux-amd64-github-release.tar.bz2 | \
     tar -xjC "$GOPATH/bin" --strip-components 3 -f-
 
-# A dummy directory is created under $GOPATH/src/dummy so we are able to use dep
-# to install all the packages of our dep lock file
-COPY Gopkg.toml ${GOPATH}/src/dummy/Gopkg.toml
-COPY Gopkg.lock ${GOPATH}/src/dummy/Gopkg.lock
-
-RUN cd ${GOPATH}/src/dummy && \
-    dep ensure -vendor-only && \
-    mv vendor/* ${GOPATH}/src/ && \
-    rmdir vendor
-
 WORKDIR $GOPATH/src/git-ghost
+ENV GO111MODULE=on
+
+# First, warm up the go modules cache.
+COPY go.mod go.sum ${GOPATH}/src/git-ghost/
+RUN cd ${GOPATH}/src/git-ghost && go mod download
+
+# Now, we actually copy all the files.
 COPY . .
 
 ####################################################################################################
 # builder
 ####################################################################################################
 FROM git-ghost-dev as builder
+
+ARG VERSION
 
 # Perform the build
 RUN make build
