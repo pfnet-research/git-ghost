@@ -95,7 +95,7 @@ var globalOpts globalFlags
 
 func init() {
 	cobra.OnInitialize()
-	RootCmd.PersistentFlags().StringVar(&globalOpts.srcDir, "src-dir", "", "source directory which you create ghost from (default to PWD env)")
+	RootCmd.PersistentFlags().StringVar(&globalOpts.srcDir, "src-dir", "", "source directory which you create ghost from (default to the current directory)")
 	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostWorkDir, "ghost-working-dir", "", "local root directory for git-ghost interacting with ghost repository (default to a temporary directory)")
 	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostPrefix, "ghost-prefix", "", "prefix of ghost branch name (default to GIT_GHOST_PREFIX env, or ghost)")
 	RootCmd.PersistentFlags().StringVar(&globalOpts.ghostRepo, "ghost-repo", "", "git remote url for ghosts repository (default to GIT_GHOST_REPO env)")
@@ -122,7 +122,11 @@ func validateEnvironment() errors.GitGhostError {
 
 func (flags *globalFlags) SetDefaults() errors.GitGhostError {
 	if globalOpts.srcDir == "" {
-		globalOpts.srcDir = os.Getenv("PWD")
+		srcDir, err := os.Getwd()
+		if err != nil {
+			return errors.New("failed to get the working directory")
+		}
+		globalOpts.srcDir = srcDir
 	}
 	if globalOpts.ghostWorkDir == "" {
 		globalOpts.ghostWorkDir = os.TempDir()
