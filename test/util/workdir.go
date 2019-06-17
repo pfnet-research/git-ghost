@@ -115,7 +115,6 @@ func (wd *WorkDir) RunCommmand(command string, args ...string) (string, string, 
 	for key, val := range wd.Env {
 		env = append(env, fmt.Sprintf("%s=%s", key, val))
 	}
-	env = append(env, fmt.Sprintf("PWD=%s", wd.Dir))
 	cmd.Env = env
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
