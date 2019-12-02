@@ -39,7 +39,7 @@ $ brew install git-ghost
 
 ### Releases
 
-The binaries of each releases are available in [Releases](/releases).
+The binaries of each releases are available in [Releases](../../releases).
 
 ## Getting Started
 
