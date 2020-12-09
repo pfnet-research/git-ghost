@@ -15,6 +15,7 @@
 package git
 
 import (
+	"bytes"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -145,4 +146,29 @@ func ResetHardToBranch(dir, branch string) errors.GitGhostError {
 	return util.JustRunCmd(
 		exec.Command("git", "-C", dir, "reset", "--hard", branch),
 	)
+}
+
+// GetParentCommit returns the parent commit of the given commit
+func GetParentCommit(dir, commit string) (string, errors.GitGhostError) {
+	resultBytes, err := util.JustOutputCmd(exec.Command("git", "-C", dir, "rev-parse", fmt.Sprintf("%s^", commit)))
+	if err != nil {
+		return "", errors.WithStack(gherrors.WithMessage(err, "failed to get the parent commit of a commit"))
+	}
+	return strings.TrimSuffix(string(resultBytes), "\n"), nil
+}
+
+// GetRemoteBranchesContainingCommit returns a slice of remote branch names each of which contain the given commit
+func GetRemoteBranchesContainingCommit(dir, commit string) ([]string, errors.GitGhostError) {
+	resultBytes, err := util.JustOutputCmd(exec.Command("git", "-C", dir, "branch", "--format", "%(refname)", "--remotes", "--contains", commit))
+	if err != nil {
+		return nil, errors.WithStack(gherrors.WithMessage(err, "failed to get remote branches containing a commit"))
+	}
+	var branchNames []string
+	for _, line := range bytes.Split(resultBytes, []byte("\n")) {
+		branchName := string(line)
+		if len(branchName) > 0 {
+			branchNames = append(branchNames, branchName)
+		}
+	}
+	return branchNames, nil
 }
