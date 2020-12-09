@@ -17,8 +17,10 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/pfnet-research/git-ghost/pkg/ghost"
+	"github.com/pfnet-research/git-ghost/pkg/ghost/git"
 	"github.com/pfnet-research/git-ghost/pkg/ghost/types"
 	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 
@@ -43,7 +45,7 @@ func NewPushCommand() *cobra.Command {
 		Short: "push commits(hash1...hash2), diff(hash...current state) to your ghost repo",
 		Long:  "push commits or diff or all to your ghost repo.  If you didn't specify any subcommand, this commands works as an alias for 'push diff' command.",
 		Args:  cobra.RangeArgs(0, 1),
-		Run:   runPushDiffCommand(&flags),
+		Run:   runPushCommitsCommand(&flags),
 	}
 	command.AddCommand(&cobra.Command{
 		Use:   "commits [from-hash] [to-hash(default=HEAD)]",
@@ -71,6 +73,32 @@ func NewPushCommand() *cobra.Command {
 	command.PersistentFlags().BoolVar(&flags.followSymlinks, "follow-symlinks", false, "follow symlinks inside the repository.")
 
 	return command
+}
+
+func getFirstRemoteAncestorCommit(commit string) (string, errors.GitGhostError) {
+	dir := globalOpts.srcDir
+	for {
+		branchNames, err := git.GetRemoteBranchesContainingCommit(dir, commit)
+		if err != nil {
+			return "", err
+		}
+		var originBranchNames []string
+		for _, branchName := range branchNames {
+			if strings.HasPrefix(branchName, fmt.Sprintf("refs/remotes/%s/", git.ORIGIN)) {
+				originBranchNames = append(originBranchNames, branchName)
+			}
+		}
+		if len(originBranchNames) > 0 {
+			// This commit is the first ancestor commit in the origin remote.
+			break
+		}
+		parentCommit, err := git.GetParentCommit(dir, commit)
+		if err != nil {
+			return "", err
+		}
+		commit = parentCommit
+	}
+	return commit, nil
 }
 
 type pushCommitsArg struct {
@@ -111,6 +139,16 @@ func (arg pushCommitsArg) validate() errors.GitGhostError {
 func runPushCommitsCommand(flags *pushFlags) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 		pushArg := newPushCommitsArg(args)
+
+		// If commitsFrom is not given, find the first ancestor commit that is included in the origin remote.
+		if pushArg.commitsFrom == "" {
+			commitsFrom, err := getFirstRemoteAncestorCommit(pushArg.commitsTo)
+			if err != nil {
+				errors.LogErrorWithStack(err)
+				os.Exit(1)
+			}
+			pushArg.commitsFrom = commitsFrom
+		}
 		if err := pushArg.validate(); err != nil {
 			errors.LogErrorWithStack(err)
 			os.Exit(1)
