@@ -17,7 +17,6 @@ package util
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 )
@@ -84,7 +83,7 @@ func CreateGitWorkDir() (*WorkDir, error) {
 }
 
 func CreateWorkDir() (*WorkDir, error) {
-	dir, err := ioutil.TempDir("", "git-ghost-e2e-test-")
+	dir, err := os.MkdirTemp("", "git-ghost-e2e-test-")
 	if err != nil {
 		return nil, err
 	}

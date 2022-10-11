@@ -15,7 +15,6 @@
 package types
 
 import (
-	"io/ioutil"
 	"os"
 
 	"github.com/pfnet-research/git-ghost/pkg/ghost/git"
@@ -50,7 +49,7 @@ type WorkingEnv struct {
 }
 
 func (weSpec WorkingEnvSpec) Initialize() (*WorkingEnv, errors.GitGhostError) {
-	ghostDir, err := ioutil.TempDir(weSpec.GhostWorkingDir, "git-ghost-")
+	ghostDir, err := os.MkdirTemp(weSpec.GhostWorkingDir, "git-ghost-")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
