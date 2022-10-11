@@ -31,5 +31,9 @@ jobs:
         args: --config golangci.yml
     - name: Build
       run: make install e2e
-    - name: Test
-      run: make test coverage
+    - name: Test With Coverage
+      run: make coverage
+    - name: Send Coverage
+      uses: shogo82148/actions-goveralls@v1
+      with:
+        path-to-profile: profile.cov
