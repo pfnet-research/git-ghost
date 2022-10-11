@@ -16,6 +16,7 @@ package util
 
 import (
 	"crypto/sha1"
+	"fmt"
 	"io"
 	"strings"
 
@@ -24,11 +25,10 @@ import (
 
 func GenerateFileContentHash(filepath string) (string, errors.GitGhostError) {
 	input := strings.NewReader(filepath)
-
 	hash := sha1.New()
 	if _, err := io.Copy(hash, input); err != nil {
 		return "", errors.WithStack(err)
 	}
 	sum := hash.Sum(nil)
-	return string(sum), nil
+	return fmt.Sprintf("%x", sum), nil
 }
