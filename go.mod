@@ -1,6 +1,6 @@
 module github.com/pfnet-research/git-ghost
 
-go 1.17
+go 1.18
 
 require (
 	github.com/hashicorp/go-multierror v1.0.0
