@@ -15,19 +15,20 @@
 package util
 
 import (
-	"os/exec"
+	"crypto/sha1"
+	"io"
 	"strings"
 
 	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 )
 
 func GenerateFileContentHash(filepath string) (string, errors.GitGhostError) {
-	// TODO: Use appropriate hash algorithm
-	cmd := exec.Command("sha1sum", "-b", filepath)
-	output, err := cmd.Output()
-	if err != nil {
+	input := strings.NewReader(filepath)
+
+	hash := sha1.New()
+	if _, err := io.Copy(hash, input); err != nil {
 		return "", errors.WithStack(err)
 	}
-	hash := strings.Split(string(output), " ")[0]
-	return hash, nil
+	sum := hash.Sum(nil)
+	return string(sum), nil
 }
