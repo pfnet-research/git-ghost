@@ -22,17 +22,16 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/pfnet-research/git-ghost/test/util"
-
+	"github.com/pfnet-research/git-ghost/test/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	ghostDir *util.WorkDir
+	ghostDir *testutil.WorkDir
 )
 
 func setup() error {
-	dir, err := util.CreateGitWorkDir()
+	dir, err := testutil.CreateGitWorkDir()
 	if err != nil {
 		return err
 	}
@@ -514,12 +513,12 @@ func TestIncludeLinkFile(t *testing.T) {
 	assert.Equal(t, "this is an included file\n", stdout)
 }
 
-func setupBasicEnv(workDir *util.WorkDir) (*util.WorkDir, *util.WorkDir, error) {
+func setupBasicEnv(workDir *testutil.WorkDir) (*testutil.WorkDir, *testutil.WorkDir, error) {
 	env := map[string]string{
 		"GIT_GHOST_REPO": workDir.Dir,
 	}
 
-	srcDir, err := util.CreateGitWorkDir()
+	srcDir, err := testutil.CreateGitWorkDir()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -531,7 +530,7 @@ func setupBasicEnv(workDir *util.WorkDir) (*util.WorkDir, *util.WorkDir, error) 
 	}
 	srcDir.Env = env
 
-	dstDir, err := util.CloneWorkDir(srcDir)
+	dstDir, err := testutil.CloneWorkDir(srcDir)
 	if err != nil {
 		srcDir.Remove()
 		return nil, nil, err
@@ -541,7 +540,7 @@ func setupBasicEnv(workDir *util.WorkDir) (*util.WorkDir, *util.WorkDir, error) 
 	return srcDir, dstDir, nil
 }
 
-func setupBasicGitRepo(wd *util.WorkDir) error {
+func setupBasicGitRepo(wd *testutil.WorkDir) error {
 	var err error
 	_, _, err = wd.RunCommmand("bash", "-c", "echo a > sample.txt")
 	if err != nil {
