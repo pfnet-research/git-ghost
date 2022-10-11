@@ -15,7 +15,6 @@
 package types
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -150,7 +149,7 @@ func (bs CommitsBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.Git
 	if ggerr != nil {
 		return nil, ggerr
 	}
-	ggerr = git.CommitFile(dstDir, branch.FileName(), fmt.Sprintf("Create ghost commit"))
+	ggerr = git.CommitFile(dstDir, branch.FileName(), "Create ghost commit")
 	if ggerr != nil {
 		return nil, ggerr
 	}
@@ -263,7 +262,7 @@ func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.GitGho
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	err = git.CommitFile(dstDir, branch.FileName(), fmt.Sprintf("Create ghost commit"))
+	err = git.CommitFile(dstDir, branch.FileName(), "Create ghost commit")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
