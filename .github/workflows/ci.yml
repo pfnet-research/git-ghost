@@ -25,8 +25,8 @@ jobs:
     - name: Get dependencies
       run: go mod download
 
-    - name: Lint
-      run : make lint
+    # - name: Lint
+    #   run : make lint
     - name: Build
       run: make install e2e
     - name: Test
