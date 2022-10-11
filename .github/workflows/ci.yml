@@ -24,9 +24,11 @@ jobs:
         fetch-depth: 0
     - name: Get dependencies
       run: go mod download
-
-    # - name: Lint
-    #   run : make lint
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v3
+      with:
+        version: v1.29
+      run: make lint
     - name: Build
       run: make install e2e
     - name: Test
