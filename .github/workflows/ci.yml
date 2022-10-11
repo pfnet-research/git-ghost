@@ -33,4 +33,3 @@ jobs:
       run: make install e2e
     - name: Test
       run: make test coverage
-
