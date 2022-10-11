@@ -30,6 +30,9 @@ $ cd git-ghost
 $ make install
 ```
 
+Compiled binary is located in `dist` folder.
+
+
 ### Using Homebrew
 
 ```bash
