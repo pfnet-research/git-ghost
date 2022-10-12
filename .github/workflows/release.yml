@@ -24,3 +24,4 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - run: IMAGE_PREFIX=${{ github.actor }} make build-image-cli
     - run: make build-all
+    - run : docker images
