@@ -30,6 +30,9 @@ $ cd git-ghost
 $ make install
 ```
 
+Compiled binary is located in `dist` folder.
+
+
 ### Using Homebrew
 
 ```bash
@@ -106,8 +109,8 @@ $ godoc -http=:6060  # access http://localhost:6060 in browser
 
 Copyright (c) 2019 Preferred Networks. See [LICENSE](LICENSE) for details.
 
-[build-image]: https://travis-ci.com/pfnet-research/git-ghost.svg
-[build-link]:  http://travis-ci.com/pfnet-research/git-ghost
+[build-image]: https://github.com/pfnet-research/git-ghost/actions/workflows/ci.yml/badge.svg
+[build-link]:  https://github.com/pfnet-research/git-ghost/actions/workflows/ci.yml
 [cov-image]:   https://coveralls.io/repos/github/pfnet-research/git-ghost/badge.svg?branch=master
 [cov-link]:    https://coveralls.io/github/pfnet-research/git-ghost?branch=master
 [godoc-image]: https://godoc.org/github.com/pfnet-research/git-ghost?status.svg

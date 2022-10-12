@@ -15,8 +15,6 @@
 package types
 
 import (
-	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -24,6 +22,7 @@ import (
 	"github.com/pfnet-research/git-ghost/pkg/ghost/git"
 	"github.com/pfnet-research/git-ghost/pkg/util"
 	"github.com/pfnet-research/git-ghost/pkg/util/errors"
+	"github.com/pfnet-research/git-ghost/pkg/util/hash"
 
 	multierror "github.com/hashicorp/go-multierror"
 	log "github.com/sirupsen/logrus"
@@ -131,7 +130,7 @@ func (bs CommitsBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.Git
 		CommitHashFrom: commitHashFrom,
 		CommitHashTo:   commitHashTo,
 	}
-	tmpFile, err := ioutil.TempFile("", "git-ghost-local-base")
+	tmpFile, err := os.CreateTemp("", "git-ghost-local-base")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -150,7 +149,7 @@ func (bs CommitsBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.Git
 	if ggerr != nil {
 		return nil, ggerr
 	}
-	ggerr = git.CommitFile(dstDir, branch.FileName(), fmt.Sprintf("Create ghost commit"))
+	ggerr = git.CommitFile(dstDir, branch.FileName(), "Create ghost commit")
 	if ggerr != nil {
 		return nil, ggerr
 	}
@@ -227,7 +226,7 @@ func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.GitGho
 		return nil, ggerr
 	}
 	commitHashFrom := resolved.CommittishFrom
-	tmpFile, err := ioutil.TempFile("", "git-ghost-local-mod")
+	tmpFile, err := os.CreateTemp("", "git-ghost-local-mod")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -245,7 +244,7 @@ func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.GitGho
 		}
 	}
 
-	hash, err := util.GenerateFileContentHash(tmpFile.Name())
+	hash, err := hash.GenerateFileContentHash(tmpFile.Name())
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -263,7 +262,7 @@ func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.GitGho
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	err = git.CommitFile(dstDir, branch.FileName(), fmt.Sprintf("Create ghost commit"))
+	err = git.CommitFile(dstDir, branch.FileName(), "Create ghost commit")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
