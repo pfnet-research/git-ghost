@@ -18,7 +18,7 @@ builds:
 
 dockers:
 - image_templates: ["ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-amd64"]
-  dockerfile: Dockerfile
+  dockerfile: release.Dockerfile
   goarch: amd64
   use: buildx
   build_flag_templates:
@@ -31,7 +31,7 @@ dockers:
   - --label=org.opencontainers.image.revision={{ .ShortCommit }}
   - --label=org.opencontainers.image.licenses=Apache-2.0
 - image_templates: ["ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-arm64v8"]
-  dockerfile: Dockerfile
+  dockerfile: release.Dockerfile
   goarch: arm64
   use: buildx
   build_flag_templates:
