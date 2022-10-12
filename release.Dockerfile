@@ -1,10 +1,3 @@
-FROM ubuntu:22.04
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    git \
-    ca-certificates \
-    openssh-client \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-COPY git-ghost /usr/local/bin
-ENTRYPOINT ["git", "ghost"]
+FROM alpine:3.15.2
+RUN apk add --no-cache git ca-certificates openssh-client
+COPY git-ghost /usr/local/bin/
