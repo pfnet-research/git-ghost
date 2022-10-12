@@ -67,10 +67,9 @@ release-code: guard-RELEASE_TAG guard-RELEASE_COMMIT guard-GITHUB_USER guard-GIT
 		--tag $(RELEASE_TAG)
 
 .PHONY: release-assets
-release-assets: guard-RELEASE_TAG guard-RELEASE_COMMIT guard-GITHUB_USER guard-GITHUB_REPO guard-GITHUB_REPO_URL guard-GITHUB_TOKEN
+release-assets: guard-RELEASE_TAG guard-GITHUB_USER guard-GITHUB_REPO guard-GITHUB_REPO_URL guard-GITHUB_TOKEN
 	@GITHUB_TOKEN=$(GITHUB_TOKEN)
 	git diff --quiet HEAD || (echo "your current branch is dirty" && exit 1)
-	git checkout $(RELEASE_COMMIT)
 	make clean build-all VERSION=$(shell cat ${PROJECTROOT}/VERSION)
 	for target in linux-amd64 darwin-amd64 windows-amd64.exe; do \
 		github-release upload \
@@ -80,7 +79,6 @@ release-assets: guard-RELEASE_TAG guard-RELEASE_COMMIT guard-GITHUB_USER guard-G
 			--name git-ghost-$$target \
 			--file $(OUTDIR)/git-ghost-$$target; \
 	done
-	git checkout -
 
 .PHONY: release-image
 release-image: guard-RELEASE_TAG

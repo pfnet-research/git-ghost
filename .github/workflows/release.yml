@@ -21,7 +21,7 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    - run: IMAGE_PREFIX=ghcr.io/${{ github.actor }} make build-image-cli
-    - run: make build-all
-    - run: docker images
+    - run: DOCKER_BUILDKIT=1 IMAGE_PREFIX=ghcr.io/${{ github.actor }} make build-image-cli
+    - run: RELEASE_TAG=${GITHUB_REF##*/} GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} make release-assets
+
 
