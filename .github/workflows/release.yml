@@ -3,8 +3,6 @@ name: Release
 on:
   push:
     tags: ["v*"]
-  pull_request: # tentative setting (will be removed)
-    types: [opened, synchronize]
 
 jobs:
   run:
