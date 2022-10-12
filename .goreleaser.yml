@@ -4,9 +4,6 @@ before:
 builds:
 - id: git-ghost
   binary: git-ghost
-  env:
-  - CGO_ENABLED=0
-  - GO_VERSION=1.19
   goos:
   - linux
   - darwin

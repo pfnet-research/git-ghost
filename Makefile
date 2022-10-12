@@ -1,9 +1,6 @@
 NAME        := git-ghost
 PROJECTROOT := $(shell pwd)
-VERSION     := $(if $(VERSION),$(VERSION),$(shell cat ${PROJECTROOT}/VERSION)-dev)
 REVISION    := $(shell git rev-parse --short HEAD)
-IMAGE_PREFIX ?= dtaniwaki/
-IMAGE_TAG   ?= $(VERSION)
 OUTDIR      ?= $(PROJECTROOT)/dist
 RELEASE_TAG ?=
 GITHUB_USER := pfnet-research
@@ -11,7 +8,7 @@ GITHUB_REPO := git-ghost
 GITHUB_REPO_URL := git@github.com:pfnet-research/git-ghost.git
 GITHUB_TOKEN ?=
 
-LDFLAGS := -ldflags="-s -w -X \"github.com/pfnet-research/git-ghost/cmd.Version=$(VERSION)\" -X \"github.com/pfnet-research/git-ghost/cmd.Revision=$(REVISION)\" -extldflags \"-static\""
+LDFLAGS := -ldflags="-s -w -X \"github.com/pfnet-research/git-ghost/cmd.Revision=$(REVISION)\" -extldflags \"-static\""
 
 guard-%:
 	@ if [ "${${*}}" = "" ]; then \
@@ -57,35 +54,9 @@ build-all: build-linux build-darwin build-windows
 lint:
 	golangci-lint run --config golangci.yml
 
-.PHONY: build-image-dev
-build-image-dev:
-	docker build -t $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) --target git-ghost-dev $(PROJECTROOT)
-
-.PHONY: build-image-cli
-build-image-cli:
-	docker build -t $(IMAGE_PREFIX)git-ghost-cli:$(IMAGE_TAG) --build-arg VERSION=$(VERSION) --target git-ghost-cli $(PROJECTROOT)
-
-.PHONY: build-image-all
-build-image-all: build-image-dev build-image-cli
-
-test:
-	@go test -v -race -short -tags no_e2e ./...
-
-.PHONY: shell
-shell: build-image-cli
-	docker run -it $(IMAGE_PREFIX)git-ghost-cli:$(IMAGE_TAG) bash
-
-.PHONY: dev-shell
-dev-shell: build-image-dev
-	docker run -it $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) bash
-
 .PHONY: e2e
 e2e:
 	@go test -v $(PROJECTROOT)/test/e2e/e2e_test.go
-
-.PHONY: docker-e2e
-docker-e2e: build-image-dev
-	@docker run $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) make install e2e DEBUG=$(DEBUG)
 
 .PHONY: update-license
 update-license:
