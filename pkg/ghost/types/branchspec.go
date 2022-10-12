@@ -22,6 +22,7 @@ import (
 	"github.com/pfnet-research/git-ghost/pkg/ghost/git"
 	"github.com/pfnet-research/git-ghost/pkg/util"
 	"github.com/pfnet-research/git-ghost/pkg/util/errors"
+	"github.com/pfnet-research/git-ghost/pkg/util/hash"
 
 	multierror "github.com/hashicorp/go-multierror"
 	log "github.com/sirupsen/logrus"
@@ -243,7 +244,7 @@ func (bs DiffBranchSpec) CreateBranch(we WorkingEnv) (GhostBranch, errors.GitGho
 		}
 	}
 
-	hash, err := util.GenerateFileContentHash(tmpFile.Name())
+	hash, err := hash.GenerateFileContentHash(tmpFile.Name())
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
