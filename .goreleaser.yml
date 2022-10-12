@@ -17,7 +17,7 @@ builds:
   - -s -w -X main.Version={{.Version}}
 
 dockers:
-- image_templates: ["ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-amd64"]
+- image_templates: ["ghcr.io/mist714/{{ .ProjectName }}:{{ .Version }}-amd64"]
   dockerfile: release.Dockerfile
   goarch: amd64
   use: buildx
@@ -44,15 +44,15 @@ dockers:
 #   - --label=org.opencontainers.image.revision={{ .ShortCommit }}
 #   - --label=org.opencontainers.image.licenses=Apache-2.0
 
-docker_manifests:
-- name_template: ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}
-  image_templates:
-  - ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-amd64
-  - ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-arm64v8
-- name_template: ghcr.io/pfnet-research/{{ .ProjectName }}:latest
-  image_templates:
-  - ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-amd64
-  - ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-arm64v8
+# docker_manifests:
+# - name_template: ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}
+#   image_templates:
+#   - ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-amd64
+#   - ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-arm64v8
+# - name_template: ghcr.io/pfnet-research/{{ .ProjectName }}:latest
+#   image_templates:
+#   - ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-amd64
+#   - ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-arm64v8
 
 release:
   prerelease: auto
