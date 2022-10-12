@@ -10,12 +10,6 @@ GITHUB_TOKEN ?=
 
 LDFLAGS := -ldflags="-s -w -X \"github.com/pfnet-research/git-ghost/cmd.Revision=$(REVISION)\" -extldflags \"-static\""
 
-guard-%:
-	@ if [ "${${*}}" = "" ]; then \
-    echo "Environment variable $* is not set"; \
-		exit 1; \
-	fi
-
 .PHONY: build
 build:
 	go build -tags netgo -installsuffix netgo $(LDFLAGS) -o $(OUTDIR)/$(NAME)

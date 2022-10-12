@@ -5,7 +5,7 @@ builds:
 - id: git-ghost
   binary: git-ghost
   env:
-  - CGO_ENABLED=0  
+  - CGO_ENABLED=0
   goos:
   - linux
   - darwin
