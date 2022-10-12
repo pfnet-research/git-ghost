@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func OldGenerateFileContentHash(filepath string) (string, error) {
+func CalculateHashWithCommand(filepath string) (string, error) {
 	cmd := exec.Command("sha1sum", "-b", filepath)
 	output, err := cmd.Output()
 	if err != nil {
@@ -25,7 +25,7 @@ func TestHashCompatibility(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	oldHash, err := OldGenerateFileContentHash(tmpFile.Name())
+	oldHash, err := CalculateHashWithCommand(tmpFile.Name())
 	if err != nil {
 		t.Fatal(err)
 	}
