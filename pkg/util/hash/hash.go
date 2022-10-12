@@ -24,13 +24,15 @@ import (
 )
 
 func GenerateFileContentHash(filepath string) (string, errors.GitGhostError) {
-	input, err := os.Open(filepath)
+	// ref: https://pkg.go.dev/crypto/sha1#example-New-File
+	f, err := os.Open(filepath)
 	if err != nil {
 		return "", errors.WithStack(err)
 	}
-	hasher := sha1.New()
-	if _, err := io.Copy(hasher, input); err != nil {
+	defer f.Close()
+	h := sha1.New()
+	if _, err := io.Copy(h, f); err != nil {
 		return "", errors.WithStack(err)
 	}
-	return fmt.Sprintf("%x", hasher.Sum(nil)), nil
+	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
