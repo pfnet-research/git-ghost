@@ -6,8 +6,10 @@ builds:
   binary: git-ghost
   env:
   - CGO_ENABLED=0
+  - GO_VERSION=1.19
   goos:
   - linux
+  - darwin
   goarch:
   - amd64
   - arm64
