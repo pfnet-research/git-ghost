@@ -22,5 +22,5 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    - run: RELEASE_TAG=${{ github.actor }} make build-image-cli
+    - run: IMAGE_PREFIX=${{ github.actor }} make build-image-cli
     - run: make build-all
