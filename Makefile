@@ -2,7 +2,7 @@ NAME        := git-ghost
 PROJECTROOT := $(shell pwd)
 VERSION     := $(if $(VERSION),$(VERSION),$(shell cat ${PROJECTROOT}/VERSION)-dev)
 REVISION    := $(shell git rev-parse --short HEAD)
-IMAGE_PREFIX ?=
+IMAGE_PREFIX ?= dtaniwaki/
 IMAGE_TAG   ?= $(VERSION)
 OUTDIR      ?= $(PROJECTROOT)/dist
 RELEASE_TAG ?=
@@ -62,30 +62,32 @@ release-code: guard-RELEASE_TAG guard-RELEASE_COMMIT guard-GITHUB_USER guard-GIT
 	git tag $(RELEASE_TAG) $(RELEASE_COMMIT)
 	git push $(GITHUB_REPO_URL) $(RELEASE_TAG)
 	github-release release \
-		--user $(GITHUB_USER) \
+	  --user $(GITHUB_USER) \
 		--repo $(GITHUB_REPO) \
 		--tag $(RELEASE_TAG)
 
 .PHONY: release-assets
-release-assets: guard-RELEASE_TAG guard-GITHUB_USER guard-GITHUB_REPO guard-GITHUB_REPO_URL guard-GITHUB_TOKEN
+release-assets: guard-RELEASE_TAG guard-RELEASE_COMMIT guard-GITHUB_USER guard-GITHUB_REPO guard-GITHUB_REPO_URL guard-GITHUB_TOKEN
 	@GITHUB_TOKEN=$(GITHUB_TOKEN)
 	git diff --quiet HEAD || (echo "your current branch is dirty" && exit 1)
+	git checkout $(RELEASE_COMMIT)
 	make clean build-all VERSION=$(shell cat ${PROJECTROOT}/VERSION)
 	for target in linux-amd64 darwin-amd64 windows-amd64.exe; do \
 		github-release upload \
-			--user $(GITHUB_USER) \
+		  --user $(GITHUB_USER) \
 			--repo $(GITHUB_REPO) \
 			--tag $(RELEASE_TAG) \
 			--name git-ghost-$$target \
 			--file $(OUTDIR)/git-ghost-$$target; \
 	done
+	git checkout -
 
 .PHONY: release-image
 release-image: guard-RELEASE_TAG
 	git diff --quiet HEAD || (echo "your current branch is dirty" && exit 1)
 	git checkout $(RELEASE_COMMIT)
 	make build-image-cli VERSION=$(shell cat ${PROJECTROOT}/VERSION)
-	docker push $(IMAGE_PREFIX)/git-ghost-cli:$(RELEASE_TAG)
+	docker push $(IMAGE_PREFIX)git-ghost-cli:$(RELEASE_TAG)
 	git checkout -
 
 .PHONY: lint
@@ -94,11 +96,11 @@ lint:
 
 .PHONY: build-image-dev
 build-image-dev:
-	docker build -t $(IMAGE_PREFIX)/git-ghost-dev:$(IMAGE_TAG) --target git-ghost-dev $(PROJECTROOT)
+	docker build -t $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) --target git-ghost-dev $(PROJECTROOT)
 
 .PHONY: build-image-cli
 build-image-cli:
-	docker build -t $(IMAGE_PREFIX)/git-ghost-cli:$(IMAGE_TAG) --build-arg VERSION=$(VERSION) --target git-ghost-cli $(PROJECTROOT)
+	docker build -t $(IMAGE_PREFIX)git-ghost-cli:$(IMAGE_TAG) --build-arg VERSION=$(VERSION) --target git-ghost-cli $(PROJECTROOT)
 
 .PHONY: build-image-all
 build-image-all: build-image-dev build-image-cli
@@ -108,11 +110,11 @@ test:
 
 .PHONY: shell
 shell: build-image-cli
-	docker run -it $(IMAGE_PREFIX)/git-ghost-cli:$(IMAGE_TAG) bash
+	docker run -it $(IMAGE_PREFIX)git-ghost-cli:$(IMAGE_TAG) bash
 
 .PHONY: dev-shell
 dev-shell: build-image-dev
-	docker run -it $(IMAGE_PREFIX)/git-ghost-dev:$(IMAGE_TAG) bash
+	docker run -it $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) bash
 
 .PHONY: e2e
 e2e:
@@ -120,7 +122,7 @@ e2e:
 
 .PHONY: docker-e2e
 docker-e2e: build-image-dev
-	@docker run $(IMAGE_PREFIX)/git-ghost-dev:$(IMAGE_TAG) make install e2e DEBUG=$(DEBUG)
+	@docker run $(IMAGE_PREFIX)git-ghost-dev:$(IMAGE_TAG) make install e2e DEBUG=$(DEBUG)
 
 .PHONY: update-license
 update-license:
