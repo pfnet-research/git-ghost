@@ -23,7 +23,7 @@ jobs:
       uses: goreleaser/goreleaser-action@v3
       with:
         version: latest
-        args: release
+        args: release --rm-dist --snapshot --skip-publish
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

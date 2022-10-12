@@ -17,7 +17,7 @@ builds:
   - -s -w -X main.Version={{.Version}}
 
 dockers:
-- image_templates: ["ghcr.io/mist714/{{ .ProjectName }}:{{ .Version }}-amd64"]
+- image_templates: ["ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-amd64"]
   dockerfile: release.Dockerfile
   goarch: amd64
   use: buildx
