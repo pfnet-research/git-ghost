@@ -1,0 +1,56 @@
+before:
+  hooks:
+  - go mod download
+builds:
+- id: git-ghost
+  binary: git-ghost
+  env:
+  - CGO_ENABLED=0
+  goos:
+  - linux
+  goarch:
+  - amd64
+  - arm64
+  ldflags:
+  - -s -w -X main.Version={{.Version}}
+
+# dockers:
+# - image_templates: ["ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-amd64"]
+#   dockerfile: Dockerfile
+#   goarch: amd64
+#   use: buildx
+#   build_flag_templates:
+#   - --platform=linux/amd64
+#   - --label=org.opencontainers.image.title={{ .ProjectName }}
+#   - --label=org.opencontainers.image.description={{ .ProjectName }}
+#   - --label=org.opencontainers.image.url=https://github.com/pfnet-research/{{ .ProjectName }}
+#   - --label=org.opencontainers.image.source=https://github.com/pfnet-research/{{ .ProjectName }}
+#   - --label=org.opencontainers.image.version={{ .Version }}
+#   - --label=org.opencontainers.image.revision={{ .ShortCommit }}
+#   - --label=org.opencontainers.image.licenses=Apache-2.0
+# - image_templates: ["ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-arm64v8"]
+#   dockerfile: Dockerfile
+#   goarch: arm64
+#   use: buildx
+#   build_flag_templates:
+#   - --platform=linux/arm64/v8
+#   - --label=org.opencontainers.image.title={{ .ProjectName }}
+#   - --label=org.opencontainers.image.description={{ .ProjectName }}
+#   - --label=org.opencontainers.image.url=https://github.com/pfnet-research/{{ .ProjectName }}
+#   - --label=org.opencontainers.image.source=https://github.com/pfnet-research/{{ .ProjectName }}
+#   - --label=org.opencontainers.image.version={{ .Version }}
+#   - --label=org.opencontainers.image.revision={{ .ShortCommit }}
+#   - --label=org.opencontainers.image.licenses=Apache-2.0
+
+# docker_manifests:
+# - name_template: ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}
+#   image_templates:
+#   - ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-amd64
+#   - ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-arm64v8
+# - name_template: ghcr.io/pfnet-research/{{ .ProjectName }}:latest
+#   image_templates:
+#   - ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-amd64
+#   - ghcr.io/pfnet-research/{{ .ProjectName }}:{{ .Version }}-arm64v8
+
+release:
+  prerelease: auto
