@@ -53,43 +53,6 @@ build-windows:
 .PHONY: build-all
 build-all: build-linux build-darwin build-windows
 
-.PHONY: release
-release: release-code release-assets release-image
-
-.PHONY: release-code
-release-code: guard-RELEASE_TAG guard-RELEASE_COMMIT guard-GITHUB_USER guard-GITHUB_REPO guard-GITHUB_REPO_URL guard-GITHUB_TOKEN
-	@GITHUB_TOKEN=$(GITHUB_TOKEN)
-	git tag $(RELEASE_TAG) $(RELEASE_COMMIT)
-	git push $(GITHUB_REPO_URL) $(RELEASE_TAG)
-	github-release release \
-	  --user $(GITHUB_USER) \
-		--repo $(GITHUB_REPO) \
-		--tag $(RELEASE_TAG)
-
-.PHONY: release-assets
-release-assets: guard-RELEASE_TAG guard-RELEASE_COMMIT guard-GITHUB_USER guard-GITHUB_REPO guard-GITHUB_REPO_URL guard-GITHUB_TOKEN
-	@GITHUB_TOKEN=$(GITHUB_TOKEN)
-	git diff --quiet HEAD || (echo "your current branch is dirty" && exit 1)
-	git checkout $(RELEASE_COMMIT)
-	make clean build-all VERSION=$(shell cat ${PROJECTROOT}/VERSION)
-	for target in linux-amd64 darwin-amd64 windows-amd64.exe; do \
-		github-release upload \
-		  --user $(GITHUB_USER) \
-			--repo $(GITHUB_REPO) \
-			--tag $(RELEASE_TAG) \
-			--name git-ghost-$$target \
-			--file $(OUTDIR)/git-ghost-$$target; \
-	done
-	git checkout -
-
-.PHONY: release-image
-release-image: guard-RELEASE_TAG
-	git diff --quiet HEAD || (echo "your current branch is dirty" && exit 1)
-	git checkout $(RELEASE_COMMIT)
-	make build-image-cli VERSION=$(shell cat ${PROJECTROOT}/VERSION)
-	docker push $(IMAGE_PREFIX)git-ghost-cli:$(RELEASE_TAG)
-	git checkout -
-
 .PHONY: lint
 lint:
 	golangci-lint run --config golangci.yml
