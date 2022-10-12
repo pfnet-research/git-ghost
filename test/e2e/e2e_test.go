@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/pfnet-research/git-ghost/test/util"
+
 	"github.com/stretchr/testify/assert"
 )
 
