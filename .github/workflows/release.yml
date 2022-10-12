@@ -13,6 +13,7 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: ~1.19
+    - run: curl -sLo- https://github.com/aktau/github-release/releases/download/v0.7.2/linux-amd64-github-release.tar.bz2 | tar -xjC "$GOPATH/bin" --strip-components 3 -f-
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v2
       with:
