@@ -17,17 +17,20 @@ package hash
 import (
 	"crypto/sha1"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/pfnet-research/git-ghost/pkg/util/errors"
 )
 
 func GenerateFileContentHash(filepath string) (string, errors.GitGhostError) {
-	hasher := sha1.New()
-	s, err := os.ReadFile(filepath)
+	input, err := os.Open(filepath)
 	if err != nil {
 		return "", errors.WithStack(err)
 	}
-	hasher.Write(s)
+	hasher := sha1.New()
+	if _, err := io.Copy(hasher, input); err != nil {
+		return "", errors.WithStack(err)
+	}
 	return fmt.Sprintf("%x", hasher.Sum(nil)), nil
 }
