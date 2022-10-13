@@ -7,7 +7,7 @@ metadata:
 spec:
   initContainers:
   - name: init
-    image: {{IMAGE_PREFIX}}git-ghost-cli:{{IMAGE_TAG}}
+    image: {{IMAGE_PREFIX}}git-ghost:{{IMAGE_TAG}}
     imagePullPolicy: IfNotPresent
     command: ["bash"]
     args:
@@ -32,7 +32,7 @@ spec:
       mountPath: /etc/git-secret
   containers:
   - name: main
-    image: {{IMAGE_PREFIX}}git-ghost-cli:{{IMAGE_TAG}}
+    image: {{IMAGE_PREFIX}}git-ghost:{{IMAGE_TAG}}
     imagePullPolicy: IfNotPresent
     command: ["git", "diff", "HEAD"]
     workingDir: /code
