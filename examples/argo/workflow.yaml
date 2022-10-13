@@ -32,7 +32,7 @@ spec:
   - name: build-image
     initContainers:
     - name: init
-      image: "{{workflow.parameters.image-prefix}}git-ghost-cli:{{workflow.parameters.image-tag}}"
+      image: "{{workflow.parameters.image-prefix}}git-ghost:{{workflow.parameters.image-tag}}"
       imagePullPolicy: IfNotPresent
       command: ["bash"]
       args:

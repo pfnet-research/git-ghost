@@ -42,7 +42,7 @@ exit 1)
 
 IMAGE_PREFIX=
 if [[ -z "$IMAGE_PREFIX" ]]; then
-  IMAGE_PREFIX=dtaniwaki/
+  IMAGE_PREFIX=ghcr.io/pfnet-research/
 fi
 
 IMAGE_TAG=
