@@ -105,6 +105,11 @@ $ godoc -http=:6060  # access http://localhost:6060 in browser
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new [Pull Request](../../pull/new/master)
 
+## Release Procedure
+
+1. Add a semver tag (v[0-9]+.[0-9]+.[0-9]+.) on github
+2. The release workflow will start automatically
+
 ## Copyright
 
 Copyright (c) 2019 Preferred Networks. See [LICENSE](LICENSE) for details.

@@ -42,12 +42,12 @@ exit 1)
 
 IMAGE_PREFIX=
 if [[ -z "$IMAGE_PREFIX" ]]; then
-  IMAGE_PREFIX=dtaniwaki/
+  IMAGE_PREFIX=ghcr.io/pfnet-research/
 fi
 
 IMAGE_TAG=
 if [[ -z "$IMAGE_TAG" ]]; then
-  IMAGE_TAG="v0.1.1"
+  IMAGE_TAG="latest"
 fi
 
 GIT_REPO=`git remote get-url origin`
