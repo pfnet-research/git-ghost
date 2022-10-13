@@ -37,7 +37,7 @@ fi
 
 IMAGE_TAG=
 if [[ -z "$IMAGE_TAG" ]]; then
-  IMAGE_TAG="v0.1.0"
+  IMAGE_TAG="latest"
 fi
 
 GIT_REPO=`git remote get-url origin`
