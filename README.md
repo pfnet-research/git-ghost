@@ -97,10 +97,9 @@ $ godoc -http=:6060  # access http://localhost:6060 in browser
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new [Pull Request](../../pull/new/master)
 
-## Release Procedure
+## Release
 
-1. Add a semver tag (v[0-9]+.[0-9]+.[0-9]+.) on github
-2. The release workflow will start automatically
+Release flow is fully automated. All the maintainer need to do is just to approve and merge [the next release PR](https://github.com/pfnet-research/git-ghost/pulls?q=is%3Apr+is%3Aopen+label%3Atagpr+)
 
 ## Copyright
 

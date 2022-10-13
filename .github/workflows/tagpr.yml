@@ -1,0 +1,32 @@
+#
+# tagpr master workflow
+#
+name: tagpr
+on:
+  push:
+    branches: ["master"]
+
+jobs:
+  tagpr:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - id: tagpr
+      name: Tagpr
+      uses: Songmu/tagpr@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # If tagpr pushed tags, invoke release custom action manually.
+      # It is because:
+      # > When you use the repository's GITHUB_TOKEN to perform tasks, 
+      # > events triggered by the GITHUB_TOKEN, with the exception of 
+      # > workflow_dispatch and repository_dispatch, will not create 
+      # > a new workflow run.
+      # ref: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
+    - name: "Release (only when tagged)"
+      uses: ./.github/actions/release
+      if: "steps.tagpr.outputs.tag != ''"
+      with:
+        tag: ${{ steps.tagpr.outputs.tag }}
+        token: ${{ secrets.GITHUB_TOKEN }}
