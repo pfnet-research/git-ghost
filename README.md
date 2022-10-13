@@ -32,14 +32,6 @@ $ make install
 
 Compiled binary is located in `dist` folder.
 
-
-### Using Homebrew
-
-```bash
-$ brew tap pfnet-research/git-ghost
-$ brew install git-ghost
-```
-
 ### Releases
 
 The binaries of each releases are available in [Releases](../../releases).
