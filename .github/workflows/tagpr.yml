@@ -13,7 +13,7 @@ jobs:
     - uses: actions/checkout@v3
     - id: tagpr
       name: Tagpr
-      uses: Songmu/tagpr@master
+      uses: Songmu/tagpr@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
