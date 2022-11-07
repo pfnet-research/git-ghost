@@ -40,7 +40,7 @@ The binaries of each releases are available in [Releases](../../releases).
 
 First, create an empty repository which can be accessible from a remote place. Set the URL as `GIT_GHOST_REPO` env.
 
-Assume your have a local working directory `DIR_L` and a remote directory to be synchronized `DIR_R`.
+Assume you have a local working directory `DIR_L` and a remote directory to be synchronized `DIR_R`.
 
 ## Case 1 (`DIR_L` HEAD == `DIR_R` HEAD)
 
