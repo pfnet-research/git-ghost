@@ -1,0 +1,18 @@
+#
+# This workflow runs when tagged manually.
+# It would be useful when tagpr workflow failed in some reason.
+#
+name: Release By Tagged Manually
+
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ./.github/actions/release
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}

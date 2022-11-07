@@ -32,14 +32,6 @@ $ make install
 
 Compiled binary is located in `dist` folder.
 
-
-### Using Homebrew
-
-```bash
-$ brew tap pfnet-research/git-ghost
-$ brew install git-ghost
-```
-
 ### Releases
 
 The binaries of each releases are available in [Releases](../../releases).
@@ -104,6 +96,10 @@ $ godoc -http=:6060  # access http://localhost:6060 in browser
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new [Pull Request](../../pull/new/master)
+
+## Release
+
+Release flow is fully automated. All the maintainer need to do is just to approve and merge [the next release PR](https://github.com/pfnet-research/git-ghost/pulls?q=is%3Apr+is%3Aopen+label%3Atagpr+)
 
 ## Copyright
 
